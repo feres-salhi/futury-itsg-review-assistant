@@ -21,7 +21,7 @@ Futury Team 10 is preparing an ITSG AI review-assistant prototype for payroll so
 ## Verification snapshot
 
 - Before this change, local clone was clean and synchronized with `origin/main`.
-- `git diff --check` passed; coordination changes are documentation-only; no application tests were run.
+- Coordination controls pushed to `origin/main` in commit `0929e65`; `git diff --check` passed. No application tests were run because this was documentation-only.
 
 ## Already tried / avoid repeating
 
@@ -29,7 +29,7 @@ Futury Team 10 is preparing an ITSG AI review-assistant prototype for payroll so
 
 ## Active focus
 
-Task T10-002 is prepared for independent review. Before other agents begin, name the human integration lead/domain reviewer and create task rows with non-overlapping ownership.
+Task T10-002 is published and waiting for independent reviewer acknowledgment. Before other agents begin, name the qualified domain reviewer and create task rows with non-overlapping ownership.
 
 ## Open questions
 

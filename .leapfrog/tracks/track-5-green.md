@@ -3,6 +3,7 @@
 ## Current State
 
 - `AGENTS.md`, `DELIVERY.md`, `.leapfrog/board.md`, log, hot cache, and checkpoint pair establish shared task coordination.
+- Coordination controls were pushed to `origin/main` in commit `0929e65`; independent reviewer acknowledgment is pending.
 - The `agile-delivery` skill was not found; current cadence is project-local and labeled accordingly.
 
 ## Next Arc
