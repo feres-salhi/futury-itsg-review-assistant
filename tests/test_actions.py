@@ -20,6 +20,14 @@ from itsg import actions
 from itsg.store import Store
 
 
+def seed_gate(store_root: Path, gate: str) -> None:
+    """Record a plain gate decision directly (seeds the gate trail for ordering)."""
+    Store(store_root).put("gate", {
+        "id": f"GATE-{gate}-seed", "gate": gate, "reviewer": "Seed Human",
+        "decision": "approved", "rationale": "seed record for gate ordering",
+    })
+
+
 class ActionRegistryTests(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
@@ -148,6 +156,7 @@ class ActionRegistryTests(unittest.TestCase):
                 tok, self.store_root, "Amr")
 
     def test_gate_with_unknown_decision_raises(self):
+        seed_gate(self.store_root, "G5")  # ordering: G6 may follow a recorded G5
         tok = actions.propose(
             "request_release", {"gate": "G6", "decision": "auto_approved", "rationale": "r"}, "s1"
         )["confirm_token"]
@@ -158,6 +167,7 @@ class ActionRegistryTests(unittest.TestCase):
                 tok, self.store_root, "Amr")
 
     def test_gate_records_human_as_decision_maker(self):
+        seed_gate(self.store_root, "G5")  # ordering: G6 may follow a recorded G5
         params = {
             "gate": "G6", "decision": "escalated",
             "rationale": "release blocked pending domain review",
@@ -172,6 +182,7 @@ class ActionRegistryTests(unittest.TestCase):
             for g in gates))
 
     def test_record_review_state_allows_g4_and_g5_only(self):
+        seed_gate(self.store_root, "G3")  # ordering: G4 may follow a recorded G3
         for gate in ("G4", "G5"):
             params = {"gate": gate, "decision": "approved", "rationale": "ok"}
             tok = actions.propose("record_review_state", params, "s1")["confirm_token"]
@@ -191,6 +202,110 @@ class ActionRegistryTests(unittest.TestCase):
         store = Store(self.store_root)
         self.assertTrue(store.all("report"))
         self.assertTrue(store.events())
+
+    # -- confirmation binds the proposed params (Finding: proposal-bound tokens) ----
+
+    def test_token_params_mismatch_refused_and_token_consumed(self):
+        tok = actions.propose("save_note", {"text": "Original", "case_id": "TC-002"}, "s1")[
+            "confirm_token"]
+        with self.assertRaises(PermissionError):
+            actions.execute(
+                "save_note", {"text": "Manipuliert", "case_id": "TC-002"},
+                tok, self.store_root, "Amr")
+        # the token was consumed with the mismatch: replaying even the original
+        # proposal is refused — a fresh confirmation is always required
+        with self.assertRaises(PermissionError):
+            actions.execute(
+                "save_note", {"text": "Original", "case_id": "TC-002"},
+                tok, self.store_root, "Amr")
+        self.assertEqual(Store(self.store_root).all("note"), [])
+
+    def test_gate_params_mismatch_refused(self):
+        seed_gate(self.store_root, "G5")
+        tok = actions.propose(
+            "request_release", {"gate": "G6", "decision": "approved", "rationale": "proposed"},
+            "s1")["confirm_token"]
+        with self.assertRaises(PermissionError):
+            actions.execute(
+                "request_release",
+                {"gate": "G6", "decision": "approved", "rationale": "geändert"},
+                tok, self.store_root, "Amr")
+        self.assertEqual(
+            [g for g in Store(self.store_root).all("gate") if g.get("gate") == "G6"], [])
+
+    def test_matching_params_execute(self):
+        params = {"text": "Notiz", "case_id": "TC-002"}
+        tok = actions.propose("save_note", params, "s1")["confirm_token"]
+        out = actions.execute("save_note", params, tok, self.store_root, "Amr")
+        self.assertTrue(out["executed"])
+
+    # -- the assistant identity never records a gate decision ------------------------
+
+    def test_gate_rejects_assistant_identity_as_reviewer(self):
+        seed_gate(self.store_root, "G5")
+        params = {"gate": "G6", "decision": "approved", "rationale": "r"}
+        tok = actions.propose("request_release", params, "s1")["confirm_token"]
+        for reviewer in ("susie-assistant", "  Susie-Assistant  ", "SUSIE-ASSISTANT"):
+            tok = actions.propose("request_release", params, "s1")["confirm_token"]
+            with self.assertRaises(PermissionError):
+                actions.execute("request_release", params, tok, self.store_root, reviewer)
+        self.assertFalse(any(
+            str(g.get("reviewer", "")).strip().lower() == "susie-assistant"
+            for g in Store(self.store_root).all("gate")))
+
+    # -- gates cannot be skipped (ordering against the recorded gate trail) ----------
+
+    def test_gate_cannot_skip_on_fresh_store(self):
+        params = {"gate": "G6", "decision": "approved", "rationale": "r"}
+        tok = actions.propose("request_release", params, "s1")["confirm_token"]
+        with self.assertRaises(PermissionError) as ctx:
+            actions.execute("request_release", params, tok, self.store_root, "Amr")
+        self.assertIn("G0", str(ctx.exception))
+        self.assertEqual(Store(self.store_root).all("gate"), [])
+
+    def test_gate_allows_next_gate_after_g5_recorded(self):
+        seed_gate(self.store_root, "G5")
+        params = {"gate": "G6", "decision": "approved", "rationale": "release approved"}
+        tok = actions.propose("request_release", params, "s1")["confirm_token"]
+        out = actions.execute("request_release", params, tok, self.store_root, "Amr")
+        self.assertTrue(out["executed"])
+        self.assertTrue(any(
+            g["gate"] == "G6" for g in Store(self.store_root).all("gate")))
+
+    def test_first_gate_allowed_on_fresh_store(self):
+        # No whitelisted action proposes G0 itself, but the ordering rule must
+        # allow it (and G1 after it) — verified at the ordering-check level.
+        actions._check_gate_ordering(self.store_root, "G0")  # must not raise
+        seed_gate(self.store_root, "G0")
+        actions._check_gate_ordering(self.store_root, "G1")  # next in sequence: allowed
+        seed_gate(self.store_root, "G1")
+        with self.assertRaises(PermissionError):
+            actions._check_gate_ordering(self.store_root, "G3")  # skip: refused
+
+    # -- every executed action leaves an action_audit record -------------------------
+
+    def test_read_only_execution_writes_action_audit(self):
+        out = actions.execute("filter_cases", {"query": "EAZ"}, None, self.store_root, "Amr")
+        self.assertEqual(out, {"executed": True, "mode": "client"})
+        audits = Store(self.store_root).all("action_audit")
+        self.assertEqual(len(audits), 1)
+        audit = audits[0]
+        self.assertTrue(audit["id"].startswith("ACT-"))
+        self.assertEqual(audit["action_id"], "filter_cases")
+        self.assertEqual(audit["mode"], "client")
+        self.assertEqual(audit["reviewer"], "Amr")
+
+    def test_gate_execution_writes_decision_and_audit(self):
+        seed_gate(self.store_root, "G5")
+        params = {"gate": "G6", "decision": "approved", "rationale": "ok"}
+        tok = actions.propose("request_release", params, "s1")["confirm_token"]
+        actions.execute("request_release", params, tok, self.store_root, "Amr")
+        gates = [g for g in Store(self.store_root).all("gate") if g.get("gate") == "G6"]
+        self.assertEqual(len(gates), 1)  # the GateDecision record
+        audits = [a for a in Store(self.store_root).all("action_audit")
+                  if a["action_id"] == "request_release"]
+        self.assertEqual(len(audits), 1)  # the execution trace, additional to it
+        self.assertEqual(audits[0]["mode"], "server")
 
 
 if __name__ == "__main__":
