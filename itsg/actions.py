@@ -9,6 +9,17 @@ action's allowed set. Every refusal raises ``PermissionError`` with a plain
 reason string (the web server maps it to HTTP 403). Unknown action ids at
 propose time raise ``ValueError``.
 
+Confirmation is proposal-bound: a token is only valid for the exact params
+that were proposed (compared as canonical JSON), so a human's "yes" can never
+be replayed against different parameters. Gate executions additionally
+refuse the assistant identity as reviewer (a human decides, never the agent)
+and enforce the G0–G6 ordering — gates cannot be skipped.
+
+Every successful execution appends exactly one ``action_audit`` record to
+the store (read-only, mutating, and gate alike), so the append-only trail
+carries one event per executed action. Gate executions record their
+``GateDecision`` in addition to that audit record.
+
 `GateDecision` itself validates reviewer/rationale (itsg.gates) — this
 module's job is the access control *before* that delegation, plus stamping
 the result with ``decision_maker: <reviewer>`` and
@@ -17,6 +28,7 @@ decision maker.
 """
 from __future__ import annotations
 
+import json
 import secrets
 import threading
 import time
@@ -100,23 +112,51 @@ def _consume_token(action_id: str, confirm_token: str | None,
     return payload
 
 
+def _canonical_params(params: dict) -> str:
+    """Canonical JSON form of a params dict (order-insensitive comparison)."""
+    return json.dumps(params, sort_keys=True)
+
+
 def execute(action_id: str, params: dict, confirm_token: str | None,
             store_root: Path, reviewer: str, session_id: str | None = None) -> dict:
-    """Execute a whitelisted action — fail closed on every missing credential."""
+    """Execute a whitelisted action — fail closed on every missing credential.
+
+    Every successful execution appends one ``action_audit`` record to the
+    store; gate executions keep their GateDecision record in addition.
+    """
     if action_id in READ_ONLY_ACTIONS:
-        # The frontend action bus performs it; the caller audit-logs this call.
+        # The frontend action bus performs it; the execution is audit-logged here.
+        _write_action_audit(store_root, action_id, session_id, "client", reviewer)
         return {"executed": True, "mode": "client"}
 
-    _consume_token(action_id, confirm_token, session_id)
+    payload = _consume_token(action_id, confirm_token, session_id)
+    if _canonical_params(payload["params"]) != _canonical_params(params):
+        raise PermissionError("confirmed parameters do not match the proposal")
 
     if action_id in MUTATING_ACTIONS:
-        return _execute_mutating(action_id, params, store_root, reviewer)
+        result = _execute_mutating(action_id, params, store_root, reviewer)
+    elif action_id in DECISION_GATE_ACTIONS:
+        result = _execute_gate(action_id, params, store_root, reviewer,
+                               DECISION_GATE_ACTIONS[action_id])
+    else:
+        raise PermissionError(f"action {action_id!r} is not executable")  # unreachable
 
-    if action_id in DECISION_GATE_ACTIONS:
-        return _execute_gate(action_id, params, store_root, reviewer,
-                             DECISION_GATE_ACTIONS[action_id])
+    _write_action_audit(store_root, action_id, session_id,
+                        result.get("mode", "server"), reviewer)
+    return result
 
-    raise PermissionError(f"action {action_id!r} is not executable")  # unreachable
+
+def _write_action_audit(store_root: Path, action_id: str, session_id: str | None,
+                        mode: str, reviewer: str) -> dict:
+    """Append the execution trace (one audit record per executed action)."""
+    return Store(store_root).put("action_audit", {
+        "id": f"ACT-{uuid4().hex[:8]}",
+        "action_id": action_id,
+        "session_id": session_id or "",
+        "mode": mode,
+        "reviewer": reviewer or "",
+        "at": utc_now(),
+    })
 
 
 def _execute_mutating(action_id: str, params: dict, store_root: Path, reviewer: str) -> dict:
@@ -151,10 +191,15 @@ def _execute_gate(action_id: str, params: dict, store_root: Path, reviewer: str,
                   allowed_gates: set[str]) -> dict:
     if not reviewer or not reviewer.strip():
         raise PermissionError(f"{action_id} requires a named human reviewer")
+    if reviewer.strip().lower() == "susie-assistant":
+        raise PermissionError(
+            "the susie-assistant identity may never record a gate decision — "
+            "a named human reviewer is required")
     gate_id = params.get("gate")
     if gate_id not in allowed_gates:
         raise PermissionError(
             f"gate {gate_id!r} is not allowed for {action_id} (allowed: {sorted(allowed_gates)})")
+    _check_gate_ordering(store_root, gate_id)
     decision = gates.GateDecision(
         gate_id, reviewer, params.get("decision", ""),
         params.get("rationale", ""),
@@ -170,3 +215,24 @@ def _execute_gate(action_id: str, params: dict, store_root: Path, reviewer: str,
         "decision_maker": reviewer,
         "executor": "susie-assistant",
     }
+
+
+def _check_gate_ordering(store_root: Path, gate_id: str) -> None:
+    """Skip protection: a gate may only be recorded directly after its predecessor.
+
+    The requested gate id must not be more than one step ahead of the highest
+    gate id already recorded in the store — the next gate in sequence is
+    allowed, earlier/repeat gates are allowed (re-approval), skipping is
+    refused. On a fresh store only the first gate (G0) may be recorded.
+    """
+    recorded_indexes = [
+        gates.GATE_IDS.index(g["gate"])
+        for g in Store(store_root).all("gate")
+        if g.get("gate") in gates.GATE_IDS
+    ]
+    highest = max(recorded_indexes, default=-1)
+    if gates.GATE_IDS.index(gate_id) > highest + 1:
+        required = gates.GATE_IDS[highest + 1] if highest + 1 < len(gates.GATE_IDS) else gate_id
+        raise PermissionError(
+            f"gate {gate_id} cannot be recorded: {required} must be recorded first "
+            "(gates cannot be skipped)")
