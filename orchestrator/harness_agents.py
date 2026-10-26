@@ -17,7 +17,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 sys.path[:0] = [str(HERE), str(HERE.parent), str(HERE.parent / "harness")]
 from graph import ROOT, build_verdict, run  # noqa: E402
-from llm import lf_client  # noqa: E402
+from llm import PROMPT_VERSION, lf_client  # noqa: E402
 from run_harness import score  # noqa: E402
 from run_review import load_env  # noqa: E402
 
@@ -53,7 +53,7 @@ def main():
             span_cm.__exit__(None, None, None)
     if lf:
         lf.flush()
-    summary = {"run_id": run_id, "cases": len(rows), "critic_runs": sum(r["sampled"] for r in rows),
+    summary = {"run_id": run_id, "prompt_version": PROMPT_VERSION, "cases": len(rows), "critic_runs": sum(r["sampled"] for r in rows),
                "correct_before": sum(r["ok_before"] for r in rows), "correct_after": sum(r["ok_after"] for r in rows),
                "critic_changed_cases": sum(bool(r["critic_changed"]) for r in rows),
                "changes": Counter(f"{r['before']} -> {r['after']}" for r in rows if r["before"] != r["after"])}

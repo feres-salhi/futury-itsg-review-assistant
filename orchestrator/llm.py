@@ -9,7 +9,8 @@ import os
 import re
 
 MODELS = {"author": "claude-sonnet-5-5", "light": "claude-haiku-5-5"}
-PROMPT_VERSION = "agents-v1"
+PROMPT = os.environ.get("TEAM10_PROMPT", "v2")   # v1 = experiment 1, v2 = experiment 2
+PROMPT_VERSION = f"agents-{PROMPT}"
 _client = None
 
 

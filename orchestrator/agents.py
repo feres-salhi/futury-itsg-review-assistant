@@ -2,7 +2,7 @@
 import json
 import re
 
-from llm import call
+from llm import PROMPT, call
 
 SCOPE = ("Scope: the employer's request 'Abgabegrund 41' with Datenbaustein DBVO (prior periods of incapacity "
          "for work): when a 41 may be sent and what the employer must put in it. Fields that only the health "
@@ -73,12 +73,22 @@ def testcase_critic(criteria, cases):
 
 
 # ---------------------------------------------------------------- 04 verdict
-FINDINGS_CRITIC_SYSTEM = """You double-check the result of a rule-based reviewer for one 'Abgabegrund 41' message.
+FINDINGS_CRITIC_V1 = """You double-check the result of a rule-based reviewer for one 'Abgabegrund 41' message.
 You see the scenario, the message the payroll software produced and every check with its status.
 If a check's status looks doubtful (wrong reading of a date, a rule the check may not cover), name it.
 You can only send a check to a person for review. You cannot pass or fail anything.
 Answer with JSON only: {"review":[{"check":"C12","note":"why a person should look"}]}
 Return an empty list if every status looks right."""
+
+# Experiment 2: flag only with concrete evidence; code drops any flag without it.
+FINDINGS_CRITIC_V2 = """You double-check the result of a rule-based reviewer for one 'Abgabegrund 41' message.
+You see the scenario, the message the payroll software produced and every check with its status.
+Most results are right. Flag a check only if you can point to a concrete fact that contradicts its status:
+a field of the message or the scenario, the value you see, and the value it should have.
+Do not flag a check because the rule is complex, because you are unsure, or because a person might like to look.
+If you cannot give all three facts, do not flag. You cannot pass or fail anything.
+Answer with JSON only: {"review":[{"check":"F5","field":"AU-AB-AG","seen":"2026-03-25","expected":"2026-03-24","note":"..."}]}
+Return an empty list if you have no such evidence."""
 
 EXPLAINER_SYSTEM = """You explain a review result to a payroll clerk in plain English, at most three short sentences.
 Name the checks that failed or need review and what to do. Use only the facts given.
@@ -89,7 +99,10 @@ def findings_critic(case, findings):
     user = json.dumps({"scenario": case["scenario"], "observed_message": case.get("observed_dbvo"),
                        "checks": [{k: f.get(k) for k in ("id", "rule", "expected", "actual", "status")} for f in findings]},
                       ensure_ascii=False, default=str)
-    return call("findings_critic", "light", FINDINGS_CRITIC_SYSTEM, user, lambda u: {"review": []}, 8000)["review"]
+    if PROMPT == "v1":
+        return call("findings_critic", "light", FINDINGS_CRITIC_V1, user, lambda u: {"review": []}, 8000)["review"]
+    review = call("findings_critic", "light", FINDINGS_CRITIC_V2, user, lambda u: {"review": []}, 8000)["review"]
+    return [r for r in review if all(str(r.get(k) or "").strip() for k in ("field", "seen", "expected"))]
 
 
 def explainer(findings):
