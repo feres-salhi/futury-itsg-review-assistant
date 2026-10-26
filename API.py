@@ -1,13 +1,26 @@
 import os
+import sys
 import json
 import re
+from pathlib import Path
+
 import requests
 import frontmatter
+
+from Graph_Schema import GraphExtraction
+from Normalizer import normalize_entity_id
+from Regular_expression_check import deterministic_cross_document_bridge
 
 ENDPOINT_URL = "https://hip-gw.hessian.ai/v1/chat/completions"
 HAI_API_KEY = "sk-bf-236ea46f-c62f-4340-bec6-e69f6ceba3df"
 
+def chunk_id_of(metadata: dict) -> str:
+    # Section numbers repeat across documents (e.g. "2" in GG_EEL and Anl1): the ID must include the document
+    return f"{metadata.get('doc', 'unknown')}_{metadata.get('section', 'unknown')}"
+
 def extract_json_payload(raw_text: str) -> str:
+    if not raw_text:  # reasoning models can spend all tokens on thinking and return empty content
+        raise ValueError("LLM returned empty content (raise max_tokens or retry)")
     cleaned = re.sub(r"<think>.*?</think>", "", raw_text, flags=re.DOTALL).strip()
     fence_match = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", cleaned, flags=re.DOTALL)
     if fence_match:
@@ -26,6 +39,9 @@ def extract_graph_from_markdown_chunk(text_content: str, metadata: dict) -> dict
     - Section: {metadata.get('section')} ({metadata.get('title')})
     - Pre-identified Abgabegründe: {metadata.get('abgabegrund')}
     - Pre-identified Datenbausteine: {metadata.get('datenbaustein')}
+
+    Return ONLY one JSON object that validates against this JSON schema (no other keys, no prose):
+    {json.dumps(GraphExtraction.model_json_schema(), ensure_ascii=False)}
     """
     
     headers = {
@@ -48,7 +64,19 @@ def extract_graph_from_markdown_chunk(text_content: str, metadata: dict) -> dict
     response = requests.post(ENDPOINT_URL, headers=headers, json=payload, timeout=120)
     response.raise_for_status()
     raw_content = response.json()["choices"][0]["message"]["content"]
-    return json.loads(extract_json_payload(raw_content))
+    # Fail closed: a reply in any other shape raises instead of silently producing a broken graph
+    graph = GraphExtraction.model_validate_json(extract_json_payload(raw_content)).model_dump()
+    return normalize_graph(graph)
+
+def normalize_graph(graph: dict) -> dict:
+    """Canonical IDs (Normalizer.py) for nodes, and the same mapping for edge endpoints."""
+    id_map = {}
+    for n in graph["nodes"]:
+        id_map[n["id"]] = n["id"] = normalize_entity_id(n["id"], n["type"])
+    for e in graph["edges"]:
+        e["source_id"] = id_map.get(e["source_id"], e["source_id"])
+        e["target_id"] = id_map.get(e["target_id"], e["target_id"])
+    return graph
 
 # ==========================================
 # 2. DETERMINISTIC BRIDGE USING FRONTMATTER
@@ -60,7 +88,7 @@ def deterministic_markdown_bridge(text_content: str, metadata: dict) -> dict:
     """
     nodes = []
     edges = []
-    chunk_id = f"sec_{metadata.get('section', 'unknown')}"
+    chunk_id = chunk_id_of(metadata)
     
     # A. Inject Metadata directly into the Graph (Zero LLM hallucination risk!)
     for db in metadata.get('datenbaustein', []):
@@ -72,13 +100,11 @@ def deterministic_markdown_bridge(text_content: str, metadata: dict) -> dict:
         nodes.append({"id": ag_id, "type": "Abgabegrund", "name": f"Abgabegrund {ag}", "description": "From Frontmatter"})
         edges.append({"source_id": ag_id, "target_id": chunk_id, "type": "MENTIONED_IN", "condition": "Frontmatter Metadata"})
 
-    # B. Regex scan the text content (e.g., § 45 SGB V found in 2.md[cite: 770])
-    law_pattern = r'§+\s*\d+[a-z]*\s*(?:Abs\.\s*\d+\s*)?(?:Satz\s*\d+\s*)?(?:SGB\s*(?:I|III|IV|V|VI|VII|IX|X|XI|XIV)|EntgFG|MuSchG|KVLG|BBiG)'
-    for law in set(re.findall(law_pattern, text_content)):
-        clean_law = law.strip().replace("  ", " ")
-        nodes.append({"id": clean_law, "type": "Rechtsgrundlage", "name": clean_law, "description": "Regex Extracted"})
-        edges.append({"source_id": clean_law, "target_id": chunk_id, "type": "MENTIONED_IN", "condition": "Regex Match"})
-        
+    # B. Regex scan the text content (shared patterns in Regular_expression_check.py)
+    regex_graph = deterministic_cross_document_bridge(text_content, chunk_id, metadata.get('source_file'))
+    nodes.extend(regex_graph["nodes"])
+    edges.extend(regex_graph["edges"])
+
     return {
         "chunk_id": chunk_id,
         "source_doc": metadata.get('source_file'),
@@ -99,7 +125,7 @@ def process_markdown_chunk_fully(raw_markdown_string: str) -> dict:
     llm_graph = extract_graph_from_markdown_chunk(text_content, metadata)
     
     # 2. Run Deterministic Bridge (Frontmatter + Regex)
-    det_graph = deterministic_markdown_bridge(text_content, metadata)
+    det_graph = normalize_graph(deterministic_markdown_bridge(text_content, metadata))  # same IDs as the LLM nodes
     
     # 3. Merge Results Safely
     existing_node_ids = {n["id"] for n in llm_graph["nodes"]}
@@ -108,13 +134,39 @@ def process_markdown_chunk_fully(raw_markdown_string: str) -> dict:
             llm_graph["nodes"].append(node)
             existing_node_ids.add(node["id"])
             
-    llm_graph["edges"].extend(det_graph["edges"])
+    seen_edges = {(e["source_id"], e["target_id"], e["type"]) for e in llm_graph["edges"]}
+    for edge in det_graph["edges"]:
+        if (edge["source_id"], edge["target_id"], edge["type"]) not in seen_edges:
+            llm_graph["edges"].append(edge)
+            seen_edges.add((edge["source_id"], edge["target_id"], edge["type"]))
+
+    # Fields Merge_graph_neo.py needs to write the chunk node
+    llm_graph["chunk_id"] = det_graph["chunk_id"]
+    llm_graph["source_doc"] = det_graph["source_doc"]
+    llm_graph["chunk_text"] = text_content
     return llm_graph
 
+def process_chunks_dir(chunks_dir: str, out_path: str) -> None:
+    """Run every chunk .md under chunks_dir (e.g. chunks/VB) and append one JSON line per chunk.
+    A failed chunk is logged and skipped, so one bad LLM reply does not stop the run."""
+    files = sorted(p for p in Path(chunks_dir).rglob("*.md") if p.name != "README.md")
+    with open(out_path, "a", encoding="utf-8") as out:
+        for i, path in enumerate(files, 1):
+            try:
+                graph = process_markdown_chunk_fully(path.read_text(encoding="utf-8"))
+                out.write(json.dumps(graph, ensure_ascii=False) + "\n")
+                print(f"[{i}/{len(files)}] OK   {path}")
+            except Exception as exc:
+                print(f"[{i}/{len(files)}] FAIL {path}: {exc}", file=sys.stderr)
+
 # ==========================================
-# 4. EXECUTION EXAMPLE
+# 4. EXECUTION
 # ==========================================
 if __name__ == "__main__":
+    # Usage: python API.py chunks/VB graph.jsonl   (no arguments: run the built-in example)
+    if len(sys.argv) == 3:
+        process_chunks_dir(sys.argv[1], sys.argv[2])
+        sys.exit(0)
     # Simulate receiving the contents of '2.md' from your colleague
     sample_md_file_content = """---
 doc: Anl1
