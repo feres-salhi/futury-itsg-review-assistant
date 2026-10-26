@@ -13,14 +13,15 @@ import copy
 import json
 import os
 import sys
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
 
 # Field positions (1-based, length) from Verfahrensbeschreibung DTA EEL 13.4
 DSLW_FIELDS = {"DATUM-ERSTELLUNG": (42, 8), "DATENSATZ-ID": (99, 36), "ABGABEGRUND": (201, 2)}  # §3.1.5, §3.1.18
-DBVO_FIELDS = {"GRUNDAV": (5, 1), "AU-AB-AG": (6, 8), "KZ-AK-AU": (22, 1), "ANZAHL-AU": (31, 2)}  # §3.12.1-3.12.6
+DBVO_FIELDS = {"GRUNDAV": (5, 1), "AU-AB-AG": (6, 8), "AU-AB-SV": (14, 8), "KZ-AK-AU": (22, 1),
+               "ANZAHL-AU": (31, 2)}  # §3.12.1-3.12.6
 DBVO_PERIOD = 50  # §3.12.7-3.12.14: BEGINN 8, ENDE 8, then 34 insurer-side characters per prior AU
 
 
@@ -54,12 +55,25 @@ def parse_teel0(path):
     dbvo = raw[raw.index("DBVO"):]
     out.update({k: dbvo[a - 1:a - 1 + n] for k, (a, n) in DBVO_FIELDS.items()})
     out["AU-ZEITRAEUME"] = []
+    if not out["ANZAHL-AU"].isdigit():
+        raise ValueError(f"DBVO malformed: ANZAHL-AU {out['ANZAHL-AU']!r} is not a number")
     for k in range(int(out["ANZAHL-AU"])):
         p = dbvo[32 + k * DBVO_PERIOD:32 + (k + 1) * DBVO_PERIOD]
-        out["AU-ZEITRAEUME"].append([fmt(d(p[0:8])), fmt(d(p[8:16]))])
+        try:
+            out["AU-ZEITRAEUME"].append([fmt(d(p[0:8])), fmt(d(p[8:16]))])
+        except ValueError:
+            raise ValueError(f"DBVO malformed: ANZAHL-AU = {out['ANZAHL-AU']} but period {k + 1} "
+                             f"is not a date pair ({p[:16]!r})") from None
     out["DATUM-ERSTELLUNG"] = fmt(d(out["DATUM-ERSTELLUNG"]))
     out["AU-AB-AG"] = fmt(d(out["AU-AB-AG"]))
     return out
+
+
+def eligible(prior, current_start):
+    """Uncertified AUs count only if a certified AU follows seamlessly (VB 13.4 §3.12 p.135). cert defaults to True."""
+    starts = {d(p["start"]) for p in prior if p.get("cert", True)} | {current_start}
+    return [[p["start"], p["end"]] for p in prior
+            if p.get("cert", True) or d(p["end"]) + timedelta(days=1) in starts]
 
 
 def chain(periods, current_start):
@@ -85,12 +99,14 @@ def finding(fid, rule, source, expected, actual, status=None, reason=None, crite
 
 
 def dbvo_findings(scenario, obs):
-    cur = d(scenario["current_au"]["start"])
-    prior = [[p["start"], p["end"]] for p in scenario["prior_au"]]
-    exp_chain = chain(prior, cur)
+    cur_au = scenario["current_au"]
+    cur = d(cur_au["start"])
+    prior = scenario["prior_au"]
+    exp_chain = chain(eligible(prior, cur), cur)
     file_periods = obs["AU-ZEITRAEUME"]
     au_start = d(obs["AU-AB-AG"])
     last_end = max(d(e) for _, e in file_periods) if file_periods else None
+    newest_first = sorted(file_periods, key=lambda p: d(p[0]), reverse=True)
     f = [
         finding("F1", "Abgabegrund = 41", "VB 13.4 §3.1.18 p.43", "41", obs["ABGABEGRUND"]),
         finding("F2", "ANZAHL-AU = number of prior AUs to report", "VB 13.4 §3.12.6 p.139",
@@ -98,10 +114,26 @@ def dbvo_findings(scenario, obs):
         finding("F3", "Reported prior AU periods (order-independent)", "VB 13.4 §3.12.7/3.12.8 p.140-141",
                 sorted(exp_chain), sorted(file_periods)),
         finding("F4", "Employer sends KZ-AK-AU = 0 (Grundstellung)", "VB 13.4 §3.12.4 p.138", "0", obs["KZ-AK-AU"]),
-        finding("C9", "41 only if current AU and >=1 prior AU are certified", "SRC-CRIT; VB 13.4 §3.12 p.135",
-                True, None, "NOT EVALUATED", "certificate status is not contained in the message",
-                "f41c7278-b5a5-4ec3-b321-39bca5c3aeeb"),
+        finding("F5", "AU-AB-AG = start of the current AU", "VB 13.4 §3.12.2 p.137", fmt(cur), obs["AU-AB-AG"]),
+        finding("F6", "Employer sends AU-AB-SV = 00000000 (Grundstellung)", "VB 13.4 §3.12.3 p.137",
+                "00000000", obs.get("AU-AB-SV")),
+        finding("F7", "Prior AUs listed most recent first", "VB 13.4 §3.12.7 p.140", newest_first, file_periods),
     ]
+    if "current_cert" in scenario:
+        cert_ok = bool(scenario["current_cert"]) and any(
+            p.get("cert", True) for p in prior if [p["start"], p["end"]] in exp_chain)
+        f.append(finding("C9", "41 only if current AU and >=1 prior AU are certified", "SRC-CRIT; VB 13.4 §3.12 p.135",
+                         True, cert_ok, criterion_id="f41c7278-b5a5-4ec3-b321-39bca5c3aeeb"))
+    else:
+        f.append(finding("C9", "41 only if current AU and >=1 prior AU are certified", "SRC-CRIT; VB 13.4 §3.12 p.135",
+                         True, None, "NOT EVALUATED", "certificate status is in neither the message nor the test case",
+                         "f41c7278-b5a5-4ec3-b321-39bca5c3aeeb"))
+    if "insurance" in scenario:
+        f.append(finding("C13", "No 41 for private insurance or marginal employment", "VB 13.4 §3.12 p.136",
+                         "GKV", scenario["insurance"]))
+    else:
+        f.append(finding("C13", "No 41 for private insurance or marginal employment", "VB 13.4 §3.12 p.136",
+                         "GKV", None, "NOT EVALUATED", "insurance type is in neither the message nor the test case"))
     if last_end:
         gap = (au_start - last_end).days
         f.append(finding("C10", "<= 6 months between start of current AU and end of last prior AU",
@@ -115,19 +147,34 @@ def dbvo_findings(scenario, obs):
     f.append(finding("C11", "Prior AUs included only if each gap <= 6 months", "SRC-CRIT; VB 13.4 §3.12 p.135",
                      len(file_periods), len(chain(file_periods, au_start)),
                      criterion_id="aade0289-e8f9-4e12-9c49-464cf6cd0789"))
-    msg_date = d(obs["DATUM-ERSTELLUNG"])
-    prior_days = sum((d(e) - d(s)).days + 1 for s, e in file_periods)
-    if msg_date < au_start:
-        f.append(finding("C12", "Prior AUs + current AU >= 30 days at time of message", "SRC-CRIT; VB 13.4 §3.12 p.135",
-                         ">= 30", f"{prior_days} prior + current (reference date unclear)", "NOT EVALUATED",
-                         f"message date {fmt(msg_date)} is before AU start {fmt(au_start)}",
-                         "9c8c9b58-4d0f-4066-98ac-973095418d63"))
-    else:
-        total = prior_days + (msg_date - au_start).days + 1
-        f.append(finding("C12", "Prior AUs + current AU >= 30 days at time of message", "SRC-CRIT; VB 13.4 §3.12 p.135",
-                         ">= 30", total, "PASS" if total >= 30 else "MISMATCH",
-                         criterion_id="9c8c9b58-4d0f-4066-98ac-973095418d63"))
+    f.append(c12(cur_au, scenario, obs, prior, cur, file_periods))
     return f
+
+
+def c12(cur_au, scenario, obs, prior, cur, file_periods):
+    """Prior AUs of the last 12 months + current AU >= 30 days. The current AU counts until its expected end
+    (Beispiel 13.4), or today + 6 days if it is open-ended (VB 13.4 §3.12 p.135, Beispiel 13.5: 02.09 -> 08.09)."""
+    rule, src, cid = ("Prior AUs (12 months) + current AU >= 30 days", "SRC-CRIT; VB 13.4 §3.12 p.135; Beispiel 13.4/13.5",
+                      "9c8c9b58-4d0f-4066-98ac-973095418d63")
+    end = cur_au.get("end") or cur_au.get("end_final") or cur_au.get("end_initial")
+    if end:
+        cur_end, how = d(end), "expected end"
+    else:
+        today = d(scenario.get("today") or obs["DATUM-ERSTELLUNG"])
+        cur_end, how = today + timedelta(days=6), f"open end: {fmt(today)} + 6 days"
+    cur_days = (cur_end - cur).days + 1
+    limit = add_months(cur, -12)
+    span = lambda ps: sum((d(e) - d(s)).days + 1 for s, e in ps if d(e) >= limit)
+    reported = cur_days + span(file_periods)
+    all_known = cur_days + span(eligible(prior, cur))
+    straddle = any(d(s) < limit <= d(e) for s, e in file_periods + eligible(prior, cur))
+    actual = f"{reported} days (current {cur_days}, {how})"
+    if straddle or (reported >= 30) != (all_known >= 30):
+        why = ("an AU straddles the 12-month limit" if straddle else
+               f"reported chain gives {reported} days, all prior AUs of the last 12 months give {all_known}")
+        return finding("C12", rule, src, ">= 30", actual, "NEEDS_REVIEW",
+                       f"rule text does not settle this: {why}", cid)
+    return finding("C12", rule, src, ">= 30", actual, "PASS" if reported >= 30 else "MISMATCH", criterion_id=cid)
 
 
 def flow_findings(case, checker_dir):
@@ -164,9 +211,9 @@ def human(report):
     short = lambda v: (json.dumps(v, ensure_ascii=False) if not isinstance(v, str) else v)[:12] if v is not None else "-"
     lines = [f"REVIEW REPORT {r['id']} – Abgabegrund 41 (DBVO) + message flow     Overall: {r['overall_status']}",
              f"Template: {r['template']}",
-             f"Test data: {report['execution']['file']}   ID {report['execution']['observed']['DATENSATZ-ID']}",
+             f"Test data: {report['execution']['file']}   ID {report['execution']['observed'].get('DATENSATZ-ID', '-')}",
              f"Test case: {report['test_case']['source']}",
-             f"Result: {cnt['PASS']} PASS · {cnt['MISMATCH']} MISMATCH · {cnt['NOT EVALUATED']} NOT EVALUATED",
+             "Result: " + " · ".join(f"{v} {k}" for k, v in cnt.items() if v or k in ("PASS", "MISMATCH")),
              "-" * 79,
              f"{'ID':4} {'Check':38} {'Expected':12} {'Actual':12} {'Status':15} Source"]
     for f in report["findings"]:
@@ -201,10 +248,16 @@ def main():
                                     metadata={"report_id": report_id, "test_case": case.get("source")})
         with span(name="load_test_case", input=args.case, output={"scenario": case["scenario"], "messages": len(case["messages"])}):
             pass
-        observed = parse_teel0(args.teel0)
-        with span(name="parse_teel0", input=args.teel0, output=observed):
+        try:
+            observed = parse_teel0(args.teel0)
+            dbvo = dbvo_findings(case["scenario"], observed)
+        except ValueError as exc:   # malformed output: stop, never PASS (svg "Malformed -> blocked")
+            observed = {"error": str(exc)}
+            dbvo = [finding("PARSE", "TEEL0 output is parsable", "VB 13.4 §3.12", "valid DBVO", str(exc), "BLOCKED")]
+        with span(name="parse_teel0", input=args.teel0, output=observed,
+                  level="ERROR" if "error" in observed else "DEFAULT"):
             pass
-        findings = dbvo_findings(case["scenario"], observed) + flow_findings(case, args.checker_dir)
+        findings = dbvo + flow_findings(case, args.checker_dir)
         with span(name="checks", output={"total": len(findings)}):
             for f in findings:
                 with span(name=f"check {f['id']}", input={"rule": f["rule"], "source": f["source"], "expected": f["expected"]},
@@ -215,8 +268,9 @@ def main():
         with span(name="attacks", output=rb):
             pass
 
-        counts = {s: sum(f["status"] == s for f in findings) for s in ("PASS", "MISMATCH", "NOT EVALUATED")}
-        overall = "MISMATCH" if counts["MISMATCH"] else "NOT EVALUATED" if counts["NOT EVALUATED"] else "PASS"
+        order = ("BLOCKED", "MISMATCH", "NEEDS_REVIEW", "NOT EVALUATED", "PASS")
+        counts = {s: sum(f["status"] == s for f in findings) for s in reversed(order)}
+        overall = next(s for s in order if counts[s] or s == "PASS")
         trace_url = lf.get_trace_url(trace_id=lf.get_current_trace_id()) if lf else None
         report = {
             "report": {"id": report_id, "created_at": datetime.now().strftime("%d.%m.%Y %H:%M"),
