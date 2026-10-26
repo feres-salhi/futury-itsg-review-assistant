@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1120" role="img" aria-labelledby="title description">
   <title id="title">ITSG AI Review Assistant — workflow schematic</title>
-  <desc id="description">A schematic showing authoritative German law and ITSG specifications flowing through versioned source intake, cited requirements, human review, test design, human execution in payroll software, deterministic comparison, evidence-backed reporting, and an audit graph. Vendor documentation is kept separate from observed execution output. Translation is an optional reviewed branch.</desc>
+  <desc id="description">A schematic showing authoritative German law, ITSG specifications, and mandated report forms/templates flowing through versioned source intake, cited requirements, human review, test design, human execution in payroll software, deterministic comparison, mandated-template rendering and conformance checking, evidence-backed reporting, and an audit graph. Vendor documentation is kept separate from observed execution output. Translation is an optional reviewed branch.</desc>
   <defs>
     <marker id="arrow" markerWidth="12" markerHeight="12" refX="9" refY="6" orient="auto" markerUnits="strokeWidth">
       <path d="M1,1 L10,6 L1,11" fill="none" stroke="#58718b" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
@@ -59,30 +59,31 @@
   <!-- Source intake -->
   <g filter="url(#shadow)">
     <rect x="82" y="174" width="250" height="112" rx="14" fill="#f1f5f9" stroke="#d8e2eb"/>
-    <rect x="349" y="174" width="250" height="112" rx="14" fill="#f1f5f9" stroke="#d8e2eb"/>
-    <rect x="655" y="174" width="270" height="112" rx="14" fill="#edf4fb" stroke="#cbdced"/>
-    <rect x="986" y="174" width="250" height="112" rx="14" fill="#edf4fb" stroke="#cbdced"/>
+    <rect x="350" y="174" width="300" height="112" rx="14" fill="#f1f5f9" stroke="#d8e2eb"/>
+    <rect x="720" y="174" width="250" height="112" rx="14" fill="#edf4fb" stroke="#cbdced"/>
+    <rect x="1010" y="174" width="250" height="112" rx="14" fill="#edf4fb" stroke="#cbdced"/>
     <rect x="1280" y="174" width="235" height="112" rx="14" fill="#f8f2e9" stroke="#ead9bd"/>
   </g>
-  <text x="102" y="204" class="node-title">Official German law</text>
-  <text x="102" y="228" class="node-copy">Canonical legal text</text>
+  <text x="102" y="204" class="node-title">Official law + ITSG specs</text>
+  <text x="102" y="228" class="node-copy">Legal text + review requirements</text>
   <text x="102" y="249" class="small">Authority and effective dates matter</text>
-  <text x="369" y="204" class="node-title">Official ITSG specs</text>
-  <text x="369" y="228" class="node-copy">Technical review requirements</text>
-  <text x="369" y="249" class="small">Edition and applicable period recorded</text>
-  <text x="675" y="204" class="node-title">Versioned source registry</text>
-  <text x="675" y="228" class="node-copy">Origin · version · dates · checksum</text>
-  <text x="675" y="249" class="small">Prior versions preserved for replay</text>
-  <text x="1006" y="204" class="node-title">Segments + citations</text>
-  <text x="1006" y="228" class="node-copy">Stable page / section locators</text>
-  <text x="1006" y="249" class="small">Exact German passage remains visible</text>
+  <text x="370" y="204" class="node-title">Mandated forms / templates</text>
+  <text x="370" y="228" class="node-copy">Official layout, fields, structure</text>
+  <text x="370" y="249" class="small">Applicable edition and validity recorded</text>
+  <text x="740" y="204" class="node-title">Versioned source registry</text>
+  <text x="740" y="228" class="node-copy">Origin · version · dates · checksum</text>
+  <text x="740" y="249" class="small">Law, specs, forms; prior versions kept</text>
+  <text x="1030" y="204" class="node-title">Segments + citations</text>
+  <text x="1030" y="228" class="node-copy">Stable page / section locators</text>
+  <text x="1030" y="249" class="small">Exact source passage remains visible</text>
   <text x="1300" y="204" class="node-title">Vendor documentation</text>
   <text x="1300" y="228" class="node-copy">Claims / configuration context</text>
   <text x="1300" y="249" class="small">Not proof of actual execution</text>
 
-  <path d="M332 229 H345" class="flow"/>
-  <path d="M599 229 H651" class="flow"/>
-  <path d="M925 229 H982" class="flow"/>
+  <path d="M332 229 H690" class="flow"/>
+  <path d="M500 286 V300 H690 V229" class="flow"/>
+  <path d="M690 229 H716" class="flow"/>
+  <path d="M970 229 H1006" class="flow"/>
   <path d="M1400 286 V478 H1260" class="flow-dashed"/>
   <text x="1269" y="463" class="tiny">context only</text>
 
@@ -145,29 +146,34 @@
 
   <!-- Comparison/report -->
   <g filter="url(#shadow)">
-    <rect x="82" y="782" width="310" height="102" rx="14" fill="#edf4fb" stroke="#cbdced"/>
-    <rect x="428" y="782" width="330" height="102" rx="14" fill="#eaf6f2" stroke="#c9e5db"/>
-    <rect x="794" y="782" width="320" height="102" rx="14" fill="#f1f5f9" stroke="#d8e2eb"/>
-    <rect x="1150" y="782" width="365" height="102" rx="14" fill="#fff5e5" stroke="#eed9b4"/>
+    <rect x="82" y="782" width="248" height="102" rx="14" fill="#edf4fb" stroke="#cbdced"/>
+    <rect x="350" y="782" width="270" height="102" rx="14" fill="#eaf6f2" stroke="#c9e5db"/>
+    <rect x="640" y="782" width="270" height="102" rx="14" fill="#edf4fb" stroke="#cbdced"/>
+    <rect x="930" y="782" width="280" height="102" rx="14" fill="#f1f5f9" stroke="#d8e2eb"/>
+    <rect x="1230" y="782" width="285" height="102" rx="14" fill="#fff5e5" stroke="#eed9b4"/>
   </g>
   <text x="102" y="814" class="node-title">Expected result</text>
   <text x="102" y="838" class="node-copy">Reviewed case + rationale</text>
   <text x="102" y="859" class="small">Criterion and source linked</text>
-  <text x="448" y="814" class="node-title">Deterministic comparator</text>
-  <text x="448" y="838" class="node-copy">Expected ↔ observed</text>
-  <text x="448" y="859" class="small">PASS · MISMATCH · NOT EVALUATED</text>
-  <text x="814" y="814" class="node-title">Evidence-backed report</text>
-  <text x="814" y="838" class="node-copy">Finding + values + citations</text>
-  <text x="814" y="859" class="small">Missing evidence can never pass</text>
-  <text x="1170" y="814" class="node-title">G5 · Human sign-off</text>
-  <text x="1170" y="838" class="node-copy">Review limitations and findings</text>
-  <text x="1170" y="859" class="small">No automated legal certification</text>
+  <text x="370" y="814" class="node-title">Deterministic comparator</text>
+  <text x="370" y="838" class="node-copy">Expected ↔ observed</text>
+  <text x="370" y="859" class="small">PASS · MISMATCH · NOT EVALUATED</text>
+  <text x="660" y="814" class="node-title">Mandated-form renderer</text>
+  <text x="660" y="838" class="node-copy">Applicable official template</text>
+  <text x="660" y="859" class="small">Required fields, order, layout, format</text>
+  <text x="950" y="814" class="node-title">Template conformance check</text>
+  <text x="950" y="838" class="node-copy">Version · completeness · structure</text>
+  <text x="950" y="859" class="small">Invalid / unknown template → blocked</text>
+  <text x="1250" y="814" class="node-title">G5 · Human sign-off</text>
+  <text x="1250" y="838" class="node-copy">Findings + form conformance</text>
+  <text x="1250" y="859" class="small">No automated legal certification</text>
 
   <path d="M510 690 V754 H236 V778" class="flow-blue"/>
   <path d="M1408 690 V754 H236 V778" class="flow-green"/>
-  <path d="M392 833 H424" class="flow-green"/>
-  <path d="M758 833 H790" class="flow-green"/>
-  <path d="M1114 833 H1146" class="flow"/>
+  <path d="M330 833 H346" class="flow-green"/>
+  <path d="M620 833 H636" class="flow-green"/>
+  <path d="M910 833 H926" class="flow-green"/>
+  <path d="M1210 833 H1226" class="flow"/>
 
   <!-- Audit and evidence backbone -->
   <g>
@@ -179,9 +185,9 @@
     <path d="M818 1010h12M824 1004v12" stroke="#3976ba" stroke-width="1.8" stroke-linecap="round"/>
   </g>
   <text x="137" y="1005" font-size="15" font-weight="700" fill="#1d3349">Evidence graph + hybrid search</text>
-  <text x="137" y="1027" class="small">Sources · versions · requirements · cases · runs · findings · approvals</text>
+  <text x="137" y="1027" class="small">Sources + form versions · requirements · cases · runs · findings · approvals</text>
   <text x="849" y="1005" font-size="15" font-weight="700" fill="#1d3349">Append-only audit trail</text>
-  <text x="849" y="1027" class="small">Who · what · when · source/model/prompt version · review decision</text>
+  <text x="849" y="1027" class="small">Who · what · when · template/renderer version · review decision</text>
   <path d="M180 976 V918 H110 V888" class="flow-dashed"/>
   <path d="M1430 976 V918 H1460 V888" class="flow-dashed"/>
 
