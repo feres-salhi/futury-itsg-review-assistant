@@ -4,3 +4,9 @@ data/
 __pycache__/
 .DS_Store
 ~$*
+reports/
+*.jsonl
+*.receipt.json
+.seal_current_run
+seal-data/
+.pytest_cache/
