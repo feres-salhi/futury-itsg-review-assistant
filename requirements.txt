@@ -1,2 +1,6 @@
 PyMuPDF>=1.26
 PyYAML>=6.0
+requests
+python-frontmatter
+pydantic>=2
+neo4j
