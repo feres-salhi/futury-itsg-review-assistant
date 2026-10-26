@@ -11,6 +11,16 @@ from Graph_Schema import GraphExtraction
 from Normalizer import normalize_entity_id
 from Regular_expression_check import deterministic_cross_document_bridge
 
+# Langfuse tracing (traceable test record): on only when the keys are in .env / the environment
+import contextlib
+from dotenv import load_dotenv
+load_dotenv(Path(__file__).resolve().parent / ".env")
+if os.environ.get("LANGFUSE_PUBLIC_KEY") and os.environ.get("LANGFUSE_SECRET_KEY"):
+    from langfuse import get_client
+    LANGFUSE = get_client()
+else:
+    LANGFUSE = None
+
 ENDPOINT_URL = "https://hip-gw.hessian.ai/v1/chat/completions"
 HAI_API_KEY = "sk-bf-236ea46f-c62f-4340-bec6-e69f6ceba3df"
 
@@ -61,11 +71,29 @@ def extract_graph_from_markdown_chunk(text_content: str, metadata: dict) -> dict
         "response_format": {"type": "json_object"}
     }
     
-    response = requests.post(ENDPOINT_URL, headers=headers, json=payload, timeout=120)
-    response.raise_for_status()
-    raw_content = response.json()["choices"][0]["message"]["content"]
-    # Fail closed: a reply in any other shape raises instead of silently producing a broken graph
-    graph = GraphExtraction.model_validate_json(extract_json_payload(raw_content)).model_dump()
+    trace = LANGFUSE.start_as_current_observation(
+        name="graph-extraction", as_type="generation", model=payload["model"], input=payload["messages"],
+        model_parameters={k: payload[k] for k in ("temperature", "max_tokens")},
+        metadata={"doc": metadata.get("doc"), "section": metadata.get("section"), "source_file": metadata.get("source_file")},
+    ) if LANGFUSE else contextlib.nullcontext()
+    with trace as gen:
+        response = requests.post(ENDPOINT_URL, headers=headers, json=payload, timeout=120)
+        response.raise_for_status()
+        body = response.json()
+        raw_content = body["choices"][0]["message"]["content"]
+        if gen:
+            usage = body.get("usage") or {}
+            gen.update(output=raw_content, usage_details={"input": usage.get("prompt_tokens", 0),
+                                                          "output": usage.get("completion_tokens", 0)})
+        # Fail closed: a reply in any other shape raises instead of silently producing a broken graph
+        try:
+            graph = GraphExtraction.model_validate_json(extract_json_payload(raw_content)).model_dump()
+        except Exception as exc:
+            if gen:
+                gen.update(level="ERROR", status_message=f"schema validation failed: {exc}"[:500])
+            raise
+        if gen:
+            gen.update(metadata={"schema_validation": "pass", "nodes": len(graph["nodes"]), "edges": len(graph["edges"])})
     return normalize_graph(graph)
 
 def normalize_graph(graph: dict) -> dict:
