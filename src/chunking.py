@@ -27,6 +27,10 @@ ROOT = Path(__file__).resolve().parents[1]
 DATA_DIR = Path(os.environ.get("DATA_DIR", ROOT.parent / "futury_overview" / "ITSG" / "ITSG"))
 OUT = ROOT / "chunks"
 
+# Rundschreiben footer, cut by its text: landscape pages have it mid-page, form pages have content below it
+RS_FOOTER = (r"^Gemeinsames Rundschreiben vom [\d./]+ in der Fassung vom|Seite \d+ von \d+$|^SGB XIV$"
+             r"|^Verletztengeld nach § 45 SGB VII und zum Krankengeld der Sozialen Entschädigung")
+
 # body_start: first page after TOC / change history. top/bottom: y-range of body text.
 DOCS = {
     "GG_EEL": dict(
@@ -41,6 +45,19 @@ DOCS = {
         file="2026_03_10_Endfassung_Beispielpapier_DTA_EEL_Version_13.3_gueltig_ab_01.01.2027.pdf",
         title="Beispielpapier DTA EEL", version="13.3",
         body_start=8, top=70, bottom=800, parent_level=1),  # footer is size < 7, table rows reach y≈765
+    # Gemeinsame Rundschreiben (GKV-Spitzenverband): Anl1 Kinderkrankengeld, Anl2 Mutterschaft, Anl3 Krankengeld
+    "Anl1": dict(
+        file="2025_12_10_NS_FLB_TOP_01_24c24i45SGBV45SGBVII47SGBXIV_Aktualisierung_der_GR_zu_EEL_Anl1.pdf",
+        title="Gemeinsames Rundschreiben Kinderkrankengeld (§ 45 SGB V, § 45 Abs. 4 SGB VII, § 47 Abs. 10 SGB XIV)",
+        version="10.12.2025", body_start=15, top=60, bottom=750, parent_level=2, rundschreiben=True, footer=RS_FOOTER),
+    "Anl2": dict(
+        file="2025_12_10_NS_FLB_TOP_01_24c24i45SGBV45SGBVII47SGBXIV_Aktualisierung_der_GR_zu_EEL_Anl2.pdf",
+        title="Gemeinsames Rundschreiben Leistungen bei Schwangerschaft und Mutterschaft",
+        version="10.12.2025", body_start=19, top=60, bottom=770, parent_level=2, rundschreiben=True, footer=RS_FOOTER),
+    "Anl3": dict(
+        file="2024_12_11_NS_FLB_TOP_02_24c24i4444b45SGBV45SGBVII47SGBXIV_Aktualisierung_der_GR_zu_Entgeltersatzleistungen_Anl3.pdf",
+        title="Gemeinsames Rundschreiben Krankengeld, Verletztengeld, Krankengeld der Sozialen Entschädigung",
+        version="11.12.2024", body_start=22, top=50, bottom=800, parent_level=2, rundschreiben=True, footer=RS_FOOTER),
 }
 
 NUM_HEAD = re.compile(r"^(\d+(?:\.\d+)*)\.?\s*([A-ZÄÖÜ(§].*)$")  # „quoted“ = cross-reference, not a heading
@@ -131,6 +148,8 @@ def merge_table_rows(rows, vocab):
 def in_body(r, cfg):
     """Inside the body area; small print counts as footer/footnote only at the page bottom
     (Beispielpapier has small-print calculations mid-page)."""
+    if cfg.get("footer"):
+        return cfg["top"] <= r["y"] <= cfg["bottom"] and not re.search(cfg["footer"], r["text"])
     return cfg["top"] <= r["y"] <= cfg["bottom"] and not (r["size"] < 7 and r["y"] > 745)
 
 
@@ -144,6 +163,25 @@ def read_toc(doc, cfg):
             if m:
                 toc.setdefault(m.group(1), key(m.group(2)))
     return toc
+
+
+def is_toc_row(t):
+    """Leader dots, a trailing page number, or an all-caps entry/continuation ("3.1.1 | VERSICHERTE | 28")."""
+    return bool(LEADER.search(t) or re.search(r"\s\d{1,3}$", t) or re.search(r"[A-ZÄÖÜ]{3}", t) and not re.search(r"[a-zäöü]", t))  # ß has no capital form here
+
+
+def split_mini_toc(rows):
+    """Rundschreiben chapters open with their own TOC (Anl3 ch. 12 even repeats the whole TOC).
+    It is the leading run of TOC rows, allowing up to 3 wrapped lines ("Beispiel 154 – ...") in between."""
+    if sum(bool(LEADER.search(r["text"])) for r in rows) < 3:
+        return rows, []
+    last, gap = -1, 0
+    for i, r in enumerate(rows):
+        if is_toc_row(r["text"]):
+            last, gap = i, 0
+        elif (gap := gap + 1) > 3:
+            break
+    return rows[last + 1:], rows[:last + 1]
 
 
 def join_lines(lines):
@@ -187,12 +225,17 @@ def chunk_doc(name, cfg):
                 removed[re.sub(r"\d+", "#", r["text"])] += 1
                 continue
             m = NUM_HEAD.match(r["text"].replace(" | ", " ", 1))  # "2.1 | Title": wide gap after number
+            # Rundschreiben: chapter-internal mini TOC ("3.1.1 | VERSICHERTE | 28", all caps or leader dots) is not a heading
+            if m and cfg.get("rundschreiben") and (LEADER.search(r["text"]) or not re.search(r"[a-zäöü]", m.group(2))):
+                m = None
             in_toc = m and m.group(1) in toc and key(m.group(2))[:6] == toc[m.group(1)][:6]
             # not in TOC (e.g. VB level 4): accept only as the next number under the current section
             nxt = m and "." in m.group(1) and len(r["text"]) < 130 and \
                 stack.get(m.group(1).count(".")) == m.group(1).rsplit(".", 1)[0] and \
                 int(m.group(1).rsplit(".", 1)[1]) == counter.get(m.group(1).rsplit(".", 1)[0], 0) + 1
-            if m and (r["x"] <= 100 or r["size"] >= 13) and (in_toc or nxt):
+            # Rundschreiben: chapter headings are large (11.7-13.7 pt); a chapter overview table repeats "2 | Title | ..."
+            h1_ok = not cfg.get("rundschreiben") or (m and "." in m.group(1)) or r["size"] >= 11
+            if m and h1_ok and (r["x"] <= 100 or r["size"] >= 13) and (in_toc or nxt):
                 sec = m.group(1)
                 if nxt:
                     counter[sec.rsplit(".", 1)[0]] += 1
@@ -224,6 +267,12 @@ def chunk_doc(name, cfg):
                 cur["pages"].append(pno)
     chunks.append(cur)
 
+    for c in chunks:
+        c["toc_rows"] = []
+        if cfg.get("rundschreiben") and c["level"] == 1:
+            c["rowdicts"], c["toc_rows"] = split_mini_toc(c["rowdicts"])
+            c["rows"] = [r["text"] for r in c["rowdicts"]]
+            removed["[chapter TOC row]"] += len(c["toc_rows"])
     by_sec = {c["section"]: c for c in chunks}
     # complete UPPER-CASE field names (not cut at a line end) decide hyphens in wrapped table cells
     vocab = {v for c in chunks for r in c["rowdicts"] for _, t in r["cells"] for v in FIELD.findall(t)}
@@ -273,6 +322,7 @@ def check(name, cfg, doc, toc, chunks):
     got = collections.Counter()
     for c in chunks:
         got.update(key(w) for w in f"{c.get('raw', '')} {' '.join(c['rows'])}".split() if key(w))
+        got.update(key(w) for r in c["toc_rows"] for w in r["text"].split() if key(w))  # removed on purpose
     lost = words - got
     body_secs = {c["section"] for c in chunks}
     missing_toc = sorted((s for s in toc if s not in body_secs), key=lambda s: [int(p) for p in s.split(".")])
@@ -282,7 +332,9 @@ def check(name, cfg, doc, toc, chunks):
                pages_body=doc.page_count - cfg["body_start"] + 1,
                pages_uncovered=sorted(set(range(cfg["body_start"], doc.page_count + 1)) - pages),
                empty_chunks=[c["section"] for c in chunks if not c["text"].strip() and c["level"] > 0],
-               replacement_chars=sum(c["text"].count("�") for c in chunks))
+               replacement_chars=sum(c["text"].count("�") for c in chunks),
+               toc_rows_removed=sum(len(c["toc_rows"]) for c in chunks),
+               dup_sections=[s for s, n in collections.Counter(c["section"] for c in chunks).items() if n > 1])
     if cfg.get("hidden_x"):
         full = " ".join(" ".join(c["rows"]) for c in chunks)
         refs = dict(re.findall(r"(\d+\.\d+\.\d+(?:\.\d+)?) „([^“]{3,90})“", full))
