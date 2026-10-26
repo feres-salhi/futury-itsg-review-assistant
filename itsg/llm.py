@@ -59,6 +59,10 @@ MODEL_EXTRACTOR = "vllm/GLM-Flash:Latest"
 MODEL_DESIGNER = "vllm/Kolibri-1"
 MODEL_CHALLENGER = "vllm/GLM-Flash:Latest"
 MODEL_ASSISTANT = "vllm/GLM-Flash:Latest"
+# Human directive 2026-10-27: if the assistant's primary model is unreachable,
+# fall back to the designer model before degrading (both roles are wired; the
+# fallback is recorded in the run envelope, never silent).
+MODEL_ASSISTANT_FALLBACK = "vllm/Kolibri-1"
 
 ROLE_MODELS = {
     ROLE_REQUIREMENT_EXTRACTOR: MODEL_EXTRACTOR,

@@ -12,6 +12,13 @@ server is not reachable.
 Endpoints (127.0.0.1 only by default):
   GET  /            → frontend/index.html (static files below --frontend)
   GET  /api/health  → {"ok": true, "store": <path>, "events": <n>}
+  GET|POST /api/report/pdf → the formal report document (application/pdf; T10-036)
+                      rendered by itsg.report_pdf from the store's report artifact
+                      (deterministic content; POST body {"live": true} additionally
+                      drafts the marked AI summary via the gateway GLM model —
+                      on any gateway failure the PDF is returned without the
+                      summary and with an honest note; the failure is recorded
+                      as an agent_run in the store, never fabricated)
   GET  /api/state   → typed UI payload assembled from the store records
                       (now plus "stories" from data/story_cases.json,
                       "reviews" from reports/RPT-*.json and "harness" from
@@ -331,6 +338,45 @@ def run_demo_into(store_root: Path, live: bool) -> dict:
     return build_state(store_root)
 
 
+_pdf_lock = threading.Lock()
+
+
+def build_report_pdf(store_root: Path, live: bool = False,
+                     client_name: str | None = None) -> bytes:
+    """Render the formal report PDF (T10-036) and return its bytes.
+
+    Deterministic content, honest degradation: ``live`` only adds the marked
+    AI summary; a gateway failure records an error agent_run in the store and
+    the PDF is still returned — with an explicit note instead of a summary.
+    """
+    import tempfile
+
+    from . import report_pdf
+
+    artifact = report_pdf.find_artifact(store_root)
+    summary = None
+    summary_note = None
+    if live:
+        data = json.loads(artifact.read_text(encoding="utf-8"))
+        with _pdf_lock:
+            run = report_pdf.draft_summary_live(
+                data, data.get("results") or [],
+                task_id=f"REPORT-{data.get('report_id', 'UNKNOWN')}")
+        if run.status == "candidate" and run.result.get("summary_de"):
+            summary = run.result["summary_de"]
+        else:
+            summary_note = ("Keine KI-Zusammenfassung: Gateway/Anmeldedaten nicht verfügbar "
+                            f"(Fehler protokolliert: {run.result.get('error', 'unbekannt')}).")
+        run_dict = run.to_dict()
+        Store(store_root).put("agent_run", {"id": run_dict["run_id"], **run_dict})
+    with _pdf_lock:
+        with tempfile.TemporaryDirectory() as tmp:
+            out = Path(tmp) / "formal-report.pdf"
+            report_pdf.generate_report_pdf(artifact, out, client_name=client_name,
+                                           summary=summary, summary_note=summary_note)
+            return out.read_bytes()
+
+
 def _chat_number(record: dict) -> int:
     """Numeric suffix of a CHAT-<n> record id (0 for anything else)."""
     match = _CHAT_ID.match(str(record.get("id", "")))
@@ -445,12 +491,15 @@ class SUSIEHandler(BaseHTTPRequestHandler):
                 return
             self._send_json({"ok": True,
                              "turns": chat_history(self.store_root, session_id)})
+        elif path == "/api/report/pdf":
+            self._report_pdf({})
         else:
             self._static(path)
 
     def do_POST(self) -> None:  # noqa: N802 (http.server API)
         path = self.path.split("?", 1)[0]
-        if path not in ("/api/run", "/api/review/run", "/api/chat", "/api/action"):
+        if path not in ("/api/run", "/api/review/run", "/api/chat", "/api/action",
+                        "/api/report/pdf"):
             self._send_json({"ok": False, "error": "not found"}, status=404)
             return
         length = int(self.headers.get("Content-Length") or 0)
@@ -470,6 +519,9 @@ class SUSIEHandler(BaseHTTPRequestHandler):
             return
         if path == "/api/chat":
             self._api_chat(body)
+            return
+        if path == "/api/report/pdf":
+            self._report_pdf(body)
             return
         # /api/review/run — body is ignored beyond validity ({"scope": ...} is
         # accepted and discarded); only the repo's own run_review.py runs.
@@ -503,6 +555,32 @@ class SUSIEHandler(BaseHTTPRequestHandler):
             self._send_json({"ok": False, "error": f"action failed: {exc}"}, status=500)
             return
         self._send_json({"ok": True, "result": result})
+
+    def _report_pdf(self, body: dict) -> None:
+        """GET/POST /api/report/pdf — formal report document as application/pdf.
+
+        Any failure becomes JSON (400/500), never a half-written PDF; the
+        PDF itself carries the honesty labels (machine-generated footer,
+        hash, compliance notice) from itsg.report_pdf.
+        """
+        client_name = body.get("client_name")
+        if client_name is not None and not isinstance(client_name, str):
+            self._send_json({"ok": False, "error": "client_name must be a string"}, status=400)
+            return
+        try:
+            pdf = build_report_pdf(self.store_root, live=bool(body.get("live", False)),
+                                   client_name=client_name)
+        except Exception as exc:
+            self._send_json({"ok": False, "error": f"report pdf failed: {exc}"}, status=500)
+            return
+        self.send_response(200)
+        self.send_header("Content-Type", "application/pdf")
+        self.send_header("Content-Length", str(len(pdf)))
+        self.send_header("Content-Disposition",
+                         'attachment; filename="susie-formalreport.pdf"')
+        self.send_header("Cache-Control", "no-store")
+        self.end_headers()
+        self.wfile.write(pdf)
 
     def _api_chat(self, body: dict) -> None:
         """POST /api/chat — one SÜSIE turn; degraded gateway output is still

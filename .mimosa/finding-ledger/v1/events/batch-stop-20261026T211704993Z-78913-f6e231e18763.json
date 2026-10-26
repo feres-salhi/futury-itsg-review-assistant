@@ -1,0 +1,360 @@
+{
+  "schemaVersion": "mimosa-finding-ledger-batch/v1",
+  "batchId": "stop-20261026T211704993Z-78913-f6e231e18763",
+  "runId": "20261026T211704993Z-78913-f6e231e18763",
+  "runStatus": "inconclusive",
+  "coverage": {
+    "status": "partial",
+    "reasons": [
+      {
+        "code": "baseline_snapshot_unreadable",
+        "stage": "baseline-read",
+        "target": "run_review.py",
+        "detail": "file is missing from task baseline",
+        "affectsCompletion": true
+      },
+      {
+        "code": "baseline_snapshot_unreadable",
+        "stage": "baseline-read",
+        "target": "tests/test_adopted_segmenter.py",
+        "detail": "file is missing from task baseline",
+        "affectsCompletion": true
+      },
+      {
+        "code": "baseline_snapshot_unreadable",
+        "stage": "baseline-read",
+        "target": "tests/test_registry_index.py",
+        "detail": "file is missing from task baseline",
+        "affectsCompletion": true
+      },
+      {
+        "code": "baseline_snapshot_unreadable",
+        "stage": "baseline-read",
+        "target": "src/chunking.py",
+        "detail": "file is missing from task baseline",
+        "affectsCompletion": true
+      },
+      {
+        "code": "baseline_snapshot_unreadable",
+        "stage": "baseline-read",
+        "target": "src/pdf_to_md.py",
+        "detail": "file is missing from task baseline",
+        "affectsCompletion": true
+      },
+      {
+        "code": "baseline_snapshot_unreadable",
+        "stage": "baseline-read",
+        "target": "harness/generate_cases.py",
+        "detail": "file is missing from task baseline",
+        "affectsCompletion": true
+      },
+      {
+        "code": "baseline_snapshot_unreadable",
+        "stage": "baseline-read",
+        "target": "harness/run_harness.py",
+        "detail": "file is missing from task baseline",
+        "affectsCompletion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "itsg/webserver.py",
+        "detail": "spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "tests/test_webserver.py",
+        "detail": "spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "frontend/theme-init.js",
+        "detail": "spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "frontend/pruefakte.js",
+        "detail": "spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "run_review.py",
+        "detail": "spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "tests/test_adopted_segmenter.py",
+        "detail": "spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "tests/test_registry_index.py",
+        "detail": "spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "src/chunking.py",
+        "detail": "spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "src/pdf_to_md.py",
+        "detail": "spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "pipeline/segmenter/chunker.py",
+        "detail": "spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "pipeline/segmenter/pdf_extractor.py",
+        "detail": "spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "pipeline/registry/importer.py",
+        "detail": "spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "pipeline/index/fts.py",
+        "detail": "spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "pipeline/index/verify.py",
+        "detail": "spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "harness/generate_cases.py",
+        "detail": "spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "harness/run_harness.py",
+        "detail": "spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "stop_budget_exhausted",
+        "stage": "supply-chain-check",
+        "target": ".",
+        "detail": "focused supply-chain check was not run before the gate budget",
+        "affectsCompletion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "baseline-read",
+        "target": "run_review.py",
+        "detail": "baseline_snapshot_unreadable: file is missing from task baseline",
+        "affectsCompletion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "baseline-read",
+        "target": "tests/test_adopted_segmenter.py",
+        "detail": "baseline_snapshot_unreadable: file is missing from task baseline",
+        "affectsCompletion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "baseline-read",
+        "target": "tests/test_registry_index.py",
+        "detail": "baseline_snapshot_unreadable: file is missing from task baseline",
+        "affectsCompletion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "baseline-read",
+        "target": "src/chunking.py",
+        "detail": "baseline_snapshot_unreadable: file is missing from task baseline",
+        "affectsCompletion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "baseline-read",
+        "target": "src/pdf_to_md.py",
+        "detail": "baseline_snapshot_unreadable: file is missing from task baseline",
+        "affectsCompletion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "baseline-read",
+        "target": "harness/generate_cases.py",
+        "detail": "baseline_snapshot_unreadable: file is missing from task baseline",
+        "affectsCompletion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "baseline-read",
+        "target": "harness/run_harness.py",
+        "detail": "baseline_snapshot_unreadable: file is missing from task baseline",
+        "affectsCompletion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "itsg/webserver.py",
+        "detail": "scanner_failed: spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "tests/test_webserver.py",
+        "detail": "scanner_failed: spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "frontend/theme-init.js",
+        "detail": "scanner_failed: spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "frontend/pruefakte.js",
+        "detail": "scanner_failed: spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "run_review.py",
+        "detail": "scanner_failed: spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "tests/test_adopted_segmenter.py",
+        "detail": "scanner_failed: spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "tests/test_registry_index.py",
+        "detail": "scanner_failed: spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "src/chunking.py",
+        "detail": "scanner_failed: spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "src/pdf_to_md.py",
+        "detail": "scanner_failed: spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "pipeline/segmenter/chunker.py",
+        "detail": "scanner_failed: spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "pipeline/segmenter/pdf_extractor.py",
+        "detail": "scanner_failed: spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "pipeline/registry/importer.py",
+        "detail": "scanner_failed: spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "pipeline/index/fts.py",
+        "detail": "scanner_failed: spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "pipeline/index/verify.py",
+        "detail": "scanner_failed: spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "harness/generate_cases.py",
+        "detail": "scanner_failed: spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "harness/run_harness.py",
+        "detail": "scanner_failed: spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "supply-chain-check",
+        "target": ".",
+        "detail": "stop_budget_exhausted: focused supply-chain check was not run before the gate budget",
+        "affectsCompletion": true
+      }
+    ]
+  },
+  "source": {
+    "component": "zcode-hook",
+    "operationId": "Stop"
+  },
+  "revision": "090703782aaa5e63b113e39178a30fd5c0f5b039",
+  "diffHash": "960493c9f595c5400bd77d0cb374a2aafb85e22349aaa2e95b8e9d72776bc9dd",
+  "rulesVersion": "unavailable",
+  "sessionHash": "2eaa473d23d8741f19ef5bb93005579616dc2cb72efad56e49eb020b233f182e",
+  "reportRef": ".mimosa/reports/task-review-session_2abe97c36f2454e3f666e1ad702165aa-20261026T211704993Z-78913-f6e231e18763.json",
+  "events": [],
+  "observedFindingIds": [],
+  "verifiedFiles": [],
+  "recordedAt": "2026-10-26T21:17:05.930Z"
+}

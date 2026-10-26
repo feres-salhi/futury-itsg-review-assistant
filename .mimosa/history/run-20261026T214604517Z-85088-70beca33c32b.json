@@ -1,0 +1,58 @@
+{
+  "schemaVersion": "mimosa-finding-history/v1",
+  "runId": "20261026T214604517Z-85088-70beca33c32b",
+  "runStatus": "inconclusive",
+  "errors": [
+    "baseline-read:tests/test_chat.py: baseline_snapshot_unreadable: file is missing from task baseline",
+    "baseline-read:seal/client.py: baseline_snapshot_unreadable: file is missing from task baseline",
+    "baseline-read:seal/demo.py: baseline_snapshot_unreadable: file is missing from task baseline",
+    "baseline-read:seal/seal_common.py: baseline_snapshot_unreadable: file is missing from task baseline",
+    "baseline-read:seal/server.py: baseline_snapshot_unreadable: file is missing from task baseline",
+    "baseline-read:seal/test_seal.py: baseline_snapshot_unreadable: file is missing from task baseline",
+    "baseline-read:seal/verify.py: baseline_snapshot_unreadable: file is missing from task baseline",
+    "baseline-read:itsg/chat.py: baseline_snapshot_unreadable: file is missing from task baseline",
+    "scan:tests/test_seal.py: scanner_failed: spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT",
+    "scan:itsg/demo.py: scanner_failed: spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT",
+    "scan:tests/test_chat.py: scanner_failed: spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT",
+    "scan:seal/client.py: scanner_failed: spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT",
+    "scan:seal/demo.py: scanner_failed: spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT",
+    "scan:seal/seal_common.py: scanner_failed: spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT",
+    "scan:seal/server.py: scanner_failed: spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT",
+    "scan:seal/test_seal.py: scanner_failed: spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT",
+    "scan:seal/verify.py: scanner_failed: spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT",
+    "scan:itsg/chat.py: scanner_failed: spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT",
+    "scan:frontend/pruefakte.js: scanner_failed: spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT"
+  ],
+  "target": ".",
+  "revision": "3f0211868d674ad9abe30b5e113bc1b9e1be5bb7",
+  "diffHash": "85001de71df5de7f5c84c73aae92c18ba3d3db2d0c4e8c0d1cbdb4f037077898",
+  "rulesVersion": "unavailable",
+  "recordedAt": "2026-10-26T21:46:04.517Z",
+  "timing": {
+    "startedAt": "2026-10-26T21:46:01.492Z",
+    "completedAt": "2026-10-26T21:46:04.517Z",
+    "durationMs": 3025
+  },
+  "tokens": {
+    "input": 0,
+    "output": 0,
+    "total": 0,
+    "modelCalls": 0,
+    "measurement": "known-zero"
+  },
+  "findings": {
+    "total": 0,
+    "bySeverity": {},
+    "byStatus": {}
+  },
+  "coverage": {
+    "status": "partial",
+    "reasonCounts": {
+      "baseline_snapshot_unreadable": 8,
+      "scanner_failed": 11,
+      "project_check_failed": 19
+    }
+  },
+  "evidenceBoundary": "static_only",
+  "immutableReport": ".mimosa/reports/task-review-session_8772c0add3c2af6d182f2ba86fcb980d-20261026T214604517Z-85088-70beca33c32b.json"
+}

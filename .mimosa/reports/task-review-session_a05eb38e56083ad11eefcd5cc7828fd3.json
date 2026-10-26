@@ -1,0 +1,740 @@
+{
+  "schema_version": "mimosa-task-review/v2",
+  "run_id": "20261026T171017852Z-49157-05a6900e8eb4",
+  "run_status": "inconclusive",
+  "errors": [
+    {
+      "stage": "candidate-select",
+      "target": "pipeline/index/cli.py",
+      "reason": "candidate_limit_exceeded: 44 changed reviewable file(s) were not scanned because the limit is 20"
+    },
+    {
+      "stage": "scan",
+      "target": "pipeline/__init__.py",
+      "reason": "scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "pipeline/ids.py",
+      "reason": "scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "pipeline/audit.py",
+      "reason": "scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "pipeline/registry/__init__.py",
+      "reason": "scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "pipeline/registry/manifest.py",
+      "reason": "scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "pipeline/registry/g0.py",
+      "reason": "scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "pipeline/registry/importer.py",
+      "reason": "scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "pipeline/registry/fetch.py",
+      "reason": "scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "pipeline/registry/cli.py",
+      "reason": "scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "pipeline/segmenter/__init__.py",
+      "reason": "scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "pipeline/segmenter/models.py",
+      "reason": "scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "pipeline/segmenter/pdf_extractor.py",
+      "reason": "scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "pipeline/segmenter/docx_extractor.py",
+      "reason": "scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "pipeline/segmenter/chunker.py",
+      "reason": "scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "pipeline/segmenter/cli.py",
+      "reason": "scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "pipeline/index/__init__.py",
+      "reason": "scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "pipeline/index/fts.py",
+      "reason": "scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "pipeline/index/query.py",
+      "reason": "scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "pipeline/index/verify.py",
+      "reason": "scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT"
+    },
+    {
+      "stage": "supply-chain-check",
+      "target": ".",
+      "reason": "stop_budget_exhausted: focused supply-chain check was not run before the gate budget"
+    }
+  ],
+  "coverage": {
+    "schema_version": "mimosa-hook-coverage/v1",
+    "status": "partial",
+    "scope": "hook_observed_diff",
+    "baseline": {
+      "complete": true,
+      "captured_files": 45,
+      "candidate_limit": 5000,
+      "truncated": false,
+      "enumeration_error_count": 0,
+      "snapshot_error_count": 0,
+      "compensated_target_count": 44
+    },
+    "change_tracking": {
+      "touched_observed": 42,
+      "touched_retained": 42,
+      "truncated": false,
+      "bash_mutation": true,
+      "bash_discovered": 64,
+      "bash_discovery_limit": 80,
+      "bash_discovery_truncated": false
+    },
+    "candidates": {
+      "eligible_files": 64,
+      "selected_files": 20,
+      "limit": 20,
+      "truncated": true
+    },
+    "scanning": {
+      "required_files": 19,
+      "scanned_files": 0,
+      "skipped_files": 0,
+      "failed_files": 19,
+      "project_checks_required": 1,
+      "project_checks_completed": 0
+    },
+    "notification": {
+      "eligible_findings": 0,
+      "detailed_findings": 0,
+      "detail_limit": 3,
+      "truncated": false
+    },
+    "reason_counts": {
+      "candidate_limit_exceeded": 1,
+      "scanner_failed": 19,
+      "stop_budget_exhausted": 1,
+      "project_check_failed": 21
+    },
+    "reasons": [
+      {
+        "code": "candidate_limit_exceeded",
+        "stage": "candidate-select",
+        "target": "pipeline/index/cli.py",
+        "detail": "44 changed reviewable file(s) were not scanned because the limit is 20",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "pipeline/__init__.py",
+        "detail": "spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "pipeline/ids.py",
+        "detail": "spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "pipeline/audit.py",
+        "detail": "spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "pipeline/registry/__init__.py",
+        "detail": "spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "pipeline/registry/manifest.py",
+        "detail": "spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "pipeline/registry/g0.py",
+        "detail": "spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "pipeline/registry/importer.py",
+        "detail": "spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "pipeline/registry/fetch.py",
+        "detail": "spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "pipeline/registry/cli.py",
+        "detail": "spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "pipeline/segmenter/__init__.py",
+        "detail": "spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "pipeline/segmenter/models.py",
+        "detail": "spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "pipeline/segmenter/pdf_extractor.py",
+        "detail": "spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "pipeline/segmenter/docx_extractor.py",
+        "detail": "spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "pipeline/segmenter/chunker.py",
+        "detail": "spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "pipeline/segmenter/cli.py",
+        "detail": "spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "pipeline/index/__init__.py",
+        "detail": "spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "pipeline/index/fts.py",
+        "detail": "spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "pipeline/index/query.py",
+        "detail": "spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "pipeline/index/verify.py",
+        "detail": "spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "stop_budget_exhausted",
+        "stage": "supply-chain-check",
+        "target": ".",
+        "detail": "focused supply-chain check was not run before the gate budget",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "candidate-select",
+        "target": "pipeline/index/cli.py",
+        "detail": "candidate_limit_exceeded: 44 changed reviewable file(s) were not scanned because the limit is 20",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "pipeline/__init__.py",
+        "detail": "scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "pipeline/ids.py",
+        "detail": "scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "pipeline/audit.py",
+        "detail": "scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "pipeline/registry/__init__.py",
+        "detail": "scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "pipeline/registry/manifest.py",
+        "detail": "scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "pipeline/registry/g0.py",
+        "detail": "scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "pipeline/registry/importer.py",
+        "detail": "scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "pipeline/registry/fetch.py",
+        "detail": "scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "pipeline/registry/cli.py",
+        "detail": "scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "pipeline/segmenter/__init__.py",
+        "detail": "scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "pipeline/segmenter/models.py",
+        "detail": "scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "pipeline/segmenter/pdf_extractor.py",
+        "detail": "scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "pipeline/segmenter/docx_extractor.py",
+        "detail": "scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "pipeline/segmenter/chunker.py",
+        "detail": "scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "pipeline/segmenter/cli.py",
+        "detail": "scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "pipeline/index/__init__.py",
+        "detail": "scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "pipeline/index/fts.py",
+        "detail": "scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "pipeline/index/query.py",
+        "detail": "scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "pipeline/index/verify.py",
+        "detail": "scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "supply-chain-check",
+        "target": ".",
+        "detail": "stop_budget_exhausted: focused supply-chain check was not run before the gate budget",
+        "affects_completion": true
+      }
+    ],
+    "reasons_truncated": false
+  },
+  "generated_at": "2026-10-26T17:10:17.852Z",
+  "session_id": "session_a05eb38e56083ad11eefcd5cc7828fd3",
+  "target": ".",
+  "revision": "090703782aaa5e63b113e39178a30fd5c0f5b039",
+  "rules_version": "unavailable",
+  "diff_hash": "7a7f0cb6f6b8c9f70ff7dc7bb83b336890d0865f13d11deb6fb4805a6ce66be7",
+  "diff": {
+    "algorithm": "sha256",
+    "changed_file_count": 20,
+    "changed_files": [
+      {
+        "file": "pipeline/__init__.py",
+        "ranges": [
+          {
+            "start": 1,
+            "end": 14
+          }
+        ],
+        "before_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "after_hash": "5f3c9d4ebff1d7bd8fb3535cb63e2d95958dd45d573f7b1c949da3016839f73a"
+      },
+      {
+        "file": "pipeline/audit.py",
+        "ranges": [
+          {
+            "start": 1,
+            "end": 53
+          }
+        ],
+        "before_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "after_hash": "d815ed55042dd05a7af527a7031be6a7b5fb7a1c4c67b939be0596b9d64b9f81"
+      },
+      {
+        "file": "pipeline/ids.py",
+        "ranges": [
+          {
+            "start": 1,
+            "end": 59
+          }
+        ],
+        "before_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "after_hash": "7059de9d1453166ca14532b83458acde16de47941ba31bfbf886f0c3cad68c02"
+      },
+      {
+        "file": "pipeline/index/__init__.py",
+        "ranges": [
+          {
+            "start": 1,
+            "end": 1
+          }
+        ],
+        "before_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "after_hash": "294679db5acef71bb0f33aabe32f201fab13e2e9eeecb48ca47ca9eea08e2800"
+      },
+      {
+        "file": "pipeline/index/fts.py",
+        "ranges": [
+          {
+            "start": 1,
+            "end": 63
+          }
+        ],
+        "before_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "after_hash": "4560adc6d4cfa5a098e6de9aeda88716338481439e25d46c3abc804c03da05a7"
+      },
+      {
+        "file": "pipeline/index/query.py",
+        "ranges": [
+          {
+            "start": 1,
+            "end": 67
+          }
+        ],
+        "before_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "after_hash": "cb520ec0848ab8e10b3d8eb9ef703ca954c38602e6f0495e87ac3a4bab76bbda"
+      },
+      {
+        "file": "pipeline/index/verify.py",
+        "ranges": [
+          {
+            "start": 1,
+            "end": 49
+          }
+        ],
+        "before_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "after_hash": "a28f2ebd9b9d3c529b63ff565fa9d299012b74d5b22b8c1a9e2aa829db7418ae"
+      },
+      {
+        "file": "pipeline/registry/__init__.py",
+        "ranges": [
+          {
+            "start": 1,
+            "end": 1
+          }
+        ],
+        "before_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "after_hash": "57999e8c2631813400f70ffae0f633cf5a6b440622c66ef6d2d7a4b588ce9daf"
+      },
+      {
+        "file": "pipeline/registry/cli.py",
+        "ranges": [
+          {
+            "start": 1,
+            "end": 26
+          }
+        ],
+        "before_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "after_hash": "92d02b3098e4f54db4e2f4757c00d01732f36c4e474b4404b7a403f96f99bbf3"
+      },
+      {
+        "file": "pipeline/registry/fetch.py",
+        "ranges": [
+          {
+            "start": 1,
+            "end": 50
+          }
+        ],
+        "before_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "after_hash": "f765e34ab9c6b2965edbfa893164b8f6a4fdc95297db3ab850311070f4c3cfeb"
+      },
+      {
+        "file": "pipeline/registry/g0.py",
+        "ranges": [
+          {
+            "start": 1,
+            "end": 64
+          }
+        ],
+        "before_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "after_hash": "2858c9d1ff21edc7798b6cb2d00320ac3059571cd7e84600af01fa33135a1967"
+      },
+      {
+        "file": "pipeline/registry/importer.py",
+        "ranges": [
+          {
+            "start": 1,
+            "end": 30
+          }
+        ],
+        "before_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "after_hash": "0be3ab0f25a420a3c25a70f561f8efc66a624f78920b096de8b41d59d297382a"
+      },
+      {
+        "file": "pipeline/registry/manifest.py",
+        "ranges": [
+          {
+            "start": 1,
+            "end": 119
+          }
+        ],
+        "before_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "after_hash": "6e618a7631f67f5e554388c223da7357b6ba8b750db1b2019dba04bcfdc05fd5"
+      },
+      {
+        "file": "pipeline/segmenter/__init__.py",
+        "ranges": [
+          {
+            "start": 1,
+            "end": 1
+          }
+        ],
+        "before_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "after_hash": "0e345cd1deb92c6c88672ff9295c8e6db27decf9908370c749f969480e60f04f"
+      },
+      {
+        "file": "pipeline/segmenter/chunker.py",
+        "ranges": [
+          {
+            "start": 1,
+            "end": 25
+          }
+        ],
+        "before_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "after_hash": "de2c1b5077c1177452159c1f65859924df0c223aba915baced048d23551c9a46"
+      },
+      {
+        "file": "pipeline/segmenter/cli.py",
+        "ranges": [
+          {
+            "start": 1,
+            "end": 25
+          }
+        ],
+        "before_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "after_hash": "56d06db1fa37a1f79c9c0b66154451163452f37ac41839669ae5b76012337f2b"
+      },
+      {
+        "file": "pipeline/segmenter/docx_extractor.py",
+        "ranges": [
+          {
+            "start": 1,
+            "end": 19
+          }
+        ],
+        "before_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "after_hash": "5a10cd9668c23c81f8fb8460f8811a43a5fde3dd5e4fcf3f8ea902c25aa2f8ae"
+      },
+      {
+        "file": "pipeline/segmenter/models.py",
+        "ranges": [
+          {
+            "start": 1,
+            "end": 77
+          }
+        ],
+        "before_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "after_hash": "0f661b5766607db704d9428a9673cdd613a8227f863e02b1ecaece49a801744b"
+      },
+      {
+        "file": "pipeline/segmenter/pdf_extractor.py",
+        "ranges": [
+          {
+            "start": 1,
+            "end": 33
+          }
+        ],
+        "before_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "after_hash": "478b82372816b0ca652912e8965cb44c6d7391b0404645a80c0755bed6bf65c2"
+      },
+      {
+        "file": "requirements.txt",
+        "ranges": [
+          {
+            "start": 1,
+            "end": 9
+          }
+        ],
+        "before_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "after_hash": "3a3fc9e1d73bb493d27d6937fff0b42ef74332b6a03110e2d1c113e690a10b2a"
+      }
+    ]
+  },
+  "timing": {
+    "started_at": "2026-10-26T17:10:15.241Z",
+    "completed_at": "2026-10-26T17:10:17.852Z",
+    "duration_ms": 2611,
+    "measurement": "hook_wall_clock"
+  },
+  "tokens": {
+    "input": 0,
+    "output": 0,
+    "total": 0,
+    "model_calls": 0,
+    "measurement": "known-zero"
+  },
+  "telemetry": {
+    "schemaVersion": "mimosa-gate-telemetry/v1",
+    "profile": "gate",
+    "operation": "Stop",
+    "outcome": "partial/INCONCLUSIVE",
+    "latencyMs": 2611,
+    "peakMemoryBytes": 110325760,
+    "memoryMeasurement": "max-observed-process-rss",
+    "scannedFiles": 0,
+    "cache": {
+      "hits": 0,
+      "misses": 0,
+      "measurement": "not-applicable"
+    },
+    "denyCount": 0,
+    "tokens": {
+      "input": 0,
+      "output": 0,
+      "total": 0,
+      "modelCalls": 0,
+      "measurement": "known-zero"
+    }
+  },
+  "finding_count": 0,
+  "rewake_finding_count": 0,
+  "evidence_boundary": {
+    "scan": "candidate",
+    "static_fix_verification": "observed_static_only",
+    "runtime_verification": "not_performed"
+  },
+  "finding_events": [],
+  "findings": [],
+  "artifacts": {
+    "immutable_report": ".mimosa/reports/task-review-session_a05eb38e56083ad11eefcd5cc7828fd3-20261026T171017852Z-49157-05a6900e8eb4.json",
+    "latest_report": ".mimosa/reports/task-review-session_a05eb38e56083ad11eefcd5cc7828fd3.json",
+    "history_summary": ".mimosa/history/run-20261026T171017852Z-49157-05a6900e8eb4.json"
+  }
+}

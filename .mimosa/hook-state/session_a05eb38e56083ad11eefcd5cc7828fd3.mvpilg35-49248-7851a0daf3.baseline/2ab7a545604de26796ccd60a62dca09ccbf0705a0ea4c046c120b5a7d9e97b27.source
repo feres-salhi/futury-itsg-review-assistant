@@ -1,0 +1,43 @@
+"""Deterministic template conformance checks (plan.md acceptance criteria).
+
+Unknown template/profile or unsupported requirement blocks conformance; a
+failed or unknown check blocks a compliance claim. An LLM-only visual or
+semantic opinion is insufficient (agent-governance.md §4) — these checks
+are deterministic field/structure comparisons.
+"""
+from __future__ import annotations
+
+REQUIRED_CHECKS = ("required_fields", "labels_and_order", "output_type", "value_mapping")
+
+
+def check_required_fields(template_profile: dict, artifact: dict) -> list[str]:
+    """Return the required template fields missing from the rendered artifact.
+
+    Fail closed: a profile without ``required_fields`` is itself a blocking
+    problem, reported as such rather than treated as "nothing required".
+    """
+    if "required_fields" not in template_profile:
+        return ["<profile>: template profile has no required_fields — cannot verify (blocked)"]
+    required = template_profile["required_fields"]
+    if not isinstance(required, list):
+        return ["<profile>: required_fields must be a list"]
+    return [name for name in required if name not in artifact]
+
+
+def check_conformance(template_profile: dict, artifact: dict) -> dict:
+    """Run all REQUIRED_CHECKS and return a structured result.
+
+    Fail-closed default while the checker is unimplemented: status 'blocked',
+    never compliant. STUB for the remaining checks — demo slice implements
+    them against the synthetic/official template profile.
+    """
+    missing = check_required_fields(template_profile, artifact)
+    return {
+        "status": "blocked",
+        "checks": {
+            "required_fields": {"missing": missing, "pass": not missing},
+            # remaining checks implemented by the demo slice:
+            # labels_and_order, output_type, value_mapping
+        },
+        "reason": "conformance checker partially implemented; unknown checks block (never pass)",
+    }

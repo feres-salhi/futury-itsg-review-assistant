@@ -1,0 +1,1422 @@
+{
+  "source": {
+    "SRC-BP": {
+      "id": "SRC-BP",
+      "title": "Beispielpapier DTA EEL — Beispielpapier §3.1",
+      "issuer": "GKV-Spitzenverband",
+      "version": "13.3",
+      "valid_from": "2027-01-01",
+      "checksum": "1355bfd7cbe71cf77e8f9573d747b2b9d86d23198daf91637c0eb42b60339386",
+      "status": "approved",
+      "notes": "offizielles Beispielkorpus; SHA-256 des Original-PDFs verifiziert"
+    }
+  },
+  "gate": {
+    "GATE-G0-2026-10-26T22:19:41+00:00": {
+      "id": "GATE-G0-2026-10-26T22:19:41+00:00",
+      "gate": "G0",
+      "reviewer": "human-owner (solo mode, provisional §9 default #7)",
+      "decision": "approved",
+      "rationale": "Origin/issuer/version/effective date verified against the corpus file; SHA-256 matches the recorded original",
+      "affected_ids": [
+        "SRC-BP"
+      ],
+      "conditions": [],
+      "decided_at": "2026-10-26T22:19:41+00:00"
+    },
+    "GATE-G1-2026-10-26T22:19:41+00:00": {
+      "id": "GATE-G1-2026-10-26T22:19:41+00:00",
+      "gate": "G1",
+      "reviewer": "human-owner (solo mode, provisional §9 default #7)",
+      "decision": "approved",
+      "rationale": "Requirement candidate checked against VB §3.12 p. 135 wording; locator resolves",
+      "affected_ids": [
+        "REQ-VOER-1",
+        "RUN-e7fbb905"
+      ],
+      "conditions": [
+        "qualified domain reviewer must confirm legal meaning before production use"
+      ],
+      "decided_at": "2026-10-26T22:19:41+00:00"
+    },
+    "GATE-G3-2026-10-26T22:19:41+00:00": {
+      "id": "GATE-G3-2026-10-26T22:19:41+00:00",
+      "gate": "G3",
+      "reviewer": "human-owner (solo mode, provisional §9 default #7)",
+      "decision": "approved",
+      "rationale": "Case candidates approved against cited official expected values (BP §3.1/§3.2.1.4); challenger recommendations recorded",
+      "affected_ids": [
+        "TC-1",
+        "TC-2",
+        "TC-3",
+        "TC-4",
+        "RUN-030b1279",
+        "RUN-231735dd"
+      ],
+      "conditions": [
+        "invalid case carries no invented expected value (NOT_EVALUATED path)"
+      ],
+      "decided_at": "2026-10-26T22:19:41+00:00"
+    },
+    "GATE-G4-2026-10-26T22:24:11+00:00": {
+      "id": "GATE-G4-2026-10-26T22:24:11+00:00",
+      "gate": "G4",
+      "reviewer": "Amr",
+      "decision": "approved",
+      "rationale": "Menschliche Genehmigung trotz bekanntem MISMATCH: EAZ-BEGINN-1 erwartet '20XX0101', beobachtet '20XX0401' (Boundary-Fall zu CRIT-EAZ-1, Beispielpapier DTA EEL V13.3 §3.2.1.4, S. 12).",
+      "affected_ids": [],
+      "conditions": [],
+      "decided_at": "2026-10-26T22:24:11+00:00"
+    }
+  },
+  "template": {
+    "TPL-SYNTH-1": {
+      "id": "TPL-SYNTH-1",
+      "official_form_id": null,
+      "version": "synthetic-0.1",
+      "valid_from": null,
+      "source_id": "TPL-SYNTH",
+      "checksum": "",
+      "status": "needs_review"
+    }
+  },
+  "agent_run": {
+    "RUN-e7fbb905": {
+      "id": "RUN-e7fbb905",
+      "run_id": "RUN-e7fbb905",
+      "task_id": "T10-018",
+      "role": "requirement_extractor",
+      "provider": "offline (demo)",
+      "model_id": "none (no LLM call)",
+      "model_revision": "unavailable",
+      "prompt_contract_version": "PROMPT-CONTRACT-0.1",
+      "started_at": "2026-10-26T22:19:41+00:00",
+      "input_ids": [
+        "SRCV-VB-134-TEST"
+      ],
+      "output_schema_version": "agent-run-envelope/1.0",
+      "status": "candidate",
+      "result": {
+        "note": "candidate drafted offline for the demo; no LLM call",
+        "requirements": [
+          {
+            "text_de": "Die Vorerkrankungsanfrage (Abgabegrund 41) darf nur ausgelöst werden, wenn eine AU-Bescheinigung für die aktuelle AU vorliegt, mindestens eine bescheinigte potentielle Vorerkrankung in den letzten 6 Monaten vor AU-Beginn im Datenbestand liegt und die kumulierten Vorzeiten der letzten 12 Monate zusammen mit der aktuellen AU zum Zeitpunkt der Meldung mindestens 30 Tage umfassen.",
+            "quote_de": "Die Vorerkrankungsanfrage (3.1.18 „Abgabegrund“ = „41“) darf nur dann durch den …",
+            "locator": "S. 135, §3.12"
+          }
+        ]
+      },
+      "citations": [
+        {
+          "source_version_id": "SRCV-VB-134-TEST",
+          "locator": "S. 135, §3.12"
+        }
+      ],
+      "uncertainties": [],
+      "conflicts": [],
+      "validation_errors": [],
+      "review_required": true,
+      "author": "coding-agent offline draft (no LLM call)"
+    },
+    "RUN-030b1279": {
+      "id": "RUN-030b1279",
+      "run_id": "RUN-030b1279",
+      "task_id": "T10-018",
+      "role": "test_case_designer",
+      "provider": "offline (demo)",
+      "model_id": "none (no LLM call)",
+      "model_revision": "unavailable",
+      "prompt_contract_version": "PROMPT-CONTRACT-0.1",
+      "started_at": "2026-10-26T22:19:41+00:00",
+      "input_ids": [
+        "CRIT-EAZ-1",
+        "CRIT-VOER-1"
+      ],
+      "output_schema_version": "agent-run-envelope/1.0",
+      "status": "candidate",
+      "result": {
+        "note": "candidate drafted offline for the demo; no LLM call",
+        "cases": [
+          {
+            "case_type": "normal",
+            "case_ref": "TC-1",
+            "expected_basis": "BP §3.1 S. 9–11"
+          },
+          {
+            "case_type": "boundary",
+            "case_ref": "TC-2",
+            "expected_basis": "BP §3.2.1.4 S. 12"
+          },
+          {
+            "case_type": "invalid",
+            "case_ref": "TC-3",
+            "expected_basis": ""
+          }
+        ]
+      },
+      "citations": [],
+      "uncertainties": [],
+      "conflicts": [],
+      "validation_errors": [],
+      "review_required": true,
+      "author": "coding-agent offline draft (no LLM call)"
+    },
+    "RUN-231735dd": {
+      "id": "RUN-231735dd",
+      "run_id": "RUN-231735dd",
+      "task_id": "T10-018",
+      "role": "independent_test_challenger",
+      "provider": "offline (demo)",
+      "model_id": "none (no LLM call)",
+      "model_revision": "unavailable",
+      "prompt_contract_version": "PROMPT-CONTRACT-0.1",
+      "started_at": "2026-10-26T22:19:41+00:00",
+      "input_ids": [
+        "CRIT-EAZ-1",
+        "CRIT-VOER-1"
+      ],
+      "output_schema_version": "agent-run-envelope/1.0",
+      "status": "candidate",
+      "result": {
+        "note": "candidate drafted offline for the demo; no LLM call",
+        "questions": [
+          "Was gilt bei Abrechnung zum 01. des laufenden Monats (§3.2.1.5)?"
+        ],
+        "counterexamples": [
+          {
+            "case_ref": "TC-3",
+            "issue": "NOT_EVALUATED-Pfad muss sichtbar bleiben, nie still PASS werden"
+          }
+        ],
+        "recommendation": "review"
+      },
+      "citations": [],
+      "uncertainties": [],
+      "conflicts": [],
+      "validation_errors": [],
+      "review_required": true,
+      "author": "coding-agent offline draft (no LLM call)"
+    },
+    "RUN-b9116a10": {
+      "id": "RUN-b9116a10",
+      "run_id": "RUN-b9116a10",
+      "task_id": "REPORT-RPT-1",
+      "role": "report_explainer",
+      "provider": "hessian-ai-vllm-gateway",
+      "model_id": "vllm/GLM-Flash:Latest",
+      "model_revision": "unavailable",
+      "prompt_contract_version": "PROMPT-CONTRACT-0.1",
+      "started_at": "2026-10-26T22:23:23+00:00",
+      "input_ids": [
+        "RPT-1"
+      ],
+      "output_schema_version": "agent-run-envelope/1.0",
+      "status": "candidate",
+      "result": {
+        "summary_de": "Der Bericht RPT-1 enthält vier Prüfergebnisse mit den Zählungen: 2 PASS, 1 MISMATCH und 1 NOT_EVALUATED. Die Fälle TC-1 (Kriterium CRIT-EAZ-1) und TC-4 (Kriterium CRIT-VOER-1) wurden mit PASS bewertet, da die beobachtete Ausgabe dem erwarteten Wert entsprach. Im Fall TC-2 (CRIT-EAZ-1) wurde ein MISMATCH festgestellt: Beim Merkmal EAZ-BEGINN-1 wurde der Wert '20XX0101' erwartet, beobachtet wurde jedoch '20XX0401'. Der Fall TC-3 (CRIT-EAZ-1) wurde mit NOT_EVALUATED gekennzeichnet, da der erwartete Wert fehlte; dieser Status stellt kein bestandenes Ergebnis dar. Zusammenfassend bestanden somit zwei der vier Fälle, ein Fall wies eine Abweichung auf und ein Fall blieb unbewertet.",
+        "deterministic_basis": {
+          "report_id": "RPT-1",
+          "counts": {
+            "PASS": 2,
+            "MISMATCH": 1,
+            "NOT_EVALUATED": 1
+          },
+          "compliance_claim": false,
+          "results": [
+            {
+              "case_id": "TC-1",
+              "criterion_id": "CRIT-EAZ-1",
+              "result_status": "PASS",
+              "reason": "observed output matches expected value"
+            },
+            {
+              "case_id": "TC-2",
+              "criterion_id": "CRIT-EAZ-1",
+              "result_status": "MISMATCH",
+              "reason": "EAZ-BEGINN-1: expected '20XX0101', observed '20XX0401'"
+            },
+            {
+              "case_id": "TC-3",
+              "criterion_id": "CRIT-EAZ-1",
+              "result_status": "NOT_EVALUATED",
+              "reason": "missing expected value"
+            },
+            {
+              "case_id": "TC-4",
+              "criterion_id": "CRIT-VOER-1",
+              "result_status": "PASS",
+              "reason": "observed output matches expected value"
+            }
+          ]
+        }
+      },
+      "citations": [],
+      "uncertainties": [],
+      "conflicts": [],
+      "validation_errors": [],
+      "review_required": true,
+      "author": ""
+    }
+  },
+  "requirement": {
+    "REQ-VOER-1": {
+      "id": "REQ-VOER-1",
+      "text": "Die Vorerkrankungsanfrage (Abgabegrund 41) darf nur ausgelöst werden, wenn eine AU-Bescheinigung für die aktuelle AU vorliegt, mindestens eine bescheinigte potentielle Vorerkrankung in den letzten 6 Monaten vor AU-Beginn im Datenbestand liegt und die kumulierten Vorzeiten der letzten 12 Monate zusammen mit der aktuellen AU zum Zeitpunkt der Meldung mindestens 30 Tage umfassen.",
+      "source_id": "SRC-VB",
+      "citation": "S. 135, §3.12 (VB DTA EEL V13.4)",
+      "status": "approved"
+    }
+  },
+  "criterion": {
+    "CRIT-EAZ-1": {
+      "id": "CRIT-EAZ-1",
+      "requirement_id": "REQ-VOER-1",
+      "description": "Für §3.1-Sachverhalte überträgt das Abrechnungsprogramm den offiziellen DSLW/DBAL/DBAE-Erwartungsdatensatz (Beispielpapier V13.3 §3.1 S. 9–11; Abwandlung §3.2.1.4 S. 12).",
+      "expected_basis": "Beispielpapier DTA EEL V13.3 (gültig ab 01.01.2027), §3.1, S. 9–11: DSLW (S. 9–10), DBAL (S. 10), DBAE (S. 11). Offizielle Erwartungswerte für die Abgabeseite des Entgeltabrechnungsprogramms (Transmit-Seite); keine Leistungsbeitragsbehauptung.",
+      "review_status": "approved"
+    },
+    "CRIT-VOER-1": {
+      "id": "CRIT-VOER-1",
+      "requirement_id": "REQ-VOER-1",
+      "description": "DBVO (Abgabegrund 41) genau dann, wenn die VB §3.12-Trigger erfüllt sind (≥1 bescheinigte Vorerkrankung/6 Monate; ≥30 Tage kumuliert/12 Monate).",
+      "expected_basis": "Verfahrensbeschreibung DTA EEL V13.4 §3.12 (S. 135–136): Anfrage nur wenn (a) AU-Bescheinigung für aktuelle AU vorliegt, (b) mindestens eine bescheinigte potentielle Vorerkrankung in den letzten 6 Monaten vor AU-Beginn, (c) kumulierte Zeiten aller potentiellen Vorerkrankungen in den letzten 12 Monaten zusammen mit der aktuellen AU zum Zeitpunkt der Meldung mindestens 30 Tage. Konstellation: 2+17+3+3=25 Tage Vorzeiten + 10 Tage aktuelle AU = 35 ≥ 30; letzte attestierte AU endet 03.03.2026, 8 Tage vor AU-Beginn (≤ 6 Monate).",
+      "review_status": "approved"
+    }
+  },
+  "test_case": {
+    "TC-1": {
+      "id": "TC-1",
+      "criterion_id": "CRIT-EAZ-1",
+      "case_type": "normal",
+      "inputs": {
+        "brutto_monat": "2.000,00 EUR (festes monatliches Gehalt)",
+        "netto_monat": "1.353,84 EUR",
+        "urlaubsgeld": "1.000,00 EUR (im Juni)",
+        "weihnachtsgeld": "1.000,00 EUR (im November)",
+        "weitergezahltes_arbeitsentgelt_waehrend_eel": "0,00 EUR",
+        "elterneigenschaft": "nein",
+        "beginn_arbeitsunfaehigkeit": "Mo. 03.05.20XX",
+        "ende_arbeitsunfaehigkeit": "offen",
+        "ende_entgeltfortzahlung": "So. 13.06.20XX",
+        "entgeltbescheinigung_erstellen_am": "Fr. 04.06.20XX",
+        "abrechnung": "letzter Tag des Monats",
+        "letzter_abgerechneter_zeitraum_bei_au_beginn": "April 20XX"
+      },
+      "expected": {
+        "ABGABEGRUND": "01",
+        "KORR-ABGABEGRUND": "00",
+        "MM-ALLGEMEIN": "J",
+        "MM-ENTGELT": "J",
+        "MM-ZEITKG": "N",
+        "MM-VOER": "N",
+        "DATUM-AB": "20XX0503",
+        "DATUM-EGZBIS": "20XX0613",
+        "EAZ-BEGINN-1": "20XX0401",
+        "EAZ-ENDE-1": "20XX0430",
+        "BRUTTO-1": "00200000",
+        "NETTO-1": "00135384",
+        "WAEHREEL-BRUTTO": "00000000"
+      },
+      "expected_basis": "Beispielpapier DTA EEL V13.3 (gültig ab 01.01.2027), §3.1, S. 9–11: DSLW (S. 9–10), DBAL (S. 10), DBAE (S. 11). Offizielle Erwartungswerte für die Abgabeseite des Entgeltabrechnungsprogramms (Transmit-Seite); keine Leistungsbeitragsbehauptung.",
+      "review_status": "approved"
+    },
+    "TC-2": {
+      "id": "TC-2",
+      "criterion_id": "CRIT-EAZ-1",
+      "case_type": "boundary",
+      "inputs": {
+        "alternative_a": "Unbezahlter Urlaub vom Mo. 01.02.20XX bis zum So. 28.02.20XX",
+        "alternative_b": "Krankengeldbezug vom Mo. 01.02.20XX bis zum So. 28.02.20XX",
+        "beginn_arbeitsunfaehigkeit": "Mi. 10.03.20XX (neue Krankheit)",
+        "abrechnung": "jeweils zum 05. des Folgemonats"
+      },
+      "expected": {
+        "ABGABEGRUND": "01",
+        "EAZ-BEGINN-1": "20XX0101",
+        "EAZ-ENDE-1": "20XX0131"
+      },
+      "expected_basis": "Beispielpapier DTA EEL V13.3 (gültig ab 01.01.2027), §3.2.1.4, S. 12 (DBAE-Tabelle). Offizielle Erwartungswerte, Transmit-Seite.",
+      "review_status": "approved"
+    },
+    "TC-3": {
+      "id": "TC-3",
+      "criterion_id": "CRIT-EAZ-1",
+      "case_type": "invalid",
+      "inputs": {
+        "brutto_monat": "2.000,00 EUR (festes monatliches Gehalt)",
+        "beginn_arbeitsunfaehigkeit": "Mo. 03.05.20XX",
+        "ende_arbeitsunfaehigkeit": "UNVOLLSTÄNDIG — nicht überliefert",
+        "abrechnung": "UNVOLLSTÄNDIG — nicht überliefert",
+        "letzter_abgerechneter_zeitraum_bei_au_beginn": "UNVOLLSTÄNDIG — nicht überliefert"
+      },
+      "expected": {},
+      "expected_basis": "Keine offizielle Grundlage: Das Beispielpapier DTA EEL V13.3 liefert kein Beispiel für einen unvollständigen Sachverhalt. Ein erwarteter Datensatz darf nicht erfunden werden (agent-governance.md §1: cite or abstain; fail closed).",
+      "review_status": "approved"
+    },
+    "TC-4": {
+      "id": "TC-4",
+      "criterion_id": "CRIT-VOER-1",
+      "case_type": "normal",
+      "inputs": {
+        "current_au": {
+          "start": "2026-03-11",
+          "end": "2026-03-20",
+          "end_note": "zunächst bis 20.03.2026 bekannt; endet schlussendlich 10.04.2026 (für die Meldung am 11.03.2026 gilt der bekannte Zeitraum)",
+          "attested": true
+        },
+        "prior_episodes": [
+          {
+            "start": "2025-07-14",
+            "end": "2025-07-15",
+            "attested": true,
+            "note": "eAU übermittelt"
+          },
+          {
+            "start": "2025-10-01",
+            "end": "2025-10-17",
+            "attested": true,
+            "note": "eAU übermittelt"
+          },
+          {
+            "start": "2025-12-01",
+            "end": "2025-12-03",
+            "attested": true,
+            "note": "eAU übermittelt"
+          },
+          {
+            "start": "2026-03-01",
+            "end": "2026-03-03",
+            "attested": true,
+            "note": "Papiernachweis beim AG, zunächst nicht bei der KK — gilt AG-seitig als bescheinigt"
+          }
+        ],
+        "reporting_date": "2026-03-11"
+      },
+      "expected": {
+        "ABGABEGRUND": "41",
+        "VOER-ANFRAGE-AUSGELOEST": "J"
+      },
+      "expected_basis": "Verfahrensbeschreibung DTA EEL V13.4 §3.12 (S. 135–136): Anfrage nur wenn (a) AU-Bescheinigung für aktuelle AU vorliegt, (b) mindestens eine bescheinigte potentielle Vorerkrankung in den letzten 6 Monaten vor AU-Beginn, (c) kumulierte Zeiten aller potentiellen Vorerkrankungen in den letzten 12 Monaten zusammen mit der aktuellen AU zum Zeitpunkt der Meldung mindestens 30 Tage. Konstellation: 2+17+3+3=25 Tage Vorzeiten + 10 Tage aktuelle AU = 35 ≥ 30; letzte attestierte AU endet 03.03.2026, 8 Tage vor AU-Beginn (≤ 6 Monate).",
+      "review_status": "approved"
+    }
+  },
+  "execution": {
+    "RUN-1": {
+      "id": "RUN-1",
+      "test_case_id": "TC-1",
+      "vendor": "Demo only (fabricated)",
+      "software_version": "demo-0.1",
+      "observed": {
+        "ABGABEGRUND": "01",
+        "KORR-ABGABEGRUND": "00",
+        "MM-ALLGEMEIN": "J",
+        "MM-ENTGELT": "J",
+        "MM-ZEITKG": "N",
+        "MM-VOER": "N",
+        "DATUM-AB": "20XX0503",
+        "DATUM-EGZBIS": "20XX0613",
+        "EAZ-BEGINN-1": "20XX0401",
+        "EAZ-ENDE-1": "20XX0430",
+        "BRUTTO-1": "00200000",
+        "NETTO-1": "00135384",
+        "WAEHREEL-BRUTTO": "00000000"
+      },
+      "evidence_ref": "fixtures/bp_3_1_normal.json#expected",
+      "run_at": ""
+    },
+    "RUN-2": {
+      "id": "RUN-2",
+      "test_case_id": "TC-2",
+      "vendor": "Demo only (fabricated)",
+      "software_version": "demo-0.1",
+      "observed": {
+        "ABGABEGRUND": "01",
+        "EAZ-BEGINN-1": "20XX0401",
+        "EAZ-ENDE-1": "20XX0131"
+      },
+      "evidence_ref": "fixtures/bp_3_2_1_4_boundary.json#expected (deliberately altered)",
+      "run_at": ""
+    },
+    "RUN-3": {
+      "id": "RUN-3",
+      "test_case_id": "TC-3",
+      "vendor": "Demo only (fabricated)",
+      "software_version": "demo-0.1",
+      "observed": null,
+      "evidence_ref": "",
+      "run_at": ""
+    },
+    "RUN-4": {
+      "id": "RUN-4",
+      "test_case_id": "TC-4",
+      "vendor": "Demo only (fabricated)",
+      "software_version": "demo-0.1",
+      "observed": {
+        "ABGABEGRUND": "41",
+        "VOER-ANFRAGE-AUSGELOEST": "J"
+      },
+      "evidence_ref": "fixtures/vorerkrankung_konstellation.json#expected",
+      "run_at": ""
+    }
+  },
+  "finding": {
+    "FIND-TC-1": {
+      "id": "FIND-TC-1",
+      "status": "PASS",
+      "reason": "observed output matches expected value",
+      "links": [
+        "TC-1",
+        "RUN-1"
+      ]
+    },
+    "FIND-TC-2": {
+      "id": "FIND-TC-2",
+      "status": "MISMATCH",
+      "reason": "EAZ-BEGINN-1: expected '20XX0101', observed '20XX0401'",
+      "links": [
+        "TC-2",
+        "RUN-2"
+      ]
+    },
+    "FIND-TC-3": {
+      "id": "FIND-TC-3",
+      "status": "NOT_EVALUATED",
+      "reason": "missing expected value",
+      "links": [
+        "TC-3",
+        "RUN-3"
+      ]
+    },
+    "FIND-TC-4": {
+      "id": "FIND-TC-4",
+      "status": "PASS",
+      "reason": "observed output matches expected value",
+      "links": [
+        "TC-4",
+        "RUN-4"
+      ]
+    }
+  },
+  "report": {
+    "RPT-1": {
+      "id": "RPT-1",
+      "template_id": "TPL-SYNTH-1",
+      "renderer_version": "itsg.renderer/0.1.0",
+      "field_map_version": "itsg.fieldmap/synth-1",
+      "artifact_ref": "data/demo/report.artifact.json",
+      "conformance": [
+        {
+          "status": "pass",
+          "checks": {
+            "required_fields": {
+              "missing": [],
+              "pass": true
+            },
+            "labels_and_order": {
+              "problems": [],
+              "pass": true,
+              "blocked": false
+            },
+            "output_type": {
+              "problems": [],
+              "pass": true,
+              "blocked": false
+            },
+            "value_mapping": {
+              "problems": [],
+              "pass": true,
+              "blocked": false
+            }
+          },
+          "compliance_claim_allowed": false,
+          "reason": "synthetic template profile: conformance checks are structural only and cannot authorize a legal or template compliance claim"
+        }
+      ],
+      "compliance_claim": false
+    }
+  },
+  "chat_turn": {
+    "CHAT-1": {
+      "id": "CHAT-1",
+      "session_id": "smoke-2",
+      "role": "user",
+      "message": "Zeig mir die Quelle dazu.",
+      "at": "2026-10-26T22:20:54+00:00"
+    },
+    "CHAT-2": {
+      "id": "CHAT-2",
+      "session_id": "smoke-2",
+      "role": "susie",
+      "utterance": "Gerne – in unserem Gespräch gibt es bisher keinen vorherigen Punkt, auf den sich „dazu“ beziehen könnte. Welche Fundstelle meinen Sie? Im aktuellen Stand sind diese Quellenbelege hinterlegt:\n\n• TC-1 / CRIT-EAZ-1: Beispielpapier DTA EEL V13.3 (gültig ab 01.01.2027), §3.1, S. 9–11 (DSLW S. 9–10, DBAL S. 10, DBAE S. 11).\n• TC-2: ebenda, §3.2.1.4, S. 12 (DBAE-Tabelle).\n• TC-4 / CRIT-VOER-1: Verfahrensbeschreibung DTA EEL V13.4, §3.12, S. 135–136.\n• TC-3: bewusst ohne offizielle Quelle (fail closed – kein Beispiel im Beispielpapier).\n\nAls registrierte Quelle mit verifizierter SHA-256-Prüfsumme ist SRC-BP (Beispielpapier DTA EEL V13.3, GKV-Spitzenverband, Status: approved) hinterlegt. Sagen Sie mir, zu welcher Fundstelle ich springen soll (z. B. „Springe zur Quelle von TC-1“).",
+      "at": "2026-10-26T22:20:54+00:00",
+      "agent_run": {
+        "run_id": "RUN-fb92559e",
+        "task_id": "T10-032",
+        "role": "susie_assistant",
+        "provider": "hessian-ai-vllm-gateway",
+        "model_id": "vllm/GLM-Flash:Latest",
+        "model_revision": "unavailable",
+        "prompt_contract_version": "PROMPT-CONTRACT-0.1",
+        "started_at": "2026-10-26T22:20:54+00:00",
+        "input_ids": [
+          "TC-1",
+          "TC-2",
+          "TC-4",
+          "TC-3",
+          "SRC-BP"
+        ],
+        "output_schema_version": "agent-run-envelope/1.0",
+        "status": "candidate",
+        "result": {
+          "utterance": "Gerne – in unserem Gespräch gibt es bisher keinen vorherigen Punkt, auf den sich „dazu“ beziehen könnte. Welche Fundstelle meinen Sie? Im aktuellen Stand sind diese Quellenbelege hinterlegt:\n\n• TC-1 / CRIT-EAZ-1: Beispielpapier DTA EEL V13.3 (gültig ab 01.01.2027), §3.1, S. 9–11 (DSLW S. 9–10, DBAL S. 10, DBAE S. 11).\n• TC-2: ebenda, §3.2.1.4, S. 12 (DBAE-Tabelle).\n• TC-4 / CRIT-VOER-1: Verfahrensbeschreibung DTA EEL V13.4, §3.12, S. 135–136.\n• TC-3: bewusst ohne offizielle Quelle (fail closed – kein Beispiel im Beispielpapier).\n\nAls registrierte Quelle mit verifizierter SHA-256-Prüfsumme ist SRC-BP (Beispielpapier DTA EEL V13.3, GKV-Spitzenverband, Status: approved) hinterlegt. Sagen Sie mir, zu welcher Fundstelle ich springen soll (z. B. „Springe zur Quelle von TC-1“).",
+          "confidence": "grounded",
+          "degraded": false
+        },
+        "citations": [],
+        "uncertainties": [],
+        "conflicts": [],
+        "validation_errors": [],
+        "review_required": true,
+        "author": "susie-assistant"
+      }
+    },
+    "CHAT-3": {
+      "id": "CHAT-3",
+      "session_id": "smoke-2",
+      "role": "user",
+      "message": "Zeig mir die Quelle dazu.",
+      "at": "2026-10-26T22:22:00+00:00"
+    },
+    "CHAT-4": {
+      "id": "CHAT-4",
+      "session_id": "smoke-2",
+      "role": "susie",
+      "utterance": "Ich springe zur hinterlegten Quelle SRC-BP: Beispielpapier DTA EEL V13.3 (gültig ab 01.01.2027), GKV-Spitzenverband, Status approved, SHA-256 des Original-PDFs verifiziert – Fundstelle §3.1, S. 9–11, der Beleg für TC-1 und das Kriterium CRIT-EAZ-1. Falls Sie eine andere Fundstelle meinten (z. B. TC-2: §3.2.1.4, S. 12 oder TC-4: Verfahrensbeschreibung DTA EEL V13.4, §3.12, S. 135–136), sagen Sie mir Bescheid, dann öffne ich die Belege zu diesem Fall.",
+      "at": "2026-10-26T22:22:00+00:00",
+      "agent_run": {
+        "run_id": "RUN-b57f7e30",
+        "task_id": "T10-032",
+        "role": "susie_assistant",
+        "provider": "hessian-ai-vllm-gateway",
+        "model_id": "vllm/GLM-Flash:Latest",
+        "model_revision": "unavailable",
+        "prompt_contract_version": "PROMPT-CONTRACT-0.1",
+        "started_at": "2026-10-26T22:22:00+00:00",
+        "input_ids": [
+          "SRC-BP",
+          "TC-1",
+          "TC-2",
+          "TC-4"
+        ],
+        "output_schema_version": "agent-run-envelope/1.0",
+        "status": "candidate",
+        "result": {
+          "utterance": "Ich springe zur hinterlegten Quelle SRC-BP: Beispielpapier DTA EEL V13.3 (gültig ab 01.01.2027), GKV-Spitzenverband, Status approved, SHA-256 des Original-PDFs verifiziert – Fundstelle §3.1, S. 9–11, der Beleg für TC-1 und das Kriterium CRIT-EAZ-1. Falls Sie eine andere Fundstelle meinten (z. B. TC-2: §3.2.1.4, S. 12 oder TC-4: Verfahrensbeschreibung DTA EEL V13.4, §3.12, S. 135–136), sagen Sie mir Bescheid, dann öffne ich die Belege zu diesem Fall.",
+          "confidence": "grounded",
+          "degraded": false
+        },
+        "citations": [],
+        "uncertainties": [],
+        "conflicts": [],
+        "validation_errors": [],
+        "review_required": true,
+        "author": "susie-assistant"
+      }
+    },
+    "CHAT-5": {
+      "id": "CHAT-5",
+      "session_id": "smoke-2",
+      "role": "user",
+      "message": "Speichere meine Notiz: Testnotiz für die Demo.",
+      "at": "2026-10-26T22:22:33+00:00"
+    },
+    "CHAT-6": {
+      "id": "CHAT-6",
+      "session_id": "smoke-2",
+      "role": "susie",
+      "utterance": "Gerne. Ich schlage vor, die Notiz „Testnotiz für die Demo.“ zum Fall TC-1 zu speichern – dem Fall, zu dem wir zuletzt die Quelle betrachtet haben. Soll ich sie speichern? Falls die Notiz zu einem anderen Fall gehören soll (z. B. TC-2, TC-3 oder TC-4), nennen Sie mir bitte den gewünschten Fall.",
+      "at": "2026-10-26T22:22:33+00:00",
+      "agent_run": {
+        "run_id": "RUN-d9d9d10d",
+        "task_id": "T10-032",
+        "role": "susie_assistant",
+        "provider": "hessian-ai-vllm-gateway",
+        "model_id": "vllm/GLM-Flash:Latest",
+        "model_revision": "unavailable",
+        "prompt_contract_version": "PROMPT-CONTRACT-0.1",
+        "started_at": "2026-10-26T22:22:33+00:00",
+        "input_ids": [
+          "TC-1"
+        ],
+        "output_schema_version": "agent-run-envelope/1.0",
+        "status": "candidate",
+        "result": {
+          "utterance": "Gerne. Ich schlage vor, die Notiz „Testnotiz für die Demo.“ zum Fall TC-1 zu speichern – dem Fall, zu dem wir zuletzt die Quelle betrachtet haben. Soll ich sie speichern? Falls die Notiz zu einem anderen Fall gehören soll (z. B. TC-2, TC-3 oder TC-4), nennen Sie mir bitte den gewünschten Fall.",
+          "confidence": "grounded",
+          "degraded": false
+        },
+        "citations": [],
+        "uncertainties": [],
+        "conflicts": [],
+        "validation_errors": [],
+        "review_required": true,
+        "author": "susie-assistant"
+      }
+    },
+    "CHAT-7": {
+      "id": "CHAT-7",
+      "session_id": "smoke-2",
+      "role": "user",
+      "message": "Genehmige TC-002.",
+      "at": "2026-10-26T22:23:24+00:00"
+    },
+    "CHAT-8": {
+      "id": "CHAT-8",
+      "session_id": "smoke-2",
+      "role": "susie",
+      "utterance": "Das ist eine menschliche Entscheidung – sagen Sie mir, wenn ich ausführen soll. Zur Einordnung: Sie meinen vermutlich TC-2 (Boundary-Fall zu CRIT-EAZ-1). Dieser hat aktuell den Status MISMATCH – EAZ-BEGINN-1: erwartet '20XX0101', beobachtet '20XX0401'. Eine Genehmigung trotz MISMATCH wäre Ihre bewusste Entscheidung. Soll ich Ihre Genehmigung für TC-2 als Review-Entscheidung 'approved' am Gate G4 erfassen (mit Vermerk auf den bekannten Mismatch)? Bitte bestätigen Sie – und sagen Sie mir, falls stattdessen Gate G5 gemeint ist.",
+      "at": "2026-10-26T22:23:24+00:00",
+      "agent_run": {
+        "run_id": "RUN-2018d59d",
+        "task_id": "T10-032",
+        "role": "susie_assistant",
+        "provider": "hessian-ai-vllm-gateway",
+        "model_id": "vllm/GLM-Flash:Latest",
+        "model_revision": "unavailable",
+        "prompt_contract_version": "PROMPT-CONTRACT-0.1",
+        "started_at": "2026-10-26T22:23:24+00:00",
+        "input_ids": [
+          "TC-2",
+          "CRIT-EAZ-1"
+        ],
+        "output_schema_version": "agent-run-envelope/1.0",
+        "status": "candidate",
+        "result": {
+          "utterance": "Das ist eine menschliche Entscheidung – sagen Sie mir, wenn ich ausführen soll. Zur Einordnung: Sie meinen vermutlich TC-2 (Boundary-Fall zu CRIT-EAZ-1). Dieser hat aktuell den Status MISMATCH – EAZ-BEGINN-1: erwartet '20XX0101', beobachtet '20XX0401'. Eine Genehmigung trotz MISMATCH wäre Ihre bewusste Entscheidung. Soll ich Ihre Genehmigung für TC-2 als Review-Entscheidung 'approved' am Gate G4 erfassen (mit Vermerk auf den bekannten Mismatch)? Bitte bestätigen Sie – und sagen Sie mir, falls stattdessen Gate G5 gemeint ist.",
+          "confidence": "grounded",
+          "degraded": false
+        },
+        "citations": [],
+        "uncertainties": [],
+        "conflicts": [],
+        "validation_errors": [],
+        "review_required": true,
+        "author": "susie-assistant"
+      }
+    },
+    "CHAT-9": {
+      "id": "CHAT-9",
+      "session_id": "smoke-2",
+      "role": "user",
+      "message": "Genehmige TC-002.",
+      "at": "2026-10-26T22:24:05+00:00"
+    },
+    "CHAT-10": {
+      "id": "CHAT-10",
+      "session_id": "smoke-2",
+      "role": "susie",
+      "utterance": "Verstanden – ich erfasse Ihre Genehmigung jetzt als menschliche Entscheidung: Review-Zustand 'approved' für TC-2 am Gate G4, mit Vermerk auf den bekannten Mismatch (EAZ-BEGINN-1: erwartet '20XX0101', beobachtet '20XX0401').",
+      "at": "2026-10-26T22:24:05+00:00",
+      "agent_run": {
+        "run_id": "RUN-c99ef800",
+        "task_id": "T10-032",
+        "role": "susie_assistant",
+        "provider": "hessian-ai-vllm-gateway",
+        "model_id": "vllm/GLM-Flash:Latest",
+        "model_revision": "unavailable",
+        "prompt_contract_version": "PROMPT-CONTRACT-0.1",
+        "started_at": "2026-10-26T22:24:05+00:00",
+        "input_ids": [
+          "TC-2"
+        ],
+        "output_schema_version": "agent-run-envelope/1.0",
+        "status": "candidate",
+        "result": {
+          "utterance": "Verstanden – ich erfasse Ihre Genehmigung jetzt als menschliche Entscheidung: Review-Zustand 'approved' für TC-2 am Gate G4, mit Vermerk auf den bekannten Mismatch (EAZ-BEGINN-1: erwartet '20XX0101', beobachtet '20XX0401').",
+          "confidence": "grounded",
+          "degraded": false
+        },
+        "citations": [],
+        "uncertainties": [],
+        "conflicts": [],
+        "validation_errors": [],
+        "review_required": true,
+        "author": "susie-assistant"
+      }
+    },
+    "CHAT-11": {
+      "id": "CHAT-11",
+      "session_id": "70944adb-8037-4671-a3da-c51ea78b69ed",
+      "role": "user",
+      "message": "Wo stehe ich bei der Prüfung?",
+      "at": "2026-10-26T22:50:47+00:00"
+    },
+    "CHAT-12": {
+      "id": "CHAT-12",
+      "session_id": "70944adb-8037-4671-a3da-c51ea78b69ed",
+      "role": "susie",
+      "utterance": "Ihr aktueller Stand bei der Prüfung:\n\nTestfälle (4 gesamt): TC-1 und TC-4 sind PASS; TC-2 weist einen MISMATCH auf (EAZ-BEGINN-1: erwartet '20XX0101', beobachtet '20XX0401'); TC-3 ist bewusst NOT_EVALUATED, da keine offizielle Grundlage für Erwartungswerte existiert (fail closed).\n\nKriterien: CRIT-EAZ-1 und CRIT-VOER-1 sind beide im Review-Status 'approved'.\n\nHarness-Lauf HARNESS-20261026-222200: 30/30 Fälle korrekt (27 clean, 3 erkannt, 0 Fehlalarme).\n\nReviews: Es liegen 10 Prüfberichte vor, alle mit Gesamtstatus 'NOT EVALUATED' und Review-Entscheidung 'pending' – es hat noch keine menschliche Freigabe stattgefunden. Die Robustheitsprüfung ist NOT EVALUATED (checker/attacks.py nicht gefunden); auch die Nachrichtenfluss-Checks C1–C8 konnten nicht ausgewertet werden (Checker nicht gefunden).\n\nKonformität: Die strukturellen Checks sind bestanden, eine Compliance-Aussage ist jedoch nicht zulässig (synthetisches Template-Profil, compliance_claim = false). Das Template TPL-SYNTH-1 hat den Status 'needs_review'.\n\nOffene Punkte: 1) Klärung des MISMATCH bei TC-2, 2) ausstehende menschliche Review-Entscheidungen (pending), 3) Template-Review, 4) fehlende Checker-Dateien.\n\nSoll ich Ihnen den Fall TC-2 mit dem MISMATCH öffnen?",
+      "at": "2026-10-26T22:50:47+00:00",
+      "agent_run": {
+        "run_id": "RUN-6401b7f2",
+        "task_id": "T10-032",
+        "role": "susie_assistant",
+        "provider": "hessian-ai-vllm-gateway",
+        "model_id": "vllm/GLM-Flash:Latest",
+        "model_revision": "unavailable",
+        "prompt_contract_version": "PROMPT-CONTRACT-0.1",
+        "started_at": "2026-10-26T22:50:47+00:00",
+        "input_ids": [
+          "TC-1",
+          "TC-4",
+          "TC-2",
+          "TC-3",
+          "criteria",
+          "HARNESS-20261026-222200",
+          "RPT-20261026-234334",
+          "RPT-1",
+          "TPL-SYNTH-1"
+        ],
+        "output_schema_version": "agent-run-envelope/1.0",
+        "status": "candidate",
+        "result": {
+          "utterance": "Ihr aktueller Stand bei der Prüfung:\n\nTestfälle (4 gesamt): TC-1 und TC-4 sind PASS; TC-2 weist einen MISMATCH auf (EAZ-BEGINN-1: erwartet '20XX0101', beobachtet '20XX0401'); TC-3 ist bewusst NOT_EVALUATED, da keine offizielle Grundlage für Erwartungswerte existiert (fail closed).\n\nKriterien: CRIT-EAZ-1 und CRIT-VOER-1 sind beide im Review-Status 'approved'.\n\nHarness-Lauf HARNESS-20261026-222200: 30/30 Fälle korrekt (27 clean, 3 erkannt, 0 Fehlalarme).\n\nReviews: Es liegen 10 Prüfberichte vor, alle mit Gesamtstatus 'NOT EVALUATED' und Review-Entscheidung 'pending' – es hat noch keine menschliche Freigabe stattgefunden. Die Robustheitsprüfung ist NOT EVALUATED (checker/attacks.py nicht gefunden); auch die Nachrichtenfluss-Checks C1–C8 konnten nicht ausgewertet werden (Checker nicht gefunden).\n\nKonformität: Die strukturellen Checks sind bestanden, eine Compliance-Aussage ist jedoch nicht zulässig (synthetisches Template-Profil, compliance_claim = false). Das Template TPL-SYNTH-1 hat den Status 'needs_review'.\n\nOffene Punkte: 1) Klärung des MISMATCH bei TC-2, 2) ausstehende menschliche Review-Entscheidungen (pending), 3) Template-Review, 4) fehlende Checker-Dateien.\n\nSoll ich Ihnen den Fall TC-2 mit dem MISMATCH öffnen?",
+          "confidence": "grounded",
+          "degraded": false
+        },
+        "citations": [],
+        "uncertainties": [],
+        "conflicts": [],
+        "validation_errors": [],
+        "review_required": true,
+        "author": "susie-assistant"
+      }
+    },
+    "CHAT-13": {
+      "id": "CHAT-13",
+      "session_id": "probe-1",
+      "role": "user",
+      "message": "Zeig mir die Quelle dazu.",
+      "at": "2026-10-26T22:51:52+00:00"
+    },
+    "CHAT-14": {
+      "id": "CHAT-14",
+      "session_id": "probe-1",
+      "role": "susie",
+      "utterance": "Gerne – allerdings ist dies Ihre erste Nachricht in diesem Kontext, daher kann ich nicht erkennen, auf welchen Punkt sich „dazu“ bezieht. Im Datensatz sind folgende Quellen hinterlegt: das Beispielpapier DTA EEL V13.3 des GKV-Spitzenverbands (gültig ab 01.01.2027, Status „approved“, SHA-256-Prüfsumme verifiziert) als Grundlage für TC-1 (§3.1, S. 9–11) und TC-2 (§3.2.1.4, S. 12) sowie die Verfahrensbeschreibung DTA EEL V13.4, §3.12 (S. 135–136) als Grundlage für TC-4. Nennen Sie mir bitte den betreffenden Fall oder die Fundstelle – soll ich z. B. die Belege zu TC-1 öffnen oder zu §3.1, S. 9–11 im Quelltext springen?",
+      "at": "2026-10-26T22:51:52+00:00",
+      "agent_run": {
+        "run_id": "RUN-5be9794d",
+        "task_id": "T10-032",
+        "role": "susie_assistant",
+        "provider": "hessian-ai-vllm-gateway",
+        "model_id": "vllm/GLM-Flash:Latest",
+        "model_revision": "unavailable",
+        "prompt_contract_version": "PROMPT-CONTRACT-0.1",
+        "started_at": "2026-10-26T22:51:52+00:00",
+        "input_ids": [
+          "SRC-BP",
+          "TC-1",
+          "TC-2",
+          "TC-4"
+        ],
+        "output_schema_version": "agent-run-envelope/1.0",
+        "status": "candidate",
+        "result": {
+          "utterance": "Gerne – allerdings ist dies Ihre erste Nachricht in diesem Kontext, daher kann ich nicht erkennen, auf welchen Punkt sich „dazu“ bezieht. Im Datensatz sind folgende Quellen hinterlegt: das Beispielpapier DTA EEL V13.3 des GKV-Spitzenverbands (gültig ab 01.01.2027, Status „approved“, SHA-256-Prüfsumme verifiziert) als Grundlage für TC-1 (§3.1, S. 9–11) und TC-2 (§3.2.1.4, S. 12) sowie die Verfahrensbeschreibung DTA EEL V13.4, §3.12 (S. 135–136) als Grundlage für TC-4. Nennen Sie mir bitte den betreffenden Fall oder die Fundstelle – soll ich z. B. die Belege zu TC-1 öffnen oder zu §3.1, S. 9–11 im Quelltext springen?",
+          "confidence": "grounded",
+          "degraded": false
+        },
+        "citations": [],
+        "uncertainties": [],
+        "conflicts": [],
+        "validation_errors": [],
+        "review_required": true,
+        "author": "susie-assistant"
+      }
+    },
+    "CHAT-15": {
+      "id": "CHAT-15",
+      "session_id": "70944adb-8037-4671-a3da-c51ea78b69ed",
+      "role": "user",
+      "message": "Öffne die Nachweise zu TC-2.",
+      "at": "2026-10-26T22:52:17+00:00"
+    },
+    "CHAT-16": {
+      "id": "CHAT-16",
+      "session_id": "70944adb-8037-4671-a3da-c51ea78b69ed",
+      "role": "susie",
+      "utterance": "Ich öffne die Nachweise zu TC-2. Der Fall ist ein Grenzfall mit Status MISMATCH; die Nachweise verweisen auf 'fixtures/bp_3_2_1_4_boundary.json#expected (deliberately altered)', die Erwartungswerte stützen sich auf das Beispielpapier DTA EEL V13.3, §3.2.1.4, S. 12 (DBAE-Tabelle).",
+      "at": "2026-10-26T22:52:17+00:00",
+      "agent_run": {
+        "run_id": "RUN-499c126c",
+        "task_id": "T10-032",
+        "role": "susie_assistant",
+        "provider": "hessian-ai-vllm-gateway",
+        "model_id": "vllm/GLM-Flash:Latest",
+        "model_revision": "unavailable",
+        "prompt_contract_version": "PROMPT-CONTRACT-0.1",
+        "started_at": "2026-10-26T22:52:17+00:00",
+        "input_ids": [
+          "TC-2"
+        ],
+        "output_schema_version": "agent-run-envelope/1.0",
+        "status": "candidate",
+        "result": {
+          "utterance": "Ich öffne die Nachweise zu TC-2. Der Fall ist ein Grenzfall mit Status MISMATCH; die Nachweise verweisen auf 'fixtures/bp_3_2_1_4_boundary.json#expected (deliberately altered)', die Erwartungswerte stützen sich auf das Beispielpapier DTA EEL V13.3, §3.2.1.4, S. 12 (DBAE-Tabelle).",
+          "confidence": "grounded",
+          "degraded": false
+        },
+        "citations": [],
+        "uncertainties": [],
+        "conflicts": [],
+        "validation_errors": [],
+        "review_required": true,
+        "author": "susie-assistant"
+      }
+    },
+    "CHAT-17": {
+      "id": "CHAT-17",
+      "session_id": "probe-2",
+      "role": "user",
+      "message": "Öffne die Nachweise zu TC-2.",
+      "at": "2026-10-26T22:52:37+00:00"
+    },
+    "CHAT-18": {
+      "id": "CHAT-18",
+      "session_id": "probe-2",
+      "role": "susie",
+      "utterance": "Ich öffne die Nachweise zu TC-2. Der Fall verweist auf „fixtures/bp_3_2_1_4_boundary.json#expected (deliberately altered)“; Grundlage der Erwartungswerte ist das Beispielpapier DTA EEL V13.3, §3.2.1.4, S. 12 (DBAE-Tabelle). Hinweis: TC-2 hat den Status MISMATCH – EAZ-BEGINN-1: erwartet „20XX0101“, beobachtet „20XX0401“.",
+      "at": "2026-10-26T22:52:37+00:00",
+      "agent_run": {
+        "run_id": "RUN-b800d77e",
+        "task_id": "T10-032",
+        "role": "susie_assistant",
+        "provider": "hessian-ai-vllm-gateway",
+        "model_id": "vllm/GLM-Flash:Latest",
+        "model_revision": "unavailable",
+        "prompt_contract_version": "PROMPT-CONTRACT-0.1",
+        "started_at": "2026-10-26T22:52:37+00:00",
+        "input_ids": [
+          "TC-2"
+        ],
+        "output_schema_version": "agent-run-envelope/1.0",
+        "status": "candidate",
+        "result": {
+          "utterance": "Ich öffne die Nachweise zu TC-2. Der Fall verweist auf „fixtures/bp_3_2_1_4_boundary.json#expected (deliberately altered)“; Grundlage der Erwartungswerte ist das Beispielpapier DTA EEL V13.3, §3.2.1.4, S. 12 (DBAE-Tabelle). Hinweis: TC-2 hat den Status MISMATCH – EAZ-BEGINN-1: erwartet „20XX0101“, beobachtet „20XX0401“.",
+          "confidence": "grounded",
+          "degraded": false
+        },
+        "citations": [],
+        "uncertainties": [],
+        "conflicts": [],
+        "validation_errors": [],
+        "review_required": true,
+        "author": "susie-assistant"
+      }
+    },
+    "CHAT-19": {
+      "id": "CHAT-19",
+      "session_id": "4d1cc558-72ba-4470-84b2-3e4404208190",
+      "role": "user",
+      "message": "Warum weicht TC-002 ab?",
+      "at": "2026-10-26T22:55:18+00:00"
+    },
+    "CHAT-20": {
+      "id": "CHAT-20",
+      "session_id": "4d1cc558-72ba-4470-84b2-3e4404208190",
+      "role": "susie",
+      "utterance": "Meine Verbindung zum Wissensdienst ist unterbrochen – ich kann Sie aber manuell durch die Schritte führen.",
+      "at": "2026-10-26T22:55:18+00:00",
+      "agent_run": {
+        "run_id": "RUN-1ef4447f",
+        "task_id": "T10-032",
+        "role": "susie_assistant",
+        "provider": "hessian-ai-vllm-gateway",
+        "model_id": "vllm/GLM-Flash:Latest",
+        "model_revision": "unavailable",
+        "prompt_contract_version": "PROMPT-CONTRACT-0.1",
+        "started_at": "2026-10-26T22:55:18+00:00",
+        "input_ids": [],
+        "output_schema_version": "agent-run-envelope/1.0",
+        "status": "error",
+        "result": {
+          "utterance": "Meine Verbindung zum Wissensdienst ist unterbrochen – ich kann Sie aber manuell durch die Schritte führen.",
+          "confidence": "unknown",
+          "degraded": true
+        },
+        "citations": [],
+        "uncertainties": [],
+        "conflicts": [],
+        "validation_errors": [
+          "transport/parse failure recorded: Unterminated string starting at: line 1 column 858 (char 857)"
+        ],
+        "review_required": true,
+        "author": "susie-assistant"
+      }
+    },
+    "CHAT-21": {
+      "id": "CHAT-21",
+      "session_id": "33d1aae8-9053-4908-8e1a-8b563bab7e84",
+      "role": "user",
+      "message": "Warum weicht TC-002 ab?",
+      "at": "2026-10-26T22:56:47+00:00"
+    },
+    "CHAT-22": {
+      "id": "CHAT-22",
+      "session_id": "33d1aae8-9053-4908-8e1a-8b563bab7e84",
+      "role": "susie",
+      "utterance": "TC-2 (vermutlich Ihr „TC-002“) weicht ab, weil beim Feld EAZ-BEGINN-1 ein anderer Wert beobachtet wurde als erwartet: erwartet „20XX0101“, beobachtet „20XX0401“ – daher der Status MISMATCH. Die übrigen geprüften Felder stimmen überein (ABGABEGRUND „01“, EAZ-ENDE-1 „20XX0131“). Wichtig zur Einordnung: TC-2 ist ein Grenzfall (case_type „boundary“), und der Belegverweis kennzeichnet den erwarteten Datensatz ausdrücklich als „(deliberately altered)“ – die Erwartungswerte wurden also absichtlich verändert, die Abweichung ist damit offenbar beabsichtigt. Als expected_basis ist das Beispielpapier DTA EEL V13.3, §3.2.1.4, S. 12 (DBAE-Tabelle) hinterlegt. Ob der beobachtete Wert „20XX0401“ dem offiziellen Wert des Beispielpapiers entspricht: Das kann ich nicht belegen. Ich öffne Ihnen die Vergleichsansicht für TC-2.",
+      "at": "2026-10-26T22:56:47+00:00",
+      "agent_run": {
+        "run_id": "RUN-ed0c1a5b",
+        "task_id": "T10-032",
+        "role": "susie_assistant",
+        "provider": "hessian-ai-vllm-gateway",
+        "model_id": "vllm/GLM-Flash:Latest",
+        "model_revision": "unavailable",
+        "prompt_contract_version": "PROMPT-CONTRACT-0.1",
+        "started_at": "2026-10-26T22:56:47+00:00",
+        "input_ids": [
+          "TC-2",
+          "CRIT-EAZ-1"
+        ],
+        "output_schema_version": "agent-run-envelope/1.0",
+        "status": "candidate",
+        "result": {
+          "utterance": "TC-2 (vermutlich Ihr „TC-002“) weicht ab, weil beim Feld EAZ-BEGINN-1 ein anderer Wert beobachtet wurde als erwartet: erwartet „20XX0101“, beobachtet „20XX0401“ – daher der Status MISMATCH. Die übrigen geprüften Felder stimmen überein (ABGABEGRUND „01“, EAZ-ENDE-1 „20XX0131“). Wichtig zur Einordnung: TC-2 ist ein Grenzfall (case_type „boundary“), und der Belegverweis kennzeichnet den erwarteten Datensatz ausdrücklich als „(deliberately altered)“ – die Erwartungswerte wurden also absichtlich verändert, die Abweichung ist damit offenbar beabsichtigt. Als expected_basis ist das Beispielpapier DTA EEL V13.3, §3.2.1.4, S. 12 (DBAE-Tabelle) hinterlegt. Ob der beobachtete Wert „20XX0401“ dem offiziellen Wert des Beispielpapiers entspricht: Das kann ich nicht belegen. Ich öffne Ihnen die Vergleichsansicht für TC-2.",
+          "confidence": "grounded",
+          "degraded": false
+        },
+        "citations": [],
+        "uncertainties": [],
+        "conflicts": [],
+        "validation_errors": [],
+        "review_required": true,
+        "author": "susie-assistant"
+      }
+    },
+    "CHAT-23": {
+      "id": "CHAT-23",
+      "session_id": "f15f8e8c-cdc3-40b7-8e3f-a6201af5b2b1",
+      "role": "user",
+      "message": "Öffne die Nachweise zu TC-2 und erkläre den MISMATCH.",
+      "at": "2026-10-26T22:58:15+00:00"
+    },
+    "CHAT-24": {
+      "id": "CHAT-24",
+      "session_id": "f15f8e8c-cdc3-40b7-8e3f-a6201af5b2b1",
+      "role": "susie",
+      "utterance": "Ich öffne die Nachweise zu TC-2. Zum MISMATCH: TC-2 ist ein Boundary-Fall zum Kriterium CRIT-EAZ-1 (Ausführung RUN-2). Abweichend ist ausschließlich das Feld EAZ-BEGINN-1: erwartet '20XX0101', beobachtet '20XX0401' – so lautet auch die Begründung des Laufs. EAZ-ENDE-1 ('20XX0131') und ABGABEGRUND ('01') stimmen mit den Erwartungen überein. Grundlage der Erwartungswerte ist das Beispielpapier DTA EEL V13.3 (gültig ab 01.01.2027), §3.2.1.4, S. 12 (DBAE-Tabelle, Transmit-Seite); referenziert ist die Fixture 'bp_3_2_1_4_boundary.json#expected (deliberately altered)'. Auffällig: Der beobachtete Wert '20XX0401' ist identisch mit dem EAZ-BEGINN-1 aus TC-1 – das könnte darauf hindeuten, dass der April-Wert aus dem §3.1-Sachverhalt übernommen wurde; das ist jedoch meine Deutung, keine belegte Ursache. Wenn Sie möchten, öffne ich zusätzlich die Vergleichsansicht für TC-2.",
+      "at": "2026-10-26T22:58:15+00:00",
+      "agent_run": {
+        "run_id": "RUN-28c595eb",
+        "task_id": "T10-032",
+        "role": "susie_assistant",
+        "provider": "hessian-ai-vllm-gateway",
+        "model_id": "vllm/GLM-Flash:Latest",
+        "model_revision": "unavailable",
+        "prompt_contract_version": "PROMPT-CONTRACT-0.1",
+        "started_at": "2026-10-26T22:58:15+00:00",
+        "input_ids": [
+          "TC-2",
+          "CRIT-EAZ-1",
+          "TC-1"
+        ],
+        "output_schema_version": "agent-run-envelope/1.0",
+        "status": "candidate",
+        "result": {
+          "utterance": "Ich öffne die Nachweise zu TC-2. Zum MISMATCH: TC-2 ist ein Boundary-Fall zum Kriterium CRIT-EAZ-1 (Ausführung RUN-2). Abweichend ist ausschließlich das Feld EAZ-BEGINN-1: erwartet '20XX0101', beobachtet '20XX0401' – so lautet auch die Begründung des Laufs. EAZ-ENDE-1 ('20XX0131') und ABGABEGRUND ('01') stimmen mit den Erwartungen überein. Grundlage der Erwartungswerte ist das Beispielpapier DTA EEL V13.3 (gültig ab 01.01.2027), §3.2.1.4, S. 12 (DBAE-Tabelle, Transmit-Seite); referenziert ist die Fixture 'bp_3_2_1_4_boundary.json#expected (deliberately altered)'. Auffällig: Der beobachtete Wert '20XX0401' ist identisch mit dem EAZ-BEGINN-1 aus TC-1 – das könnte darauf hindeuten, dass der April-Wert aus dem §3.1-Sachverhalt übernommen wurde; das ist jedoch meine Deutung, keine belegte Ursache. Wenn Sie möchten, öffne ich zusätzlich die Vergleichsansicht für TC-2.",
+          "confidence": "grounded",
+          "degraded": false
+        },
+        "citations": [],
+        "uncertainties": [],
+        "conflicts": [],
+        "validation_errors": [],
+        "review_required": true,
+        "author": "susie-assistant"
+      }
+    },
+    "CHAT-25": {
+      "id": "CHAT-25",
+      "session_id": "0d4d279f-f837-4ba6-9db5-da10a63bb2c5",
+      "role": "user",
+      "message": "Öffne die Nachweise zu TC-2.",
+      "at": "2026-10-26T22:58:32+00:00"
+    },
+    "CHAT-26": {
+      "id": "CHAT-26",
+      "session_id": "0d4d279f-f837-4ba6-9db5-da10a63bb2c5",
+      "role": "susie",
+      "utterance": "Ich öffne die Nachweise zu TC-2. Kurz zur Einordnung: TC-2 ist ein Grenzfall mit Status MISMATCH – EAZ-BEGINN-1 weicht ab (erwartet '20XX0101', beobachtet '20XX0401'). Die Erwartungswerte stammen aus dem Beispielpapier DTA EEL V13.3, §3.2.1.4, S. 12 (DBAE-Tabelle).",
+      "at": "2026-10-26T22:58:32+00:00",
+      "agent_run": {
+        "run_id": "RUN-e79c4198",
+        "task_id": "T10-032",
+        "role": "susie_assistant",
+        "provider": "hessian-ai-vllm-gateway",
+        "model_id": "vllm/GLM-Flash:Latest",
+        "model_revision": "unavailable",
+        "prompt_contract_version": "PROMPT-CONTRACT-0.1",
+        "started_at": "2026-10-26T22:58:32+00:00",
+        "input_ids": [
+          "TC-2",
+          "SRC-BP"
+        ],
+        "output_schema_version": "agent-run-envelope/1.0",
+        "status": "candidate",
+        "result": {
+          "utterance": "Ich öffne die Nachweise zu TC-2. Kurz zur Einordnung: TC-2 ist ein Grenzfall mit Status MISMATCH – EAZ-BEGINN-1 weicht ab (erwartet '20XX0101', beobachtet '20XX0401'). Die Erwartungswerte stammen aus dem Beispielpapier DTA EEL V13.3, §3.2.1.4, S. 12 (DBAE-Tabelle).",
+          "confidence": "grounded",
+          "degraded": false
+        },
+        "citations": [
+          {
+            "source_version_id": "SRC-BP",
+            "locator": "§3.2.1.4, S. 12"
+          }
+        ],
+        "uncertainties": [],
+        "conflicts": [],
+        "validation_errors": [],
+        "review_required": true,
+        "author": "susie-assistant"
+      }
+    },
+    "CHAT-27": {
+      "id": "CHAT-27",
+      "session_id": "041b0438-382b-4981-b05b-bac3e3a1ceb7",
+      "role": "user",
+      "message": "Öffne die Nachweise zu TC-2.",
+      "at": "2026-10-26T22:59:06+00:00"
+    },
+    "CHAT-28": {
+      "id": "CHAT-28",
+      "session_id": "041b0438-382b-4981-b05b-bac3e3a1ceb7",
+      "role": "susie",
+      "utterance": "Ich öffne die Nachweise zu TC-2. Der Fall (Boundary, Kriterium CRIT-EAZ-1) verweist auf die Belegquelle \"fixtures/bp_3_2_1_4_boundary.json#expected (deliberately altered)\" mit Grundlage im Beispielpapier DTA EEL V13.3, §3.2.1.4, S. 12. Hinweis: TC-2 hat aktuell den Status MISMATCH – EAZ-BEGINN-1: erwartet '20XX0101', beobachtet '20XX0401'.",
+      "at": "2026-10-26T22:59:06+00:00",
+      "agent_run": {
+        "run_id": "RUN-fbcc4bc7",
+        "task_id": "T10-032",
+        "role": "susie_assistant",
+        "provider": "hessian-ai-vllm-gateway",
+        "model_id": "vllm/GLM-Flash:Latest",
+        "model_revision": "unavailable",
+        "prompt_contract_version": "PROMPT-CONTRACT-0.1",
+        "started_at": "2026-10-26T22:59:06+00:00",
+        "input_ids": [
+          "TC-2",
+          "CRIT-EAZ-1"
+        ],
+        "output_schema_version": "agent-run-envelope/1.0",
+        "status": "candidate",
+        "result": {
+          "utterance": "Ich öffne die Nachweise zu TC-2. Der Fall (Boundary, Kriterium CRIT-EAZ-1) verweist auf die Belegquelle \"fixtures/bp_3_2_1_4_boundary.json#expected (deliberately altered)\" mit Grundlage im Beispielpapier DTA EEL V13.3, §3.2.1.4, S. 12. Hinweis: TC-2 hat aktuell den Status MISMATCH – EAZ-BEGINN-1: erwartet '20XX0101', beobachtet '20XX0401'.",
+          "confidence": "grounded",
+          "degraded": false
+        },
+        "citations": [],
+        "uncertainties": [],
+        "conflicts": [],
+        "validation_errors": [],
+        "review_required": true,
+        "author": "susie-assistant"
+      }
+    },
+    "CHAT-29": {
+      "id": "CHAT-29",
+      "session_id": "b37ace1b-f881-473c-b1ef-a2d5343b9bf7",
+      "role": "user",
+      "message": "Fasse den Status von TC-2 in einem Satz mit **wichtig** hervorgehoben zusammen.",
+      "at": "2026-10-26T23:10:17+00:00"
+    },
+    "CHAT-30": {
+      "id": "CHAT-30",
+      "session_id": "b37ace1b-f881-473c-b1ef-a2d5343b9bf7",
+      "role": "susie",
+      "utterance": "TC-2 (Grenzfall zu CRIT-EAZ-1) hat den Status **MISMATCH** – **wichtig** ist dabei, dass im Lauf RUN-2 der beobachtete Wert EAZ-BEGINN-1 '20XX0401' vom erwarteten '20XX0101' abweicht, während ABGABEGRUND und EAZ-ENDE-1 übereinstimmen.",
+      "at": "2026-10-26T23:10:17+00:00",
+      "agent_run": {
+        "run_id": "RUN-42ea504c",
+        "task_id": "T10-032",
+        "role": "susie_assistant",
+        "provider": "hessian-ai-vllm-gateway",
+        "model_id": "vllm/GLM-Flash:Latest",
+        "model_revision": "unavailable",
+        "prompt_contract_version": "PROMPT-CONTRACT-0.1",
+        "started_at": "2026-10-26T23:10:17+00:00",
+        "input_ids": [
+          "TC-2"
+        ],
+        "output_schema_version": "agent-run-envelope/1.0",
+        "status": "candidate",
+        "result": {
+          "utterance": "TC-2 (Grenzfall zu CRIT-EAZ-1) hat den Status **MISMATCH** – **wichtig** ist dabei, dass im Lauf RUN-2 der beobachtete Wert EAZ-BEGINN-1 '20XX0401' vom erwarteten '20XX0101' abweicht, während ABGABEGRUND und EAZ-ENDE-1 übereinstimmen.",
+          "confidence": "grounded",
+          "degraded": false,
+          "model": "vllm/GLM-Flash:Latest"
+        },
+        "citations": [],
+        "uncertainties": [],
+        "conflicts": [],
+        "validation_errors": [],
+        "review_required": true,
+        "author": "susie-assistant"
+      }
+    },
+    "CHAT-31": {
+      "id": "CHAT-31",
+      "session_id": "b37ace1b-f881-473c-b1ef-a2d5343b9bf7",
+      "role": "user",
+      "message": "Where do I stand in the review?",
+      "at": "2026-10-26T23:11:08+00:00"
+    },
+    "CHAT-32": {
+      "id": "CHAT-32",
+      "session_id": "b37ace1b-f881-473c-b1ef-a2d5343b9bf7",
+      "role": "susie",
+      "utterance": "Here is where you stand in the review:\n\n- **Criteria:** Both criteria are already approved – CRIT-EAZ-1 and CRIT-VOER-1.\n- **Test cases:** TC-1 and TC-4 are PASS; TC-2 shows a MISMATCH (EAZ-BEGINN-1 '20XX0401' vs. expected '20XX0101'); TC-3 is NOT_EVALUATED (no official expected basis).\n- **Review reports:** The 10 latest review reports (all for TC-1, newest RPT-20261027-000449) are still awaiting your decision: review decision 'pending', no reviewer assigned. Their overall status is 'NOT EVALUATED' because 10 findings could not be checked (checker not found, e.g. C1–C8, plus C9 and C13).\n- **Harness:** Run HARNESS-20261026-222200 is fully correct: 30/30 cases correct, 27 clean, 3 detected, 0 false alarms.\n- **Template:** TPL-SYNTH-1 is in status 'needs_review'; conformance passed structurally, but a compliance claim is not allowed (synthetic template profile).\n\nIn short: the technical runs are done and the criteria are approved, but the human review decision on the TC-1 reports is still open. That is a human gate – shall I start the review flow for TC-1?",
+      "at": "2026-10-26T23:11:08+00:00",
+      "agent_run": {
+        "run_id": "RUN-96b35296",
+        "task_id": "T10-032",
+        "role": "susie_assistant",
+        "provider": "hessian-ai-vllm-gateway",
+        "model_id": "vllm/GLM-Flash:Latest",
+        "model_revision": "unavailable",
+        "prompt_contract_version": "PROMPT-CONTRACT-0.1",
+        "started_at": "2026-10-26T23:11:08+00:00",
+        "input_ids": [
+          "CRIT-EAZ-1",
+          "CRIT-VOER-1",
+          "TC-1",
+          "TC-2",
+          "TC-3",
+          "TC-4",
+          "RPT-20261027-000449",
+          "HARNESS-20261026-222200",
+          "TPL-SYNTH-1",
+          "RPT-1"
+        ],
+        "output_schema_version": "agent-run-envelope/1.0",
+        "status": "candidate",
+        "result": {
+          "utterance": "Here is where you stand in the review:\n\n- **Criteria:** Both criteria are already approved – CRIT-EAZ-1 and CRIT-VOER-1.\n- **Test cases:** TC-1 and TC-4 are PASS; TC-2 shows a MISMATCH (EAZ-BEGINN-1 '20XX0401' vs. expected '20XX0101'); TC-3 is NOT_EVALUATED (no official expected basis).\n- **Review reports:** The 10 latest review reports (all for TC-1, newest RPT-20261027-000449) are still awaiting your decision: review decision 'pending', no reviewer assigned. Their overall status is 'NOT EVALUATED' because 10 findings could not be checked (checker not found, e.g. C1–C8, plus C9 and C13).\n- **Harness:** Run HARNESS-20261026-222200 is fully correct: 30/30 cases correct, 27 clean, 3 detected, 0 false alarms.\n- **Template:** TPL-SYNTH-1 is in status 'needs_review'; conformance passed structurally, but a compliance claim is not allowed (synthetic template profile).\n\nIn short: the technical runs are done and the criteria are approved, but the human review decision on the TC-1 reports is still open. That is a human gate – shall I start the review flow for TC-1?",
+          "confidence": "grounded",
+          "degraded": false,
+          "model": "vllm/GLM-Flash:Latest"
+        },
+        "citations": [],
+        "uncertainties": [],
+        "conflicts": [],
+        "validation_errors": [],
+        "review_required": true,
+        "author": "susie-assistant"
+      }
+    },
+    "CHAT-33": {
+      "id": "CHAT-33",
+      "session_id": "95804157-22ee-4ecb-911a-d8e6e0c1c616",
+      "role": "user",
+      "message": "Export the report.",
+      "at": "2026-10-26T23:14:36+00:00"
+    },
+    "CHAT-34": {
+      "id": "CHAT-34",
+      "session_id": "95804157-22ee-4ecb-911a-d8e6e0c1c616",
+      "role": "susie",
+      "utterance": "Shall I export the report? Please note before exporting: the current report RPT-1 is based on a synthetic template profile — its conformance checks are structural only and cannot authorize a legal or template compliance claim (compliance_claim: false), and the template TPL-SYNTH-1 still has the status 'needs_review'. The export itself is not a release decision.",
+      "at": "2026-10-26T23:14:36+00:00",
+      "agent_run": {
+        "run_id": "RUN-f293dec3",
+        "task_id": "T10-032",
+        "role": "susie_assistant",
+        "provider": "hessian-ai-vllm-gateway",
+        "model_id": "vllm/GLM-Flash:Latest",
+        "model_revision": "unavailable",
+        "prompt_contract_version": "PROMPT-CONTRACT-0.1",
+        "started_at": "2026-10-26T23:14:36+00:00",
+        "input_ids": [
+          "RPT-1",
+          "TPL-SYNTH-1"
+        ],
+        "output_schema_version": "agent-run-envelope/1.0",
+        "status": "candidate",
+        "result": {
+          "utterance": "Shall I export the report? Please note before exporting: the current report RPT-1 is based on a synthetic template profile — its conformance checks are structural only and cannot authorize a legal or template compliance claim (compliance_claim: false), and the template TPL-SYNTH-1 still has the status 'needs_review'. The export itself is not a release decision.",
+          "confidence": "grounded",
+          "degraded": false,
+          "model": "vllm/GLM-Flash:Latest"
+        },
+        "citations": [],
+        "uncertainties": [],
+        "conflicts": [],
+        "validation_errors": [],
+        "review_required": true,
+        "author": "susie-assistant"
+      }
+    },
+    "CHAT-35": {
+      "id": "CHAT-35",
+      "session_id": "58f23d2a-3841-4386-aa6b-4902949f33e9",
+      "role": "user",
+      "message": "Exportiere das Protokoll.",
+      "at": "2026-10-26T23:18:11+00:00"
+    },
+    "CHAT-36": {
+      "id": "CHAT-36",
+      "session_id": "58f23d2a-3841-4386-aa6b-4902949f33e9",
+      "role": "susie",
+      "utterance": "Ich stoße den Export an. Der Export umfasst den aktuellen Bericht RPT-1 (Konformitätsprüfung, Status: pass, ohne Compliance-Claim) sowie den Harness-Lauf HARNESS-20261026-222200 mit 30 Fällen (30 korrekt, 27 clean, 3 erkannte Abweichungen, 0 Fehlalarme).",
+      "at": "2026-10-26T23:18:11+00:00",
+      "agent_run": {
+        "run_id": "RUN-8af1d132",
+        "task_id": "T10-032",
+        "role": "susie_assistant",
+        "provider": "hessian-ai-vllm-gateway",
+        "model_id": "vllm/GLM-Flash:Latest",
+        "model_revision": "unavailable",
+        "prompt_contract_version": "PROMPT-CONTRACT-0.1",
+        "started_at": "2026-10-26T23:18:11+00:00",
+        "input_ids": [
+          "RPT-1",
+          "HARNESS-20261026-222200"
+        ],
+        "output_schema_version": "agent-run-envelope/1.0",
+        "status": "candidate",
+        "result": {
+          "utterance": "Ich stoße den Export an. Der Export umfasst den aktuellen Bericht RPT-1 (Konformitätsprüfung, Status: pass, ohne Compliance-Claim) sowie den Harness-Lauf HARNESS-20261026-222200 mit 30 Fällen (30 korrekt, 27 clean, 3 erkannte Abweichungen, 0 Fehlalarme).",
+          "confidence": "grounded",
+          "degraded": false,
+          "model": "vllm/GLM-Flash:Latest"
+        },
+        "citations": [],
+        "uncertainties": [],
+        "conflicts": [],
+        "validation_errors": [],
+        "review_required": true,
+        "author": "susie-assistant"
+      }
+    },
+    "CHAT-37": {
+      "id": "CHAT-37",
+      "session_id": "f1ea5286-c883-4172-96c7-920d89e871b2",
+      "role": "user",
+      "message": "Exportiere das Protokoll.",
+      "at": "2026-10-26T23:19:50+00:00"
+    },
+    "CHAT-38": {
+      "id": "CHAT-38",
+      "session_id": "f1ea5286-c883-4172-96c7-920d89e871b2",
+      "role": "susie",
+      "utterance": "Soll ich den Bericht exportieren? Der Export würde den aktuellen Prüfbericht (RPT-1, Konformitätsprüfung: pass, Compliance-Claim nicht zugelassen) sowie die Harness-Ergebnisse des Laufs HARNESS-20261026-222200 (30 Fälle, 30 korrekt) umfassen. Bitte bestätigen Sie mit Ja oder Nein.",
+      "at": "2026-10-26T23:19:50+00:00",
+      "agent_run": {
+        "run_id": "RUN-ff75c7b4",
+        "task_id": "T10-032",
+        "role": "susie_assistant",
+        "provider": "hessian-ai-vllm-gateway",
+        "model_id": "vllm/GLM-Flash:Latest",
+        "model_revision": "unavailable",
+        "prompt_contract_version": "PROMPT-CONTRACT-0.1",
+        "started_at": "2026-10-26T23:19:50+00:00",
+        "input_ids": [
+          "report",
+          "harness"
+        ],
+        "output_schema_version": "agent-run-envelope/1.0",
+        "status": "candidate",
+        "result": {
+          "utterance": "Soll ich den Bericht exportieren? Der Export würde den aktuellen Prüfbericht (RPT-1, Konformitätsprüfung: pass, Compliance-Claim nicht zugelassen) sowie die Harness-Ergebnisse des Laufs HARNESS-20261026-222200 (30 Fälle, 30 korrekt) umfassen. Bitte bestätigen Sie mit Ja oder Nein.",
+          "confidence": "grounded",
+          "degraded": false,
+          "model": "vllm/GLM-Flash:Latest"
+        },
+        "citations": [],
+        "uncertainties": [],
+        "conflicts": [],
+        "validation_errors": [],
+        "review_required": true,
+        "author": "susie-assistant"
+      }
+    },
+    "CHAT-39": {
+      "id": "CHAT-39",
+      "session_id": "51a79260-8a7b-4d2e-bfa6-592780bf51d9",
+      "role": "user",
+      "message": "Exportiere das Protokoll.",
+      "at": "2026-10-26T23:22:21+00:00"
+    },
+    "CHAT-40": {
+      "id": "CHAT-40",
+      "session_id": "51a79260-8a7b-4d2e-bfa6-592780bf51d9",
+      "role": "susie",
+      "utterance": "Gerne. Einen separaten Protokoll-Export bietet die Werkbank nicht an – ich schlage daher den verfügbaren Bericht-Export vor. Der aktuelle Stand umfasst im Backend 4 AgentRuns, 71 Ereignisse und 4 Gates.",
+      "at": "2026-10-26T23:22:21+00:00",
+      "agent_run": {
+        "run_id": "RUN-23c1a3b8",
+        "task_id": "T10-032",
+        "role": "susie_assistant",
+        "provider": "hessian-ai-vllm-gateway",
+        "model_id": "vllm/GLM-Flash:Latest",
+        "model_revision": "unavailable",
+        "prompt_contract_version": "PROMPT-CONTRACT-0.1",
+        "started_at": "2026-10-26T23:22:21+00:00",
+        "input_ids": [
+          "backend"
+        ],
+        "output_schema_version": "agent-run-envelope/1.0",
+        "status": "candidate",
+        "result": {
+          "utterance": "Gerne. Einen separaten Protokoll-Export bietet die Werkbank nicht an – ich schlage daher den verfügbaren Bericht-Export vor. Der aktuelle Stand umfasst im Backend 4 AgentRuns, 71 Ereignisse und 4 Gates.",
+          "confidence": "grounded",
+          "degraded": false,
+          "model": "vllm/GLM-Flash:Latest"
+        },
+        "citations": [],
+        "uncertainties": [],
+        "conflicts": [],
+        "validation_errors": [],
+        "review_required": true,
+        "author": "susie-assistant"
+      }
+    }
+  },
+  "note": {
+    "NOTE-ace776ee": {
+      "id": "NOTE-ace776ee",
+      "text": "Testnotiz für die Demo.",
+      "case_id": "TC-1",
+      "author": "Amr",
+      "created_at": "2026-10-26T22:22:38+00:00"
+    }
+  },
+  "action_audit": {
+    "ACT-a43c7914": {
+      "id": "ACT-a43c7914",
+      "action_id": "export_report",
+      "session_id": "95804157-22ee-4ecb-911a-d8e6e0c1c616",
+      "mode": "server",
+      "reviewer": "Amr",
+      "at": "2026-10-26T23:14:47+00:00"
+    },
+    "ACT-c22be9a5": {
+      "id": "ACT-c22be9a5",
+      "action_id": "export_report",
+      "session_id": "58f23d2a-3841-4386-aa6b-4902949f33e9",
+      "mode": "server",
+      "reviewer": "",
+      "at": "2026-10-26T23:18:37+00:00"
+    },
+    "ACT-601cf305": {
+      "id": "ACT-601cf305",
+      "action_id": "export_report",
+      "session_id": "51a79260-8a7b-4d2e-bfa6-592780bf51d9",
+      "mode": "server",
+      "reviewer": "Amr",
+      "at": "2026-10-26T23:22:26+00:00"
+    }
+  }
+}

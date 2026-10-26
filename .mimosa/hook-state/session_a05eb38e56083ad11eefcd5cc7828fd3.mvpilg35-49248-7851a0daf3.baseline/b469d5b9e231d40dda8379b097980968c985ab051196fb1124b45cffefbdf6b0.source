@@ -1,0 +1,30 @@
+"""Stage A — inbox import and registry (task T10-004; ingestion-pipeline.md §4–§5).
+
+Contract for the implementation:
+
+  1. For every file in ``data/inbox/``: compute SHA-256, then
+       - if a registered manifest already carries that checksum: link to the
+         existing SRCV by appending the inbox path to its ``intake_paths`` —
+         identical bytes are never duplicated;
+       - else create ``data/sources/SRC-<n>/SRCV-<n>-<L>/`` with the original
+         bytes copied once (immutable) and a manifest.json with the
+         architecture §4 fields.
+  2. Every version enters with status ``candidate`` — fetch is not accept.
+  3. Filename version hints (V13.1, gueltig_ab_01.01.2027) are captured as
+     candidate metadata; unknown fields stay empty.
+  4. Write one AuditRecord per run (pipeline.audit).
+
+Known dedupe case in the corpus: GG_EEL exists twice (``Laws/`` and
+``Rules Input part 1/``) with identical bytes -> exactly one SRCV with two
+recorded intake paths (verification hook ingestion-pipeline.md §8.5).
+"""
+from __future__ import annotations
+
+from pathlib import Path
+
+from .manifest import Manifest
+
+
+def register_inbox(inbox: Path, sources_root: Path, task_id: str = "T10-004") -> list[Manifest]:
+    """Register every file in the inbox. STUB — implemented by T10-004."""
+    raise NotImplementedError("T10-004: stage A inbox import")

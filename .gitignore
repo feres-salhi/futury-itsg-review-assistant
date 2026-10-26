@@ -1,0 +1,25 @@
+# OS / editor noise
+.DS_Store
+__pycache__/
+*.py[cod]
+
+# Virtualenvs and tool artifacts
+.venv/
+.mimosa/
+
+# Derived data — data/sources is truth-on-disk (immutable originals + manifests),
+# data/index and data/demo are rebuildable caches (ingestion-pipeline.md §3).
+# The corpus itself stays tracked under ITSG Files/.
+# T10-031: harness ground truth is tracked input data, so `data/*` (not `data/`)
+# keeps specific files re-includable; data/secrets/ stays excluded.
+data/*
+!data/testcases.json
+!data/case_correct.json
+
+# Generated outputs (T10-031: adopted teammate tooling)
+reports/
+md/
+
+# Python packaging
+*.egg-info/
+build/

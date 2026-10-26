@@ -1,0 +1,14 @@
+{
+  "schemaVersion": "mimosa-hook-status/v1",
+  "recordedAt": "2026-10-26T17:21:08.889Z",
+  "sessionId": "session_0af5e4b32e7f6c8d0481cad3988e984b",
+  "event": "PostToolUse",
+  "toolName": "Edit",
+  "file": ".leapfrog/tracks/track-5-green.md",
+  "outcome": "clear",
+  "coverage": "complete",
+  "findingCount": 0,
+  "durationMs": 7,
+  "hostState": "hook_complete",
+  "reportHint": ".mimosa/reports/"
+}
