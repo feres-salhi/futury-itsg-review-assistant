@@ -28,12 +28,15 @@ API_KEY_ENV = "HESSIAN_API_KEY"
 PROMPT_VERSION = "retrieval-qa-v1"
 TIMEOUT_SECONDS = 60.0
 MIN_QUOTE_CHARS = 15  # a 3-letter "quote" would match almost anywhere
+TABLE_MIN_WORDS = 6  # loose "table" matching needs enough words to be meaningful
+TABLE_MAX_GAP = 4  # other words allowed between two consecutive quote words
 
 ENV_FILE = Path(__file__).resolve().parent.parent / ".env"
 
 log = logging.getLogger("retrieval.ask")
 
 Status = Literal["ANSWERED", "NEEDS_REVIEW", "NOT_FOUND"]
+MatchLevel = Literal["exact", "table"]
 
 
 class MissingApiKeyError(RuntimeError):
@@ -48,6 +51,11 @@ class Citation(BaseModel):
     quote: str
 
 
+class VerifiedCitation(Citation):
+    """A citation as returned to callers. match_level is set by us, never by the model."""
+    match_level: Optional[MatchLevel] = None  # None = quote was rejected
+
+
 class ModelAnswer(BaseModel):
     """What the model must return. Unknown fields are rejected."""
     model_config = ConfigDict(extra="forbid")
@@ -60,7 +68,7 @@ class AskResult(BaseModel):
     """What callers get back: the checked answer plus an audit record."""
     answer: str
     status: Status
-    citations: List[Citation]
+    citations: List[VerifiedCitation]
     validation_errors: List[str]
     audit: dict
 
@@ -153,27 +161,72 @@ def _parse_model_json(content) -> ModelAnswer:
     return ModelAnswer.model_validate(data)
 
 
-def verify(answer: ModelAnswer, chunks: List[Chunk]) -> List[str]:
-    """Deterministic checks of the model's citations. Returns a list of problems (empty = ok)."""
+def _words(text: str) -> List[str]:
+    """Lowercase words only: punctuation and the table separator "|" are dropped."""
+    return re.findall(r"\w+", text.lower())
+
+
+def _table_match(quote: str, chunk_text: str) -> bool:
+    """True if all quote words occur in order, at most TABLE_MAX_GAP other words apart.
+
+    Text tables wrap cells across lines, so a genuine quote can have other columns'
+    fragments between its words. Tracks every possible position, so it never misses a
+    valid alignment and never accepts words that are reordered or far apart.
+    """
+    q, c = _words(quote), _words(chunk_text)
+    if len(q) < TABLE_MIN_WORDS:
+        return False
+    reach = {i for i, w in enumerate(c) if w == q[0]}
+    for word in q[1:]:
+        reach = {j for j, w in enumerate(c) if w == word and any(i < j <= i + TABLE_MAX_GAP + 1 for i in reach)}
+        if not reach:
+            return False
+    return True
+
+
+def match_quote(quote: str, chunk_text: str) -> Optional[MatchLevel]:
+    """"exact" = word-for-word (whitespace-normalised); "table" = loose table match; None = rejected."""
+    quote = _normalize(quote)
+    if len(quote) < MIN_QUOTE_CHARS:
+        return None
+    if quote in _normalize(chunk_text):
+        return "exact"
+    if _table_match(quote, chunk_text):
+        return "table"
+    return None
+
+
+def verify_citations(answer: ModelAnswer, chunks: List[Chunk]):
+    """Deterministic checks of the model's citations.
+
+    Returns (problems, citations): problems is a list (empty = ok); citations carry the match level.
+    """
     by_id = {c.chunk_id: c for c in chunks}
     problems = []
+    checked = []
     if answer.status == "ANSWERED" and not answer.citations:
         problems.append("status ANSWERED but no citations")
     for i, cit in enumerate(answer.citations, start=1):
         chunk = by_id.get(cit.chunk_id)
+        level = None
         if chunk is None:
             problems.append(f"citation {i}: chunk_id {cit.chunk_id!r} was not in the input chunks")
-            continue
-        quote = _normalize(cit.quote)
-        if len(quote) < MIN_QUOTE_CHARS:
-            problems.append(f"citation {i}: quote shorter than {MIN_QUOTE_CHARS} characters")
-        elif quote not in _normalize(chunk.text):
-            problems.append(f"citation {i}: quote not found word-for-word in {cit.chunk_id}")
-        if cit.section != chunk.section:
-            problems.append(f"citation {i}: section {cit.section!r} does not match chunk section {chunk.section!r}")
-        if not chunk.page_start <= cit.page <= chunk.page_end:
-            problems.append(f"citation {i}: page {cit.page} outside chunk pages {chunk.pages}")
-    return problems
+        else:
+            level = match_quote(cit.quote, chunk.text)
+            if len(_normalize(cit.quote)) < MIN_QUOTE_CHARS:
+                problems.append(f"citation {i}: quote shorter than {MIN_QUOTE_CHARS} characters")
+            elif level is None:
+                problems.append(f"citation {i}: quote not found word-for-word in {cit.chunk_id}")
+            if cit.section != chunk.section:
+                problems.append(f"citation {i}: section {cit.section!r} does not match chunk section {chunk.section!r}")
+            if not chunk.page_start <= cit.page <= chunk.page_end:
+                problems.append(f"citation {i}: page {cit.page} outside chunk pages {chunk.pages}")
+        checked.append(VerifiedCitation(**cit.model_dump(), match_level=level))
+    return problems, checked
+
+
+def verify(answer: ModelAnswer, chunks: List[Chunk]) -> List[str]:
+    return verify_citations(answer, chunks)[0]
 
 
 def _audit(chunks: List[Chunk], status: str, problems: List[str], model_revision: str) -> dict:
@@ -230,9 +283,9 @@ def ask(question: str, chunks: Optional[List[Chunk]] = None, client=None) -> Ask
         problems = [f"malformed model response ({kind}); rejected"]
         return _result("The model response was malformed; a human must review.", "NEEDS_REVIEW", [], problems, chunks, revision)
 
-    problems = verify(parsed, chunks)
+    problems, citations = verify_citations(parsed, chunks)
     status = "NEEDS_REVIEW" if problems else parsed.status  # may only be lowered, never raised
-    return _result(parsed.answer, status, parsed.citations, problems, chunks, revision)
+    return _result(parsed.answer, status, citations, problems, chunks, revision)
 
 
 if __name__ == "__main__":
