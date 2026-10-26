@@ -2,13 +2,12 @@
 itsg store, static frontend serving, traversal refusal, demo re-run; plus the
 story-cases/reviews/harness state overlays and POST /api/review/run (T10-032)."""
 import contextlib
+import http.client
 import io
 import json
 import os
 import tempfile
 import unittest
-import urllib.error
-import urllib.request
 from pathlib import Path
 
 from itsg import actions, chat, demo, webserver
@@ -23,7 +22,20 @@ def _serve(frontend: Path, store: Path):
     httpd = webserver.ThreadingHTTPServer(("127.0.0.1", 0), SUSIEHandler)
     thread = __import__("threading").Thread(target=httpd.serve_forever, daemon=True)
     thread.start()
-    return httpd, f"http://127.0.0.1:{httpd.server_address[1]}"
+    return httpd, httpd.server_address[1]
+
+
+def _request(port: int, method: str, path: str, body=None, headers=None, timeout: int = 10):
+    """Loopback-only HTTP helper: the host is the literal 127.0.0.1, the port comes
+    from the ephemeral test server. Returns (status, body bytes) without raising
+    on 4xx/5xx, so callers assert on the status directly."""
+    conn = http.client.HTTPConnection("127.0.0.1", port, timeout=timeout)
+    try:
+        conn.request(method, path, body=body, headers=headers or {})
+        response = conn.getresponse()
+        return response.status, response.read()
+    finally:
+        conn.close()
 
 
 class TestBuildState(unittest.TestCase):
@@ -64,7 +76,7 @@ class TestWebserver(unittest.TestCase):
         (frontend / "secret.txt").write_text("nope", encoding="utf-8")
         with contextlib.redirect_stdout(io.StringIO()):
             demo.run_demo(store, live=False, fresh=True)
-        self.httpd, self.base = _serve(frontend, store)
+        self.httpd, self.port = _serve(frontend, store)
 
     def tearDown(self):
         self.httpd.shutdown()
@@ -72,8 +84,7 @@ class TestWebserver(unittest.TestCase):
         self.tmp.cleanup()
 
     def _get(self, path):
-        with urllib.request.urlopen(self.base + path, timeout=5) as response:
-            return response.status, response.read()
+        return _request(self.port, "GET", path, timeout=5)
 
     def test_health(self):
         status, body = self._get("/api/health")
@@ -92,29 +103,24 @@ class TestWebserver(unittest.TestCase):
         status, body = self._get("/index.html")
         self.assertEqual(status, 200)
         self.assertIn(b"<title>t</title>", body)
-        with self.assertRaises(urllib.error.HTTPError) as caught:
-            self._get("/../secret.txt")
-        self.assertEqual(caught.exception.code, 403)
-        with self.assertRaises(urllib.error.HTTPError) as caught:
-            self._get("/missing.html")
-        self.assertEqual(caught.exception.code, 404)
+        status, _ = self._get("/../secret.txt")
+        self.assertEqual(status, 403)
+        status, _ = self._get("/missing.html")
+        self.assertEqual(status, 404)
 
     def test_run_offline_rebuilds_store(self):
-        request = urllib.request.Request(
-            self.base + "/api/run", data=json.dumps({"live": False}).encode(),
-            headers={"Content-Type": "application/json"}, method="POST")
-        with urllib.request.urlopen(request, timeout=30) as response:
-            payload = json.loads(response.read())
+        status, body = _request(
+            self.port, "POST", "/api/run", body=json.dumps({"live": False}).encode(),
+            headers={"Content-Type": "application/json"}, timeout=30)
+        payload = json.loads(body)
+        self.assertEqual(status, 200)
         self.assertTrue(payload["ok"])
         self.assertEqual(len(payload["cases"]), 4)
 
     def test_run_rejects_non_object_body(self):
-        request = urllib.request.Request(
-            self.base + "/api/run", data=b"[1]", headers={"Content-Type": "application/json"},
-            method="POST")
-        with self.assertRaises(urllib.error.HTTPError) as caught:
-            urllib.request.urlopen(request, timeout=5)
-        self.assertEqual(caught.exception.code, 400)
+        status, _ = _request(
+            self.port, "POST", "/api/run", body=b"[1]", headers={"Content-Type": "application/json"})
+        self.assertEqual(status, 400)
 
 
 class TestStoriesReviews(unittest.TestCase):
@@ -134,7 +140,7 @@ class TestStoriesReviews(unittest.TestCase):
         SUSIEHandler.review_script_path = webserver.ROOT / "run_review.py"
         with contextlib.redirect_stdout(io.StringIO()):
             demo.run_demo(store, live=False, fresh=True)
-        self.httpd, self.base = _serve(frontend, store)
+        self.httpd, self.port = _serve(frontend, store)
 
     def tearDown(self):
         self.httpd.shutdown()
@@ -145,8 +151,8 @@ class TestStoriesReviews(unittest.TestCase):
         self.tmp.cleanup()
 
     def _get_state(self):
-        with urllib.request.urlopen(self.base + "/api/state", timeout=5) as response:
-            return json.loads(response.read())
+        _, body = _request(self.port, "GET", "/api/state", timeout=5)
+        return json.loads(body)
 
     def _write_story_fixture(self):
         cases = [
@@ -301,14 +307,14 @@ class TestStoriesReviews(unittest.TestCase):
         # run_review.py writes to its own ROOT/reports; point the handler there
         # for this one real (deterministic, offline) execution.
         SUSIEHandler.reports_path = webserver.ROOT / "reports"
-        request = urllib.request.Request(
-            self.base + "/api/review/run", data=json.dumps({"scope": "ignored"}).encode(),
-            headers={"Content-Type": "application/json"}, method="POST")
         try:
-            with urllib.request.urlopen(request, timeout=60) as response:
-                payload = json.loads(response.read())
+            status, body = _request(
+                self.port, "POST", "/api/review/run", body=json.dumps({"scope": "ignored"}).encode(),
+                headers={"Content-Type": "application/json"}, timeout=60)
+            payload = json.loads(body)
         finally:
             SUSIEHandler.reports_path = Path(self.tmp.name) / "reports"
+        self.assertEqual(status, 200)
         self.assertTrue(payload["ok"])
         review = payload["review"]
         self.assertTrue(review["id"].startswith("RPT-"))
@@ -354,7 +360,7 @@ class TestChatEndpoints(unittest.TestCase):
         SUSIEHandler.index_path = tmp / "data" / "index" / "fts.sqlite"
         with contextlib.redirect_stdout(io.StringIO()):
             demo.run_demo(self.store, live=False, fresh=True)
-        self.httpd, self.base = _serve(frontend, self.store)
+        self.httpd, self.port = _serve(frontend, self.store)
 
     def tearDown(self):
         self.httpd.shutdown()
@@ -364,21 +370,13 @@ class TestChatEndpoints(unittest.TestCase):
         self.tmp.cleanup()
 
     def _post(self, path, payload):
-        request = urllib.request.Request(
-            self.base + path, data=json.dumps(payload).encode(),
-            headers={"Content-Type": "application/json"}, method="POST")
-        try:
-            with urllib.request.urlopen(request, timeout=10) as response:
-                return response.status, json.loads(response.read())
-        except urllib.error.HTTPError as exc:
-            return exc.code, json.loads(exc.read())
+        status, body = _request(self.port, "POST", path, body=json.dumps(payload).encode(),
+                                headers={"Content-Type": "application/json"})
+        return status, json.loads(body)
 
     def _get(self, path):
-        try:
-            with urllib.request.urlopen(self.base + path, timeout=10) as response:
-                return response.status, json.loads(response.read())
-        except urllib.error.HTTPError as exc:
-            return exc.code, json.loads(exc.read())
+        status, body = _request(self.port, "GET", path)
+        return status, json.loads(body)
 
     def test_chat_endpoint_returns_envelope_and_persists_history(self):
         gateway = _FakeGateway()

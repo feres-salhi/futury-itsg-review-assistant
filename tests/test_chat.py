@@ -151,6 +151,32 @@ class ChatTurnTests(unittest.TestCase):
         self.assertIsNone(r.action)
         self.assertFalse(r.needs_confirmation)
 
+    def test_primary_model_failure_falls_back_to_kolibri(self):
+        calls = []
+
+        def flaky(endpoint, model, system_prompt, messages, token=""):
+            calls.append(model)
+            if model == "vllm/GLM-Flash:Latest":
+                raise llm.LLMError("primary down")
+            return json.dumps({"utterance": "Antwort via Fallback", "confidence": "grounded",
+                               "citations": [{"kind": "state", "ref": "TC-1"}], "action": None})
+
+        r = chat.turn("…", {}, [], [], gateway=flaky)
+        self.assertFalse(r.degraded)
+        self.assertEqual(r.utterance, "Antwort via Fallback")
+        self.assertEqual(calls, ["vllm/GLM-Flash:Latest", "vllm/Kolibri-1"])
+        self.assertEqual(r.agent_run["model_id"], "vllm/Kolibri-1")
+        self.assertEqual(r.agent_run["result"]["model"], "vllm/Kolibri-1")
+        self.assertTrue(any("fallback" in e.lower() for e in r.agent_run["validation_errors"]))
+
+    def test_both_models_down_degrades(self):
+        def boom(endpoint, model, system_prompt, messages, token=""):
+            raise llm.LLMError("down")
+
+        r = chat.turn("…", {}, [], [], gateway=boom)
+        self.assertTrue(r.degraded)
+        self.assertIn("Wissensdienst", r.utterance)
+
     def test_gateway_failure_is_degraded_not_fatal(self):
         def boom(*a, **k):
             raise llm.LLMError("down")
@@ -178,7 +204,7 @@ class ChatTurnTests(unittest.TestCase):
         self.assertEqual(r.agent_run["input_ids"], ["TC-002"])
         self.assertEqual(
             sorted(r.agent_run["result"]),
-            ["confidence", "degraded", "utterance"])
+            ["confidence", "degraded", "model", "utterance"])
 
     def test_corpus_citations_land_in_envelope_with_locator(self):
         reply = json.dumps({

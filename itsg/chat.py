@@ -25,6 +25,7 @@ from .llm import (
     DEFAULT_ENDPOINT,
     LLMError,
     MODEL_ASSISTANT,
+    MODEL_ASSISTANT_FALLBACK,
     chat_completion,
     extract_json_payload,
     resolve_token,
@@ -85,7 +86,7 @@ CITATIONS: Jede sachliche Aussage braucht eine Quellenangabe (kind "state" für 
 ABSTENTION: Kannst Du eine sachliche Aussage nicht belegen, antworte genau: "{ABSTAIN_LINE}"
 GENERAL KNOWLEDGE: Ist eine Aussage nicht aus App-State oder Korpus belegt, aber allgemein gültig, sage zuerst genau: "{DISCLAIMER_FLAG_LINE}" — dann die Antwort, ausdrücklich als allgemeines Wissen gekennzeichnet (confidence "general").
 DECISION GATES: Gate-Entscheidungen (Freigaben, Review-Zustände) trifft nie die Assistentin. Sage dazu genau: "{GATE_HANDBACK_LINE}"
-ACTIONS: Schlage Aktionen AUSSCHLIESSLICH mit den im Nutzerkontext (Abschnitt "AKTIONEN") gelisteten ids an; erfinde keine anderen. Read-only Aktionen darfst Du frei vorschlagen. Mutierende und Gate-Aktionen werden NIEMALS still ausgeführt: stelle vorher die Ja/Nein-Frage ("Soll ich …?") und warte auf die Bestätigung des Menschen.
+ACTIONS: Schlage Aktionen AUSSCHLIESSLICH mit den im Nutzerkontext (Abschnitt "AKTIONEN") gelisteten ids an; erfinde keine anderen. Read-only Aktionen darfst Du frei vorschlagen. Mutierende und Gate-Aktionen werden NIEMALS still ausgeführt: stelle vorher die Ja/Nein-Frage ("Soll ich …?") und warte auf die Bestätigung des Menschen. STELLST DU EINE JA/NEIN-FRAGE, SO IST DIE ENTSPRECHENDE action IM SELBEN JSON-OBJEKT PFLICHT — eine Bestätigungsfrage ohne action-Feld ist ein Verstoß; der Mensch muss immer einen klickbaren Vorschlag erhalten.
 OUTPUT: ausschließlich EIN JSON-Objekt, kein weiterer Text:
 {{"utterance": "<Antworttext in der Sprache des Nutzers>", "citations": [{{"kind": "state"|"corpus", "ref": "<ID>", "locator": "<Fundstelle, nur corpus>"}}], "action": {{"id": "<action_id>", "params": {{...}}}} | null, "confidence": "grounded"|"general"|"unknown"}}
 {_DATA_LINE}
@@ -157,8 +158,17 @@ def turn(message: str, state_context: dict, corpus_hits: list[dict], history: li
 
     try:
         user_content = build_user_content(message, state_context, corpus_hits, history)
-        raw = gateway(DEFAULT_ENDPOINT, MODEL_ASSISTANT, SUSIE_SYSTEM_PROMPT,
-                      [{"role": "user", "content": user_content}], "")
+        messages = [{"role": "user", "content": user_content}]
+        model_used = MODEL_ASSISTANT
+        try:
+            raw = gateway(DEFAULT_ENDPOINT, MODEL_ASSISTANT, SUSIE_SYSTEM_PROMPT, messages, "")
+        except LLMError:
+            # Human directive 2026-10-27: primary model down → one fallback
+            # attempt with Kolibri-1 before degrading; the envelope records
+            # which model actually answered.
+            model_used = MODEL_ASSISTANT_FALLBACK
+            raw = gateway(DEFAULT_ENDPOINT, MODEL_ASSISTANT_FALLBACK,
+                          SUSIE_SYSTEM_PROMPT, messages, "")
         reply = _parse_reply(raw)
     except (LLMError, ValueError, KeyError, TypeError) as exc:
         return _degraded_turn(task_id, f"transport/parse failure recorded: {exc}")
@@ -201,7 +211,8 @@ def turn(message: str, state_context: dict, corpus_hits: list[dict], history: li
             action = None
             validation_errors.append(f"unregistered action stripped: {exc}")
 
-    run = _envelope(task_id, utterance, confidence, False, citations, validation_errors)
+    run = _envelope(task_id, utterance, confidence, False, citations,
+                    validation_errors, model_used=model_used)
     return ChatReply(utterance=utterance, citations=citations, action=action,
                      needs_confirmation=needs_confirmation, disclaimer=disclaimer,
                      confidence=confidence, degraded=False, agent_run=run.to_dict())
@@ -217,19 +228,23 @@ def _degraded_turn(task_id: str, reason: str) -> ChatReply:
 
 
 def _envelope(task_id: str, utterance: str, confidence: str, degraded: bool,
-              citations: list[dict], validation_errors: list[str]):
+              citations: list[dict], validation_errors: list[str],
+              model_used: str = MODEL_ASSISTANT):
     """Wrap the turn in an AgentRun audit envelope; status reflects degradation."""
     envelope_citations = [
         {"source_version_id": c.get("ref", ""), "locator": c.get("locator", "")}
         for c in citations if c.get("kind") == "corpus"
     ]
     run = new_run(
-        ROLE_SUSIE_ASSISTANT, task_id, PROVIDER, MODEL_ASSISTANT,
+        ROLE_SUSIE_ASSISTANT, task_id, PROVIDER, model_used,
         input_ids=[c.get("ref", "") for c in citations if c.get("ref")],
-        result={"utterance": utterance, "confidence": confidence, "degraded": degraded},
+        result={"utterance": utterance, "confidence": confidence,
+                "degraded": degraded, "model": model_used},
         citations=envelope_citations,
         author=AUTHOR,
     )
+    if model_used != MODEL_ASSISTANT:
+        run.validation_errors.append(f"primary model unavailable — fallback answered: {model_used}")
     run.validation_errors.extend(validation_errors)
     if degraded:
         run.status = "error"

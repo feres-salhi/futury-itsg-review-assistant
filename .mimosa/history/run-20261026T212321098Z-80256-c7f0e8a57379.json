@@ -1,0 +1,43 @@
+{
+  "schemaVersion": "mimosa-finding-history/v1",
+  "runId": "20261026T212321098Z-80256-c7f0e8a57379",
+  "runStatus": "inconclusive",
+  "errors": [
+    "scan:harness/generate_story_cases.py: scanner_failed: spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT",
+    "scan:tests/test_candidates.py: scanner_failed: spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT",
+    "scan:tests/test_secrets_llm.py: scanner_failed: spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT",
+    "scan:itsg/candidates.py: scanner_failed: spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT",
+    "scan:itsg/llm.py: scanner_failed: spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT"
+  ],
+  "target": ".",
+  "revision": "090703782aaa5e63b113e39178a30fd5c0f5b039",
+  "diffHash": "6621ea07f245f02e1ed89372b4aacf791fe7b6647dd5c360fb9e1b539df380c8",
+  "rulesVersion": "unavailable",
+  "recordedAt": "2026-10-26T21:23:21.098Z",
+  "timing": {
+    "startedAt": "2026-10-26T21:23:18.122Z",
+    "completedAt": "2026-10-26T21:23:21.098Z",
+    "durationMs": 2976
+  },
+  "tokens": {
+    "input": 0,
+    "output": 0,
+    "total": 0,
+    "modelCalls": 0,
+    "measurement": "known-zero"
+  },
+  "findings": {
+    "total": 0,
+    "bySeverity": {},
+    "byStatus": {}
+  },
+  "coverage": {
+    "status": "partial",
+    "reasonCounts": {
+      "scanner_failed": 5,
+      "project_check_failed": 5
+    }
+  },
+  "evidenceBoundary": "static_only",
+  "immutableReport": ".mimosa/reports/task-review-session_8772c0add3c2af6d182f2ba86fcb980d-20261026T212321098Z-80256-c7f0e8a57379.json"
+}

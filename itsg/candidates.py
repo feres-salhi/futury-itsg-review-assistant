@@ -54,12 +54,14 @@ ROLE_REQUIREMENT_EXTRACTOR = "requirement_extractor"
 ROLE_TEST_CASE_DESIGNER = "test_case_designer"
 ROLE_TEST_CHALLENGER = "independent_test_challenger"
 ROLE_SUSIE_ASSISTANT = "susie_assistant"
+ROLE_REPORT_EXPLAINER = "report_explainer"
 
 ROLES = (
     ROLE_REQUIREMENT_EXTRACTOR,
     ROLE_TEST_CASE_DESIGNER,
     ROLE_TEST_CHALLENGER,
     ROLE_SUSIE_ASSISTANT,
+    ROLE_REPORT_EXPLAINER,
 )
 
 ROLE_GATES = {
@@ -67,6 +69,7 @@ ROLE_GATES = {
     ROLE_TEST_CASE_DESIGNER: "G3",
     ROLE_TEST_CHALLENGER: None,  # recommendation only — no gate decision exists
     ROLE_SUSIE_ASSISTANT: None,  # recommendation only — the human owns every gate
+    ROLE_REPORT_EXPLAINER: None,  # recommendation only — drafts a marked summary, owns nothing
 }
 
 CANDIDATE = "candidate"

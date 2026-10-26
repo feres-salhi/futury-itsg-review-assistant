@@ -1,0 +1,25 @@
+"""Two-level chunker (task T10-005): canonical heading segments + paragraph retrieval chunks.
+
+Contracts (ingestion-pipeline.md §6):
+
+  - one canonical Segment per heading H1–H6; canonical segments are never
+    split or overlapped;
+  - retrieval chunks are paragraph-based windows within a section, each
+    carrying the full heading path and page range (German legal sentences
+    are not cut mid-paragraph);
+  - tables stay inside their section chunk for v1 (§9 #3 provisional
+    default; structured table extraction is a later, specialized step);
+  - segment text must be a verbatim substring of the stored original
+    (verification hook §8.1 — mechanically enforced by pipeline.index.verify);
+  - Segment IDs are stable per source version (pipeline.ids scheme).
+"""
+from __future__ import annotations
+
+from pathlib import Path
+
+from .models import Segment
+
+
+def segment_document(path: Path, source_version_id: str, source_type: str) -> list[Segment]:
+    """Dispatch on source_type and return the two-level chunk set. STUB — implemented by T10-005."""
+    raise NotImplementedError("T10-005: two-level chunking")
