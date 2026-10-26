@@ -3,6 +3,7 @@ import json
 import re
 import requests
 from Graph_Schema import GraphExtraction
+from Normalizer import normalize_entity_id
 
 ENDPOINT_URL = "https://hip-gw.hessian.ai/v1/chat/completions"
 HAI_API_KEY = os.environ.get("sk-bf-236ea46f-c62f-4340-bec6-e69f6ceba3df")
@@ -23,7 +24,14 @@ def extract_graph_from_chunk_requests(chunk_text: str, source_doc: str, chunk_id
     
     prompt_with_schema = (
         f"{"""
-
+    "report": {
+    "id": "RPT-001",
+    "created_at": "27.10.2026 10:15",
+    "scope": "DTA EEL - Abgabegrund 41 (DBVO, Vorerkrankungsanfrage) + message flow",
+    "template": "SYNTHETIC - no official ITSG report form found; no compliance claim",
+    "overall_status": "NOT EVALUATED",
+    "counts": {"PASS": 6, "MISMATCH": 0, "NOT EVALUATED": 10}
+    }
         """}\n\n"
         f"You MUST respond ONLY with a valid JSON object matching this exact JSON Schema:\n"
         f"{schema_str}"
