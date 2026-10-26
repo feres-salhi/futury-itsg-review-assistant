@@ -72,7 +72,9 @@ If you give no question it uses the Abgabegrund 41 example.
     "prompt_contract_version": "retrieval-qa-v1",
     "input_ids": ["chunk ids that were sent to the model"],
     "status": "ANSWERED",
-    "validation_error_count": 0
+    "validation_error_count": 0,
+    "attempts": 1,
+    "response_format_json_object": true
   }
 }
 ```
@@ -97,7 +99,9 @@ If you give no question it uses the Abgabegrund 41 example.
 Important rules that the code enforces:
 
 - The code can only lower a status (`ANSWERED` to `NEEDS_REVIEW`). It never raises one.
-- If the model call fails, or its reply is not valid JSON in the right shape, you get `NEEDS_REVIEW` with a fixed message and an empty `citations` list. This does happen: in a live test the same question was sometimes returned malformed. A second try often works, but the UI should not retry silently and hide the first result.
+- If the model call fails, or its reply is not valid JSON in the right shape, you get `NEEDS_REVIEW` with a fixed message and an empty `citations` list. This happened in 2 of 3 early live runs, which is why the retries above exist.
+- **Retries:** if the model reply is not valid JSON in the required shape, the same request is sent again, up to 3 attempts in total. A reply that parses but has a wrong or missing quote, section or page is **never** retried: it stays `NEEDS_REVIEW` on the first result. Only the final result is returned, and `audit.attempts` says how many calls were made (so the UI can show it). If all 3 attempts are malformed you get `NEEDS_REVIEW` with a fixed message. A failed network call (timeout, auth) is not retried.
+- **JSON mode:** the request asks the API for `response_format={"type": "json_object"}`. If the API answers 400/404/422 to that, the request is repeated without it, and `audit.response_format_json_object` is `false`. Replies wrapped in ```` ```json ```` fences are accepted: the fences are removed before parsing.
 - `ask()` does not raise for model problems. It only raises `MissingApiKeyError` when there is no key.
 
 ## 6. match_level: exact vs table

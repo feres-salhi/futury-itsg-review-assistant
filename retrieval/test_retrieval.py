@@ -359,3 +359,68 @@ def test_table_level_needs_at_least_six_words():
     text = "Zwingende Angabe | der Datensatz-ID | aus der"
     assert ask_mod.match_quote("Zwingende Angabe der Datensatz-ID aus der", text) == "table"  # 7 words
     assert ask_mod.match_quote("Zwingende Angabe der Datensatz aus", "Zwingende Angabe | der Datensatz xx aus") is None  # 5 words
+
+
+# ---- retries and response_format -------------------------------------------
+
+class SeqClient(FakeClient):
+    """Returns the given contents one per call (the last one repeats)."""
+
+    def __init__(self, contents, reject_format=False):
+        super().__init__()
+        self.contents, self.reject_format = list(contents), reject_format
+
+    def _create(self, **kwargs):
+        self.calls.append(kwargs)
+        if self.reject_format and "response_format" in kwargs:
+            err = RuntimeError("response_format not supported")
+            err.status_code = 400
+            raise err
+        content = self.contents[min(len(self.calls) - 1, len(self.contents) - 1)]
+        message = SimpleNamespace(content=content)
+        return SimpleNamespace(choices=[SimpleNamespace(message=message)], model="fake-model-rev1")
+
+
+def test_malformed_then_valid_is_answered_after_two_attempts(index):
+    client = SeqClient(["not json", reply()])
+    result = ask("q", chunks=index.search("Abgabegrund 41"), client=client)
+    assert result.status == "ANSWERED" and result.audit["attempts"] == 2 and len(client.calls) == 2
+
+
+def test_three_malformed_replies_give_needs_review_without_crash(index):
+    client = SeqClient(["not json", '{"status": "NOT_FOUND"}', ""])
+    result = ask("q", chunks=index.search("Abgabegrund 41"), client=client)
+    assert result.status == "NEEDS_REVIEW" and result.audit["attempts"] == 3 and len(client.calls) == 3
+    assert "malformed" in result.validation_errors[0] and result.citations == []
+
+
+def test_fake_quote_is_not_retried(index):
+    fake = "Der Abgabegrund 41 darf nach Belieben des Arbeitgebers entfallen."
+    client = SeqClient([reply(quote=fake), reply()])  # a second call would "fix" it: it must not happen
+    result = ask("q", chunks=index.search("Abgabegrund 41"), client=client)
+    assert result.status == "NEEDS_REVIEW" and result.audit["attempts"] == 1 and len(client.calls) == 1
+
+
+def test_fenced_json_is_parsed_on_first_attempt(index):
+    client = SeqClient([f"```json\n{reply()}\n```"])
+    result = ask("q", chunks=index.search("Abgabegrund 41"), client=client)
+    assert result.status == "ANSWERED" and result.audit["attempts"] == 1
+
+
+def test_json_object_mode_is_requested_and_recorded(index):
+    client = SeqClient([reply()])
+    result = ask("q", chunks=index.search("Abgabegrund 41"), client=client)
+    assert client.calls[0]["response_format"] == {"type": "json_object"}
+    assert result.audit["response_format_json_object"] is True
+
+
+def test_falls_back_without_response_format_when_api_rejects_it(index):
+    client = SeqClient([reply()], reject_format=True)
+    result = ask("q", chunks=index.search("Abgabegrund 41"), client=client)
+    assert result.status == "ANSWERED" and result.audit["attempts"] == 1
+    assert "response_format" in client.calls[0] and "response_format" not in client.calls[1]
+    assert result.audit["response_format_json_object"] is False
+
+
+def test_prompt_demands_one_json_object_without_fences():
+    assert "exactly ONE JSON object" in ask_mod.SYSTEM_PROMPT and "no Markdown fences" in ask_mod.SYSTEM_PROMPT
