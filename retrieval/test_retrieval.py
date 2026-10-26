@@ -424,3 +424,29 @@ def test_falls_back_without_response_format_when_api_rejects_it(index):
 
 def test_prompt_demands_one_json_object_without_fences():
     assert "exactly ONE JSON object" in ask_mod.SYSTEM_PROMPT and "no Markdown fences" in ask_mod.SYSTEM_PROMPT
+
+
+# ---- section normalisation -------------------------------------------------
+
+@pytest.mark.parametrize("model_section, chunk_section, ok", [
+    ("2.5 Stornierung von Mitteilungen", "2.5", True),
+    ("2.5", "2.5", True),
+    ("23 Abgabegrund 88 – Stornierung eines Datensatzes", "23", True),
+    ("3.1 Stornierung", "2.5", False),
+    ("Stornierung", "2.5", False),
+    ("2.50", "2.5", False),
+    ("2.50 Titel", "2.5", False),
+    ("2.5x", "2.5", False),
+    ("", "2.5", False),
+])
+def test_section_matching(model_section, chunk_section, ok):
+    assert ask_mod.section_matches(model_section, chunk_section) is ok
+
+
+def test_section_with_title_is_accepted_end_to_end(index):
+    chunks = index.search("Stornierung Abgabegrund 88")
+    quote = "Eine Stornierung erfolgt mit dem Abgabegrund 88."
+    good = ask("q", chunks=chunks, client=FakeClient(reply(quote=quote, chunk_id="GG_EEL/2.5", section="2.5 Stornierung von Mitteilungen", page=12)))
+    assert good.status == "ANSWERED" and good.validation_errors == []
+    bad = ask("q", chunks=chunks, client=FakeClient(reply(quote=quote, chunk_id="GG_EEL/2.5", section="3.1 Stornierung", page=12)))
+    assert bad.status == "NEEDS_REVIEW" and any("does not match chunk section" in e for e in bad.validation_errors)
