@@ -34,7 +34,7 @@ def evaluate(case):
         res = run_checks(case)
     except Exception as e:
         return "CRASH", [type(e).__name__]
-    failed = [r["id"] for r in res if r["status"] == "FAIL"]
+    failed = [r["check_id"] for r in res if r["status"] != "PASS"]
     return ("CAUGHT" if failed else "MISSED"), failed
 
 if __name__ == "__main__":
@@ -53,4 +53,5 @@ if __name__ == "__main__":
     print(f"\nDetection: {caught}/{total} stopped (caught or blocked)")
     with open("data/attack_results.json", "w", encoding="utf-8") as f:
         json.dump(out, f, indent=2, ensure_ascii=False)
+
 
