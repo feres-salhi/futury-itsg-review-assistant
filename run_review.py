@@ -138,8 +138,9 @@ def flow_findings(case, checker_dir):
     except ImportError:
         return [finding(f"C{i}", "message flow check", "checker/checks.py", None, None, "NOT EVALUATED",
                         f"checker not found in {checker_dir}") for i in range(1, 9)]
+    status_map = {"PASS": "PASS", "MISMATCH": "MISMATCH", "NOT_EVALUATED": "NOT EVALUATED", "NOT EVALUATED": "NOT EVALUATED"}
     return [finding(r["id"], r["rule"], r["source"], r["expected"], r["actual"],
-                    "PASS" if r["status"] == "PASS" else "MISMATCH") for r in run_checks(case)]
+                    status_map.get(r["status"], "MISMATCH"), r.get("reason")) for r in run_checks(case)]
 
 
 def robustness(case):
