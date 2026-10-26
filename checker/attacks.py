@@ -1,5 +1,6 @@
 ﻿import json, copy, sys
 from checks import run_checks
+from guard import validate
 
 def load(path):
     with open(path, encoding="utf-8-sig") as f:
@@ -27,6 +28,9 @@ def mutations():
 
 def evaluate(case):
     try:
+        problems = validate(case)
+        if problems:
+            return "BLOCKED", problems[:2]
         res = run_checks(case)
     except Exception as e:
         return "CRASH", [type(e).__name__]
@@ -42,10 +46,11 @@ if __name__ == "__main__":
         case = copy.deepcopy(base)
         fn(case)
         status, failed = evaluate(case)
-        caught += status == "CAUGHT"
+        caught += status in ("CAUGHT", "BLOCKED")
         print(f"[{status:6}] {kind:4} {name}  {failed if failed else ''}")
         out.append({"kind": kind, "attack": name, "result": status, "failed_checks": failed})
     total = len(out)
-    print(f"\nDetection: {caught}/{total} caught")
+    print(f"\nDetection: {caught}/{total} stopped (caught or blocked)")
     with open("data/attack_results.json", "w", encoding="utf-8") as f:
         json.dump(out, f, indent=2, ensure_ascii=False)
+
