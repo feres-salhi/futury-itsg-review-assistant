@@ -63,6 +63,21 @@ class SystemPromptTests(unittest.TestCase):
 
 
 class BuildUserContentTests(unittest.TestCase):
+    def test_every_registered_action_id_appears_in_user_content(self):
+        # The whitelist must reach the model's context, or it can never
+        # propose a valid action id (yes/no takeover would be inert).
+        from itsg import actions
+
+        content = chat.build_user_content("Frage?", {}, [], [])
+        for action_id in (*actions.READ_ONLY_ACTIONS, *actions.MUTATING_ACTIONS,
+                          *actions.DECISION_GATE_ACTIONS):
+            self.assertIn(action_id, content, f"registry id missing from context: {action_id}")
+        # decision gates carry their required params shape
+        self.assertIn('"gate"', content)
+        self.assertIn('"decision"', content)
+        self.assertIn('"rationale"', content)
+        self.assertIn('"target_id"', content)
+
     def test_renders_state_hits_and_history(self):
         content = chat.build_user_content(
             "Warum weicht TC-002 ab?",
