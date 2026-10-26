@@ -115,6 +115,27 @@ class ChatTurnTests(unittest.TestCase):
         self.assertFalse(r.needs_confirmation)
         self.assertTrue(r.agent_run["validation_errors"])
 
+    def test_forced_abstain_neutralizes_proposed_action(self):
+        # A retracted justification must yield nothing actionable: no proposal,
+        # no confirmation token, and a recorded validation error.
+        reply = json.dumps({"utterance": "Sicher gilt …", "confidence": "grounded",
+            "citations": [],
+            "action": {"id": "save_note", "params": {"text": "Notiz", "case_id": "TC-002"}}})
+        r = chat.turn("…", {}, [], [], gateway=_gw(reply))
+        self.assertIn("Das kann ich nicht belegen", r.utterance)
+        self.assertIsNone(r.action)
+        self.assertFalse(r.needs_confirmation)
+        self.assertTrue(r.agent_run["validation_errors"])
+
+    def test_non_dict_action_is_treated_as_no_action(self):
+        # Malformed model output must never crash the turn (never-raise contract).
+        reply = json.dumps({"utterance": "Erledigt.", "confidence": "grounded",
+            "citations": [{"kind": "state", "ref": "TC-002"}], "action": "wipe"})
+        r = chat.turn("…", {}, [], [], gateway=_gw(reply))
+        self.assertFalse(r.degraded)
+        self.assertIsNone(r.action)
+        self.assertFalse(r.needs_confirmation)
+
     def test_gateway_failure_is_degraded_not_fatal(self):
         def boom(*a, **k):
             raise llm.LLMError("down")
