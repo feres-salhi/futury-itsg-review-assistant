@@ -53,7 +53,7 @@ CITATIONS: Jede sachliche Aussage braucht eine Quellenangabe (kind "state" für 
 ABSTENTION: Kannst Du eine sachliche Aussage nicht belegen, antworte genau: "{ABSTAIN_LINE}"
 GENERAL KNOWLEDGE: Ist eine Aussage nicht aus App-State oder Korpus belegt, aber allgemein gültig, sage zuerst genau: "{DISCLAIMER_FLAG_LINE}" — dann die Antwort, ausdrücklich als allgemeines Wissen gekennzeichnet (confidence "general").
 DECISION GATES: Gate-Entscheidungen (Freigaben, Review-Zustände) trifft nie die Assistentin. Sage dazu genau: "{GATE_HANDBACK_LINE}"
-ACTIONS: Du darfst ausschließlich Aktionen aus der Werkbank-Whitelist mit {"id", "params"} vorschlagen; ausführen darf sie nur der Mensch.
+ACTIONS: Du darfst ausschließlich Aktionen aus der Werkbank-Whitelist mit {{"id": "<action_id>", "params": {{...}}}} vorschlagen; ausführen darf sie nur der Mensch.
 OUTPUT: ausschließlich EIN JSON-Objekt, kein weiterer Text:
 {{"utterance": "<Antworttext in der Sprache des Nutzers>", "citations": [{{"kind": "state"|"corpus", "ref": "<ID>", "locator": "<Fundstelle, nur corpus>"}}], "action": {{"id": "<action_id>", "params": {{...}}}} | null, "confidence": "grounded"|"general"|"unknown"}}
 {_DATA_LINE}
@@ -137,16 +137,25 @@ def turn(message: str, state_context: dict, corpus_hits: list[dict], history: li
     disclaimer = False
 
     # -- enforce cite-or-abstain (the model never has the final word) ---------
+    action = reply.get("action") if isinstance(reply.get("action"), dict) else None
+    if reply.get("action") and action is None:
+        validation_errors.append(
+            f"malformed action (not an object) ignored: {reply.get('action')!r}")
     if confidence == "grounded" and not citations:
         utterance = ABSTAIN_LINE
         confidence = "unknown"
         validation_errors.append(
             "grounded claim without citation forced to abstain (cite or abstain)")
+        # A retracted justification must yield nothing actionable: no proposal,
+        # no confirmation token (the envelope records the retraction).
+        if action is not None:
+            validation_errors.append(
+                f"action stripped alongside forced abstention: {action.get('id')!r}")
+            action = None
     if confidence == "general":
         disclaimer = True  # forced, whatever the model said
 
     # -- enforce the action whitelist ------------------------------------------
-    action = reply.get("action")
     if action:
         try:
             proposed = actions.propose(str(action.get("id")), action.get("params") or {},
@@ -159,16 +168,18 @@ def turn(message: str, state_context: dict, corpus_hits: list[dict], history: li
             validation_errors.append(f"unregistered action stripped: {exc}")
 
     run = _envelope(task_id, utterance, confidence, False, citations, validation_errors)
-    return ChatReply(utterance, citations, action, needs_confirmation, disclaimer,
-                     confidence, False, run.to_dict())
+    return ChatReply(utterance=utterance, citations=citations, action=action,
+                     needs_confirmation=needs_confirmation, disclaimer=disclaimer,
+                     confidence=confidence, degraded=False, agent_run=run.to_dict())
 
 
 def _degraded_turn(task_id: str, reason: str) -> ChatReply:
     """Rehearsed degraded reply — a gateway failure is recorded, never fatal."""
     run = _envelope(task_id, DEGRADED_UTTERANCE, "unknown", True, [],
                     [reason])
-    return ChatReply(DEGRADED_UTTERANCE, [], None, False, False, "unknown", True,
-                     run.to_dict())
+    return ChatReply(utterance=DEGRADED_UTTERANCE, citations=[], action=None,
+                     needs_confirmation=False, disclaimer=False, confidence="unknown",
+                     degraded=True, agent_run=run.to_dict())
 
 
 def _envelope(task_id: str, utterance: str, confidence: str, degraded: bool,
