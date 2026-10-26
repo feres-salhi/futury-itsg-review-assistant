@@ -91,7 +91,7 @@ OUTPUT: Reply with exactly ONE JSON object and nothing else: no Markdown fences,
 
 CITATIONS: Every claim needs a citation. "quote" must be copied WORD FOR WORD from the cited chunk
 (at least one full sentence or clause, not paraphrased). "chunk_id" and "section" must be those of the chunk,
-"page" a page inside the chunk's page range.
+"section" must be only the section number, e.g. 2.5 (no title). "page" a page inside the chunk's page range.
 
 ABSTENTION: If the chunks do not contain the answer, return status NOT_FOUND with an empty citations list.
 If the chunks are unclear, conflicting or only partly relevant, return NEEDS_REVIEW. Never invent a quote.
@@ -197,6 +197,22 @@ def match_quote(quote: str, chunk_text: str) -> Optional[MatchLevel]:
     return None
 
 
+_LEADING_SECTION = re.compile(r"\d+(?:\.\d+)*(?=\s|$)")
+
+
+def section_matches(model_section: str, chunk_section: str) -> bool:
+    """Exact match, or the model's value starts with the chunk's section number ("2.5 Titel" for "2.5").
+
+    Only the leading number is compared, and it must be a whole number: "2.50" and "3.1" do not
+    match "2.5", and a value without a leading number never matches.
+    """
+    value = model_section.strip()
+    if value == chunk_section:
+        return True
+    lead = _LEADING_SECTION.match(value)
+    return bool(lead) and lead.group(0) == chunk_section
+
+
 def verify_citations(answer: ModelAnswer, chunks: List[Chunk]):
     """Deterministic checks of the model's citations.
 
@@ -218,7 +234,7 @@ def verify_citations(answer: ModelAnswer, chunks: List[Chunk]):
                 problems.append(f"citation {i}: quote shorter than {MIN_QUOTE_CHARS} characters")
             elif level is None:
                 problems.append(f"citation {i}: quote not found word-for-word in {cit.chunk_id}")
-            if cit.section != chunk.section:
+            if not section_matches(cit.section, chunk.section):
                 problems.append(f"citation {i}: section {cit.section!r} does not match chunk section {chunk.section!r}")
             if not chunk.page_start <= cit.page <= chunk.page_end:
                 problems.append(f"citation {i}: page {cit.page} outside chunk pages {chunk.pages}")

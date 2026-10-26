@@ -113,7 +113,7 @@ Every quote the model gives is checked against the chunk it cites.
   **The UI should show a small note: "matched across a table, please spot-check".**
 - `null`: not found. The status will be `NEEDS_REVIEW`.
 
-A quote must be at least 15 characters. The checks also need the `chunk_id` to be one of the chunks sent to the model, the `section` to equal the chunk's section, and the `page` to be inside the chunk's page range.
+A quote must be at least 15 characters. The checks also need the `chunk_id` to be one of the chunks sent to the model, the `section` to be the chunk's section number (a value like `2.5 Some title` is accepted for chunk `2.5`; `3.1`, `2.50` or text without a number is rejected), and the `page` to be inside the chunk's page range.
 
 ## 7. Known limits
 
