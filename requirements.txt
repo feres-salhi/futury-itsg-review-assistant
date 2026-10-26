@@ -4,3 +4,5 @@ requests
 python-frontmatter
 pydantic>=2
 neo4j
+python-dotenv
+langfuse>=3,<4
