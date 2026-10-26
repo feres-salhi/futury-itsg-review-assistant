@@ -74,9 +74,48 @@ Vorerkrankungen Hinweis. {INJECTION}
 """
 
 
+# Excerpt of the real chunks/Beispiel/23.md: cells split by " | " and wrapped across lines.
+TABLE_TEXT = """DBSD – Datenbaustein Stornierungsdaten
+```text
+Feld | Inhalt | Bemerkungen
+DATENSATZ-ID-URSPRUNGSMELDUNG | 01234567-8901- | Zwingende Angabe der Datensatz-ID aus der
+2345-6789- | ursprünglich vom Arbeitgeber abgesetzten und
+012345678901 | nunmehr zu stornierenden Meldung
+VORNAME | MAX
+FAMILIENNAME | MUSTERMANN
+AKTENZEICHENVERURSACHER | KG-20XX | In diesem Feld ist regelmäßig das in der zu
+```
+stornierenden Meldung angegebene
+Aktenzeichen Verursacher anzugeben.
+"""
+TABLE_QUOTE = (
+    "Zwingende Angabe der Datensatz-ID aus der ursprünglich vom Arbeitgeber "
+    "abgesetzten und nunmehr zu stornierenden Meldung"
+)
+
+CHUNK_TABLE = f"""---
+doc: Beispiel
+doc_title: Test
+version: '1'
+section: '23'
+title: Stornierungsdaten
+level: 2
+parent: null
+page_start: 30
+page_end: 30
+abgabegrund:
+- '88'
+datenbaustein:
+- DBSD
+---
+
+{TABLE_TEXT}"""
+
+
 @pytest.fixture
 def chunks_dir(tmp_path):
-    for name, body in {"GG_EEL/2.1.2": CHUNK_41, "GG_EEL/2.5": CHUNK_88, "GG_EEL/9.9": CHUNK_EVIL}.items():
+    files = {"GG_EEL/2.1.2": CHUNK_41, "GG_EEL/2.5": CHUNK_88, "GG_EEL/9.9": CHUNK_EVIL, "Beispiel/23": CHUNK_TABLE}
+    for name, body in files.items():
         path = tmp_path / f"{name}.md"
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(body, encoding="utf-8")
@@ -226,6 +265,7 @@ def test_missing_api_key_gives_clear_error(monkeypatch, tmp_path):
     monkeypatch.delenv("HESSIAN_API_KEY", raising=False)
     with pytest.raises(MissingApiKeyError, match="HESSIAN_API_KEY is not set"):
         make_client(env_path=tmp_path / "no.env")
+    monkeypatch.setattr(ask_mod, "load_env_file", lambda *a, **k: None)  # ignore the real .env
     with pytest.raises(MissingApiKeyError):
         ask("q", chunks=[])  # no client given -> tries to build one
 
@@ -246,3 +286,55 @@ def test_key_is_read_from_env_file_and_never_logged(monkeypatch, tmp_path, caplo
     logged = json.loads(caplog.records[-1].getMessage())
     assert set(logged) >= {"provider", "model_id", "prompt_contract_version", "input_ids", "status"}
     assert "question" not in logged and "answer" not in logged
+
+
+# ---- quote matching levels -------------------------------------------------
+
+def table_chunk(index):
+    return next(c for c in index.search("Stornierungsdaten DBSD Abgabegrund 88") if c.chunk_id == "Beispiel/23")
+
+
+def table_reply(quote):
+    return reply(quote=quote, chunk_id="Beispiel/23", section="23", page=30)
+
+
+def test_exact_quote_is_reported_as_exact(index):
+    result = ask("q", chunks=index.search("Abgabegrund 41"), client=FakeClient(reply()))
+    assert result.status == "ANSWERED"
+    assert [c.match_level for c in result.citations] == ["exact"]
+
+
+def test_real_table_quote_passes_as_table(index):
+    chunk = table_chunk(index)
+    assert TABLE_QUOTE not in ask_mod._normalize(chunk.text)  # really not an exact match
+    result = ask("q", chunks=[chunk], client=FakeClient(table_reply(TABLE_QUOTE)))
+    assert result.status == "ANSWERED" and result.validation_errors == []
+    assert [c.match_level for c in result.citations] == ["table"]
+
+
+def test_table_quote_second_real_fragment_passes(index):
+    quote = "In diesem Feld ist regelmäßig das in der zu stornierenden Meldung angegebene Aktenzeichen Verursacher anzugeben."
+    result = ask("q", chunks=[table_chunk(index)], client=FakeClient(table_reply(quote)))
+    assert result.status == "ANSWERED"
+
+
+def test_reordered_words_from_chunk_are_rejected(index):
+    words = TABLE_QUOTE.split()
+    fake = " ".join(reversed(words))  # every word exists in the chunk, wrong order
+    result = ask("q", chunks=[table_chunk(index)], client=FakeClient(table_reply(fake)))
+    assert result.status == "NEEDS_REVIEW"
+    assert [c.match_level for c in result.citations] == [None]
+
+
+def test_words_too_far_apart_are_rejected(index):
+    # in order, all in the chunk, but 5+ other words between neighbours
+    fake = "Feld Zwingende MAX Aktenzeichen Verursacher Bemerkungen anzugeben"
+    result = ask("q", chunks=[table_chunk(index)], client=FakeClient(table_reply(fake)))
+    assert result.status == "NEEDS_REVIEW"
+    assert any("not found word-for-word" in e for e in result.validation_errors)
+
+
+def test_table_level_needs_at_least_six_words():
+    text = "Zwingende Angabe | der Datensatz-ID | aus der"
+    assert ask_mod.match_quote("Zwingende Angabe der Datensatz-ID aus der", text) == "table"  # 7 words
+    assert ask_mod.match_quote("Zwingende Angabe der Datensatz aus", "Zwingende Angabe | der Datensatz xx aus") is None  # 5 words
