@@ -1,0 +1,5 @@
+# Team 10 Event Log (append-only)
+
+- 2026-10-26 | INIT | Initialized shared agent instructions, delivery cadence, and Leapfrog Layer 1 checkpoint spine. Existing source documents: architecture.md, plan.md, agent-governance.md, itsg-workflow.svg. Prior published commit: 45472d8. Verification anchor: repository was clean and aligned with origin/main before this setup. Agile-delivery skill lookup returned no installed/memory file; DELIVERY.md records the repo-local protocol transparently.
+- 2026-10-26 | Team10-LetzGo! DELIVERY | Added root `AGENTS.md` and `CLAUDE.md`, project `DELIVERY.md`, human-facing chat marker rule, 45-minute asynchronous progress cadence, two-hour paired checkpoints, task ownership/one-writer rule, and handoff criteria. Updated `agent-governance.md` and `plan.md`. `git diff --check` passed; application tests not run. Task T10-002 is `IN_REVIEW`; independent reviewer acknowledgment is pending. The marker indicates instruction compliance only, not truth.
+

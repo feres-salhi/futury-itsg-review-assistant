@@ -52,6 +52,8 @@ Record the provider/model and reported revision for reproducibility; if the prov
 
 ### Common response rules
 
+- Begin every human-facing chat message to a Team 10 member with the exact prefix `Team10-LetzGo! ` before any other text. This is an instruction-following marker only; it does not verify factual accuracy, source validity, or absence of hallucination. Cite sources and use the review gates below for those checks.
+- Do not prepend this marker to machine-readable system-agent payloads such as JSON, CSV, or official report artifacts. Add it only in the chat/presentation layer so schemas, signatures, and mandated forms remain valid.
 - Return only the requested schema; reject unexpected fields or free-form payloads at the boundary.
 - Quote or reference the exact input segment supporting each extracted requirement. A citation must resolve to the stored source version and locator.
 - Distinguish source text, model inference, human decision, deterministic result, and vendor assertion.

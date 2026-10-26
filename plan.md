@@ -39,6 +39,10 @@ The AI tools are assistants, not additional decision-makers or votes. Use the sa
 
 The complete reusable contract is [agent-governance.md](agent-governance.md). Read it before assigning work to a coding agent or enabling a system-agent role.
 
+## Async progress and checkpoints
+
+Since team members may not coordinate directly, treat `.leapfrog/board.md` and `.leapfrog/log.md` as the canonical shared status. Follow [AGENTS.md](AGENTS.md) and [DELIVERY.md](DELIVERY.md): claim tasks and file ownership before editing; update status at transitions and at least every 45 minutes; hand off with changed files, next step, blocker, and verification evidence; and write paired Leapfrog checkpoints every two hours, after material decisions, before handoff/context reset, and at session end. Chat updates supplement these durable records. The exact `Team10-LetzGo!` prefix is an instruction-following marker only; it is not a factuality check.
+
 ## Schedule and decision gates
 
 These are elapsed-time blocks, not a requirement for everyone to work continuously. Take breaks and use short handoffs; a tired final integration is a bigger risk than one fewer stretch feature.
