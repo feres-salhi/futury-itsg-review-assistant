@@ -64,7 +64,7 @@ A status the page does not know is shown gray, never green.
 
 ## Known limits
 
-- **No login.** Anyone with the URL can run reviews, spend API calls (rate-limited) and record decisions under any typed name.
+- **No login (accepted for the 1-day demo; say so in the pitch).** Anyone with the URL can run reviews, spend API calls (rate-limited) and record decisions under any typed name.
   The reviewer name is not verified, so the decision log is a demo of the human gate, not an audit-grade record.
 - The report file never changes after a decision; the decision lives in `reports/review-events.jsonl`.
 - The live Sources tab shows only what the report cites. Source records, requirement text and criterion approvals are not part
