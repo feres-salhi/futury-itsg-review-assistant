@@ -54,8 +54,28 @@ class Chunk:
         return f"{self.page_start}-{self.page_end}"
 
 
+_SUFFIXES = (("ungen", "ung"), ("en", ""), ("er", ""), ("es", ""), ("e", ""), ("n", ""), ("s", ""))  # longest first
+_MIN_STEM = 5  # never cut a word down below this many letters
+_FOLD = str.maketrans({"ä": "a", "ö": "o", "ü": "u", "ß": "s"})
+
+
+def _stem(token: str) -> str:
+    """Tiny deterministic German normaliser: Vorerkrankungen -> vorerkrankung, Abgabegründe -> abgabegrund.
+
+    Strips one plural/case ending and folds umlauts. Words with digits are left alone, so
+    codes such as "88" or "dbsd" are never changed. Applied to chunks and questions alike.
+    """
+    if not token.isalpha():
+        return token
+    for suffix, replacement in _SUFFIXES:
+        if token.endswith(suffix) and len(token) - len(suffix) + len(replacement) >= _MIN_STEM:
+            token = token[: -len(suffix)] + replacement
+            break
+    return token.translate(_FOLD)
+
+
 def _tokens(text: str) -> list:
-    return [t for t in _WORD.findall(text.lower()) if t not in _STOPWORDS and len(t) > 1]
+    return [_stem(t) for t in _WORD.findall(text.lower()) if t not in _STOPWORDS and len(t) > 1]
 
 
 def _load_chunk(path: Path, root: Path):

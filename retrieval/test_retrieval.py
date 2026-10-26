@@ -162,6 +162,27 @@ def test_search_ignores_readme_and_returns_at_most_five(index):
     assert len(ids) <= 5 and all("README" not in i for i in ids)
 
 
+def test_plural_question_finds_singular_chunk(index):
+    # CHUNK_88 only says "Stornierung" (singular); CHUNK_41 only "Vorerkrankungen" in text, "Vorerkrankungszeiten" elsewhere
+    assert index.search("Stornierungen")[0].chunk_id == "GG_EEL/2.5"
+    assert "GG_EEL/2.1.2" in [c.chunk_id for c in index.search("Vorerkrankung")]  # singular finds plural text
+
+
+def test_singular_question_finds_plural_chunk(index):
+    assert index.search("Meldung")[0].chunk_id == "Beispiel/23"  # text has "Meldung" and "Meldungen" forms via title/body
+    assert "GG_EEL/2.5" in [c.chunk_id for c in index.search("Mitteilung")]  # title "Mitteilungen"
+
+
+def test_stem_is_conservative():
+    from search import _stem
+    assert _stem("vorerkrankungen") == _stem("vorerkrankung") == "vorerkrankung"
+    assert _stem("stornierungen") == _stem("stornierung")
+    assert _stem("meldungen") == _stem("meldung")
+    assert _stem("abgabegründe") == _stem("abgabegrund")
+    assert _stem("88") == "88" and _stem("dbsd") == "dbsd" and _stem("41a") == "41a"
+    assert _stem("alle") == "alle"  # too short to cut
+
+
 # ---- ask -------------------------------------------------------------------
 
 def test_normal_question_is_answered_and_audited(index):
