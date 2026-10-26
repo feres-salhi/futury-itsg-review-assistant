@@ -16,12 +16,12 @@ The core slice must work before any optional AI features. Use the provided prese
 
 | Person | Primary ownership | Concrete deliverables |
 |---|---|---|
-| MSc 1 — SWE/data science | Workflow, data model, source provenance, orchestration | Source/requirement/test/execution records; stable IDs and citations; workflow state and event log; integration lead |
-| MSc 2 — SWE/data science | Deterministic comparator and quality | Input/output schema; comparator; reproducible finding format; test design and independent review of the comparator |
-| Bachelor 1 — IT/SWE specialization | Source intake and evidence display | Upload/import one text or JSON fixture; page/section locators; requirement and source view |
-| Bachelor 2 — IT/SWE specialization | Test-case workflow and user interface | Test-case list/detail; expected-vs-actual display; clear statuses and report screen |
-| Bachelor 3 — IT/SWE specialization | Vendor output and report integration | Synthetic CSV/JSON output importer; report renderer; required-field/structure conformance checks; evidence-backed report |
-| You — product/domain facilitator and presenter | Scope, source checks, human gates, acceptance, demo narrative | Choose the bounded example; help identify the applicable official report form and its version; confirm form assumptions with a qualified reviewer; keep claims honest; track decisions/blockers; rehearse and present |
+| Member 1 | Workflow, data model, source provenance, orchestration | Source/requirement/test/execution records; stable IDs and citations; workflow state and event log; integration lead |
+| Member 2 | Deterministic comparator and quality | Input/output schema; comparator; reproducible finding format; test design and independent review of the comparator |
+| Member 3 | Source intake and evidence display | Upload/import one text or JSON fixture; page/section locators; requirement and source view |
+| Member 4 | Test-case workflow and user interface | Test-case list/detail; expected-vs-actual display; clear statuses and report screen |
+| Member 5 | Vendor output and report integration | Synthetic CSV/JSON output importer; report renderer; required-field/structure conformance checks; evidence-backed report |
+| Member 6 | Scope, source checks, human gates, acceptance, demo narrative | Choose the bounded example; help identify the applicable official report form and its version; confirm form assumptions with a qualified reviewer; keep claims honest; track decisions/blockers; rehearse and present |
 
 The three Bachelor roles can shift based on their strengths. Keep one owner per deliverable and agree on shared record formats early. You do not need to write the legal rules or the core engine to contribute: protect the scope, make sure evidence is visible, and stop the demo from claiming more than it proves.
 
