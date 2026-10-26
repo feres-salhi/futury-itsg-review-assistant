@@ -1,4 +1,4 @@
-﻿import json, sys
+import json, sys
 from datetime import datetime
 
 RULE_VERSION = "checks.py 0.2"
@@ -42,7 +42,8 @@ def run_checks(case):
                     "expected": expected, "observed": observed,
                     "citation": {"source_id": src, "source": SOURCES[src], "locator": locator,
                                  "status": "verified" if verified else "needs_review"},
-                    "rule_version": RULE_VERSION, "links": [src, tc, run]})
+                    "rule_version": RULE_VERSION, "links": [src, tc, run],
+                    "id": cid, "source": f"{SOURCES[src]} - {locator}", "actual": observed})
 
     codes = [x.get("Abgabegrund") for x in m]
     ag01 = [i for i, x in enumerate(m) if x.get("Abgabegrund") == "01"]
