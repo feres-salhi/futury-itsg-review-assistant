@@ -201,3 +201,7 @@ Wait for background `b3xx3q9a0` to finish, report before/after accuracy and doub
 - 03:00 Experiment log artifact https://claude.ai/artifact/X2ajV1r8sgUU8osCAFXiZN + Desktop/Team10-experiment-log.pdf (A4 landscape, 4 pages). Langfuse per-run cost/latency (metrics API): v3 critic 2.61M tokens/$0.36 vs v2 0.42M/$0.11; no-explainer -34% cost; full loop $0.52 (92% Sonnet writers); expa 600 cases $0.30. Langfuse arrival of check F1 spans for AGENTS-verdict-20261027-024151 not yet confirmed. Report restyle (white, 5jACB2) running in a subagent.
 
 - 03:10 Report 5jACB2sEqWgptBrbRLXM7m v6: white printed-style report (latest.json data, All cases table, F1 note) + Desktop/Team10-review-report.pdf (5 pages). Build: scratchpad build_white.py, report/template-white.html.
+
+- 03:15 Pushed HEAD (lisa-stories, 2e130f0) to new remote branch origin/lisa-update (user request). Contains d2be005, 23808cb, 8b4d54f, 2e130f0 on top of origin/lisa-stories 733e5e2. PR link: https://github.com/gracelee087/futury_team_10/pull/new/lisa-update
+
+- 03:25 Added deliverables/ (4 PDFs: experiment log, review report, full loop, orchestration) and pushed to origin/lisa-update.
