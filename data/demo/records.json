@@ -1382,6 +1382,134 @@
         "review_required": true,
         "author": "susie-assistant"
       }
+    },
+    "CHAT-41": {
+      "id": "CHAT-41",
+      "session_id": "5be9417e-0962-4011-9e58-929e378c31f6",
+      "role": "user",
+      "message": "Start over",
+      "at": "2026-10-26T23:57:45+00:00"
+    },
+    "CHAT-42": {
+      "id": "CHAT-42",
+      "session_id": "5be9417e-0962-4011-9e58-929e378c31f6",
+      "role": "susie",
+      "utterance": "Understood. One note upfront: I don't have a reset or 'start over' action in my repertoire, so I cannot clear the workspace or this session myself. The workspace currently contains 4 test cases (TC-1 to TC-4) and a harness run with 300 cases. How would you like to begin? For example, I can display the case list unfiltered as a neutral starting point — shall I?",
+      "at": "2026-10-26T23:57:45+00:00",
+      "agent_run": {
+        "run_id": "RUN-e061b3a7",
+        "task_id": "T10-032",
+        "role": "susie_assistant",
+        "provider": "hessian-ai-vllm-gateway",
+        "model_id": "vllm/GLM-Flash:Latest",
+        "model_revision": "unavailable",
+        "prompt_contract_version": "PROMPT-CONTRACT-0.1",
+        "started_at": "2026-10-26T23:57:45+00:00",
+        "input_ids": [
+          "cases",
+          "harness"
+        ],
+        "output_schema_version": "agent-run-envelope/1.0",
+        "status": "candidate",
+        "result": {
+          "utterance": "Understood. One note upfront: I don't have a reset or 'start over' action in my repertoire, so I cannot clear the workspace or this session myself. The workspace currently contains 4 test cases (TC-1 to TC-4) and a harness run with 300 cases. How would you like to begin? For example, I can display the case list unfiltered as a neutral starting point — shall I?",
+          "confidence": "grounded",
+          "degraded": false,
+          "model": "vllm/GLM-Flash:Latest"
+        },
+        "citations": [],
+        "uncertainties": [],
+        "conflicts": [],
+        "validation_errors": [],
+        "review_required": true,
+        "author": "susie-assistant"
+      }
+    },
+    "CHAT-43": {
+      "id": "CHAT-43",
+      "session_id": "5be9417e-0962-4011-9e58-929e378c31f6",
+      "role": "user",
+      "message": "Generate report",
+      "at": "2026-10-27T00:00:33+00:00"
+    },
+    "CHAT-44": {
+      "id": "CHAT-44",
+      "session_id": "5be9417e-0962-4011-9e58-929e378c31f6",
+      "role": "susie",
+      "utterance": "I can export a report from the current workspace. For transparency before you confirm: the harness run HARNESS-20261027-002545 covers 300 cases (130 clean, 170 detected, 0 false alarms), and report RPT-1 passed the structural conformance check — but a compliance claim is not allowed, since the synthetic template profile (TPL-SYNTH-1, status 'needs_review') cannot authorize a legal or template compliance claim. Shall I export the report?",
+      "at": "2026-10-27T00:00:33+00:00",
+      "agent_run": {
+        "run_id": "RUN-402ad31b",
+        "task_id": "T10-032",
+        "role": "susie_assistant",
+        "provider": "hessian-ai-vllm-gateway",
+        "model_id": "vllm/GLM-Flash:Latest",
+        "model_revision": "unavailable",
+        "prompt_contract_version": "PROMPT-CONTRACT-0.1",
+        "started_at": "2026-10-27T00:00:33+00:00",
+        "input_ids": [
+          "HARNESS-20261027-002545",
+          "RPT-1",
+          "TPL-SYNTH-1"
+        ],
+        "output_schema_version": "agent-run-envelope/1.0",
+        "status": "candidate",
+        "result": {
+          "utterance": "I can export a report from the current workspace. For transparency before you confirm: the harness run HARNESS-20261027-002545 covers 300 cases (130 clean, 170 detected, 0 false alarms), and report RPT-1 passed the structural conformance check — but a compliance claim is not allowed, since the synthetic template profile (TPL-SYNTH-1, status 'needs_review') cannot authorize a legal or template compliance claim. Shall I export the report?",
+          "confidence": "grounded",
+          "degraded": false,
+          "model": "vllm/GLM-Flash:Latest"
+        },
+        "citations": [],
+        "uncertainties": [],
+        "conflicts": [],
+        "validation_errors": [],
+        "review_required": true,
+        "author": "susie-assistant"
+      }
+    },
+    "CHAT-45": {
+      "id": "CHAT-45",
+      "session_id": "5be9417e-0962-4011-9e58-929e378c31f6",
+      "role": "user",
+      "message": "Export report",
+      "at": "2026-10-27T00:01:22+00:00"
+    },
+    "CHAT-46": {
+      "id": "CHAT-46",
+      "session_id": "5be9417e-0962-4011-9e58-929e378c31f6",
+      "role": "susie",
+      "utterance": "Understood — exporting the report now. The export covers the current workspace: harness run HARNESS-20261027-002545 (300 cases: 130 clean, 170 detected, 0 false alarms) and report RPT-1, which passed the structural conformance check but does not authorize a compliance claim (synthetic template TPL-SYNTH-1, status 'needs_review').",
+      "at": "2026-10-27T00:01:22+00:00",
+      "agent_run": {
+        "run_id": "RUN-5e120321",
+        "task_id": "T10-032",
+        "role": "susie_assistant",
+        "provider": "hessian-ai-vllm-gateway",
+        "model_id": "vllm/GLM-Flash:Latest",
+        "model_revision": "unavailable",
+        "prompt_contract_version": "PROMPT-CONTRACT-0.1",
+        "started_at": "2026-10-27T00:01:22+00:00",
+        "input_ids": [
+          "HARNESS-20261027-002545",
+          "RPT-1",
+          "TPL-SYNTH-1"
+        ],
+        "output_schema_version": "agent-run-envelope/1.0",
+        "status": "candidate",
+        "result": {
+          "utterance": "Understood — exporting the report now. The export covers the current workspace: harness run HARNESS-20261027-002545 (300 cases: 130 clean, 170 detected, 0 false alarms) and report RPT-1, which passed the structural conformance check but does not authorize a compliance claim (synthetic template TPL-SYNTH-1, status 'needs_review').",
+          "confidence": "grounded",
+          "degraded": false,
+          "model": "vllm/GLM-Flash:Latest"
+        },
+        "citations": [],
+        "uncertainties": [],
+        "conflicts": [],
+        "validation_errors": [],
+        "review_required": true,
+        "author": "susie-assistant"
+      }
     }
   },
   "note": {
@@ -1417,6 +1545,14 @@
       "mode": "server",
       "reviewer": "Amr",
       "at": "2026-10-26T23:22:26+00:00"
+    },
+    "ACT-b64edb57": {
+      "id": "ACT-b64edb57",
+      "action_id": "export_report",
+      "session_id": "5be9417e-0962-4011-9e58-929e378c31f6",
+      "mode": "server",
+      "reviewer": "Team 10",
+      "at": "2026-10-27T00:01:43+00:00"
     }
   }
 }

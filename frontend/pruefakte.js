@@ -13,6 +13,7 @@
    'brand.sub': 'Systemüberprüfung sozialversicherungsrechtlicher IT-Ergebnisse',
    'nav.aria': 'Prüfbereiche',
    'nav.cases': 'Prüffälle', 'nav.stories': 'Story-Suiten', 'nav.sources': 'Quellen & Kriterien', 'nav.report': 'Prüfbericht', 'nav.audit': 'Verlauf',
+   'nav.susie': 'SÜSIE-Modus', 'bottom.note': 'Synthetische Daten · keine Konformitäts- oder Rechtsauffassung',
    'story.1': 'Arbeitsunfall/Reha statt Krankheit', 'story.3': 'Kurze Krankheitstage ohne Bescheinigung',
    'story.4': 'Antwort der Kasse (61) auf die 41', 'story.6': 'Storno und Korrektur einer 01',
    'stories.title': 'Story-Suiten', 'stories.subtitle': 'Szenariobasierte Prüffälle nach Story und Kategorie.',
@@ -133,6 +134,7 @@
    'brand.sub': 'Systematic review of social-insurance IT results',
    'nav.aria': 'Review areas',
    'nav.cases': 'Cases', 'nav.stories': 'Story suites', 'nav.sources': 'Sources & criteria', 'nav.report': 'Report', 'nav.audit': 'History',
+   'nav.susie': 'SÜSIE mode', 'bottom.note': 'Synthetic data · no conformance or legal claim',
    'story.1': 'Work accident or rehab instead of illness', 'story.3': 'Short sick days without a certificate',
    'story.4': "The insurer's reply (61) to the 41", 'story.6': 'Cancel and correct a 01',
    'stories.title': 'Story suites', 'stories.subtitle': 'Scenario-based cases grouped by story and category.',
@@ -418,6 +420,9 @@
   if (!badge || !text) return;
   badge.classList.toggle('offline', !connected);
   text.textContent = connected ? t('backend.connected') : t('backend.offline');
+  const dot = q('#bridge-dot');const label = q('#bridge-label');
+  if (dot) {dot.classList.toggle('ok', connected);dot.classList.toggle('bad', !connected);}
+  if (label) label.textContent = connected ? t('backend.connected') : t('backend.offline');
  }
  function setApiStatus(kind, text) {
   const node = q('#api-status');if (!node) return;
