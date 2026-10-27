@@ -46,6 +46,14 @@ console.info(`[SÜSIE] frontend build ${SUSIE_BUILD}`);
       governance: "Governance",
       freigaben: "Freigaben", freigabenSub: "Offene menschliche Entscheidungen: Quellen, Entwürfe und Berichtsschritte, die auf Ihre Freigabe warten",
       verlauf: "Verlauf", verlaufSub: "Das Prüfungsprotokoll: wer was wann entschieden hat — Freigaben mit Name und Begründung, KI-Läufe, Änderungen",
+      technik: "Unter der Haube", technikSub: "Die Architektur der Prüfung: KI entwirft, Code rechnet und prüft, der Mensch entscheidet — vom Gesetz bis zum signierten Bericht",
+      techHeadline: "Vom Gesetz zum signierten Bericht",
+      techIntro: "Drei Bühnen, drei Rollen: Die KI entwirft, deterministischer Code rechnet und prüft — und an jeder Nahtstelle entscheidet ein Mensch. Fahren Sie mit der Maus über eine Bühne, um ihren Ablauf zu verfolgen.",
+      techLaneRules: "Regeln", techLaneTests: "Tests", techLaneVerdict: "Befund",
+      techLegendAi: "KI entwirft", techLegendCode: "Code rechnet und prüft", techLegendPerson: "Der Mensch entscheidet",
+      techBrokenNote: "Beschädigte Datei → STOPP, an eine Person übergeben",
+      techDisputeNote: "Einspruch → zurück zu Tests oder Regeln, max. 2-mal",
+      techLoopRewrite: "Abgelehnt oder Problem gefunden → neu schreiben, max. 2 Runden",
       govOffline: "Verbindung zum Bridge-Server fehlt — Governance-Daten sind nur mit Backend verfügbar.",
       freigabenNone: "Nichts offen — alle Entscheidungen sind getroffen.",
       govRationalePh: "Begründung (Pflicht) …",
@@ -196,6 +204,14 @@ console.info(`[SÜSIE] frontend build ${SUSIE_BUILD}`);
       governance: "Governance",
       freigaben: "Approvals", freigabenSub: "Open human decisions: sources, drafts and report steps waiting for your approval",
       verlauf: "History", verlaufSub: "The review protocol: who decided what and when — approvals with name and rationale, AI runs, changes",
+      technik: "Under the hood", technikSub: "The architecture of the review: AI drafts, code computes and checks, the human decides — from the law to the signed report",
+      techHeadline: "From the law to the signed report",
+      techIntro: "Three stages, three roles: the AI drafts, deterministic code computes and checks — and a human decides at every hand-off. Hover a stage to trace its flow.",
+      techLaneRules: "Rules", techLaneTests: "Tests", techLaneVerdict: "Verdict",
+      techLegendAi: "AI drafts", techLegendCode: "Code computes and checks", techLegendPerson: "The person decides",
+      techBrokenNote: "Broken file → STOP, hand to a person",
+      techDisputeNote: "Dispute → back to tests or rules, max 2 times",
+      techLoopRewrite: "Rejected or problem found → rewrite, max 2 rounds",
       govOffline: "Connection to the bridge server is down — governance data is only available with the backend.",
       freigabenNone: "Nothing open — all decisions have been made.",
       govRationalePh: "Rationale (required) …",
@@ -763,9 +779,31 @@ console.info(`[SÜSIE] frontend build ${SUSIE_BUILD}`);
       return { executed: true, detail: LANG === "de" ? `Nachweise zu ${case_id} geöffnet` : `Evidence for ${case_id} opened` };
     },
     filter_cases({ filter }) {
-      S.filter = String(filter ?? ""); renderCases();
-      return { executed: true, detail: S.filter ? (LANG === "de" ? `Filter „${S.filter}“ aktiv` : `Filter "${S.filter}" active`)
-                                 : (LANG === "de" ? "Filter zurückgesetzt" : "Filter cleared") };
+      // A status concept must drive the status chips, not the free-text search:
+      // the searchable text carries the localized labels ("Abweichung"/"Deviation"),
+      // so a chat-suggested "MISMATCH" text filter matched zero cards (owner bug
+      // report 2026-10-27: SÜSIE promised the 11 mismatches, the list went empty).
+      const raw = String(filter ?? "").trim();
+      const low = raw.toLowerCase();
+      const STATUS_WORDS = {
+        PASS: ["pass", "bestanden"],
+        MISMATCH: ["mismatch", "abweichung", "deviation", "fehler", "abweichend", "error"],
+        NOT_EVALUATED: ["not_evaluated", "not evaluated", "nicht bewertet", "unevaluated", "offen"],
+      };
+      const status = Object.entries(STATUS_WORDS).find(([, words]) => words.includes(low))?.[0];
+      // chat-driven filtering REPLACES the filter state (chip + text) — a stale
+      // status chip stacking with a new text filter would silently empty the list
+      if (status) {
+        S.caseStatus = status; S.filter = "";
+      } else {
+        S.caseStatus = "all"; S.filter = raw;
+      }
+      S.view = "cases"; showView("cases"); renderCases();
+      const detail = status
+        ? (LANG === "de" ? `Statusfilter „${statusLabel(status)}“ aktiv` : `Status filter "${statusLabel(status)}" active`)
+        : raw ? (LANG === "de" ? `Filter „${raw}“ aktiv` : `Filter "${raw}" active`)
+              : (LANG === "de" ? "Filter zurückgesetzt" : "Filter cleared");
+      return { executed: true, detail };
     },
     jump_to_source({ ref }) {
       S.view = "sources"; showView("sources"); renderSources();
@@ -878,7 +916,7 @@ console.info(`[SÜSIE] frontend build ${SUSIE_BUILD}`);
   function showView(v) {
     if (v !== S.view) { S.viewStack = S.viewStack || []; S.viewStack.push(S.view); }
     S.view = v;
-    for (const id of ["cases", "report", "sources", "regulations", "freigaben", "verlauf"]) $(`view-${id}`).hidden = id !== v;
+    for (const id of ["cases", "report", "sources", "regulations", "freigaben", "verlauf", "technik"]) $(`view-${id}`).hidden = id !== v;
     $("case-summary").hidden = v !== "cases";  // the case counts mean nothing elsewhere
     document.body.dataset.view = v;
     if (v === "regulations" && !S.regLoaded) loadRegulations();

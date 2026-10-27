@@ -227,3 +227,21 @@ Team10-LetzGo! DONE+VERIFIED (suite 315 green; browser-verified downloads; live 
 - Verified: HTTP per-case PDF 200 for EAZ-001/EAZ-019/TC-3/TC-1 (48KB each), unknown case 404, full report 200 (248KB); EAZ-001 PDF content checked (3 pages, Single-case note, criterion, status). Browser: case card → "Single-case report (PDF)" download FIRED; Report view → "Export report" download FIRED. Live chat: deterministic navigation local (by design); open question answered by claude-sonnet-5-5, degraded=False, grounded BRUTTO-1 detail for EAZ-019.
 - Remaining recommendations (not changed, owner decision): run_comparison button mislabel + gate REVIEWER identity; designer jobs get no corpus text for create_case_from_reference; cases[:10] silent drop; 61k-token state context per turn (cost/latency); report.artifact.json should be regenerated from the store for the FULL report too (currently full PDF still renders the 4-story artifact plus store inputs).
 - Not committed (needs owner authorization).
+
+---
+Team10-LetzGo! T10-055 IN_PROGRESS
+Done: boot reads (AGENTS/DELIVERY/governance, leapfrog, board, hot, impeccable context + craft-floor + animate), design decided: bilingual authored SVG diagram in SÜSIE tokens, data-driven build in JS.
+In progress: sidebar sub-link under Verlauf, view-technik section, renderTechnik, CSS motion.
+Next: implement, then node --check + live browser verification on a fresh bridge port.
+Blocker: none
+Files owned: frontend/susie.html, frontend/susie.js, frontend/susie.css, .leapfrog/**
+Evidence/verification: pending
+Handoff/reviewer: Amr (self-review, solo mode)
+## 2026-10-27 — Owner bug report: chat mismatch filter showed wrong/empty list; name ask "gone" — diagnosed + filter FIXED+VERIFIED — ZCode / GLM-Flash
+Team10-LetzGo! DONE (filter fix verified; name ask = by-design persistence, owner decision pending)
+- Owner report (1): SÜSIE greeted "34 cases … 22 PASS, 11 MISMATCH, 1 not evaluated (TC-3 …)" and offered to filter for the 11 mismatches; opening the filter was "inaccurate".
+- Numbers AUDITED against the store, the live /api/state and the EAZ corpus ground truth: 34 cases (30 EAZ + 4 TC), 22 PASS / 11 MISMATCH / 1 NOT_EVALUATED is CORRECT — the 11 mismatches are exactly the 10 planted-error EAZ cases (EAZ-003/004/016/017/019/021/024/026/028/029, planted_error=true in data/eaz_cases.json) plus TC-2; TC-3 is the deliberate missing-expected-value case (expected={}, fail-closed NOT_EVALUATED). The greeting was factually accurate.
+- Actual defect (found + fixed): chat-driven `filter_cases` in frontend/susie.js wrote the status concept into the FREE-TEXT search; searchable() only contains localized labels ("Abweichung"/"Deviation"), so filter "MISMATCH" matched ZERO cards — SÜSIE promises 11, list goes empty. Also it never switched to the Cases view and stacked with a stale status chip. Fix: status words (mismatch/abweichung/deviation/fehler/…, pass/bestanden, not evaluated/nicht bewertet/…) map to the status chips (S.caseStatus), chat filtering REPLACES chip+text state, view switches to Cases; itsg/chat.py ACTION_DESCRIPTIONS now documents `{"filter"}` accepted values (PASS | MISMATCH | NOT_EVALUATED | Freitext).
+- Verified live in real browser (in-app browser, :8799): SUSIE_APP.invoke("filter_cases",{filter:"MISMATCH"}) → chip "Deviation 11" active, search cleared, 11 cards rendered (was 0 before fix); filter "EAZ-019" → 1 card, no chip stacking. Suite 315 passed / 7 skipped (pre-existing), node --check PASS. Bridge :8799 restarted (old PID 75235 killed, same command) — static files are no-store, owner just reloads the tab.
+- Owner report (2): "susie chat doesn't ask for name anymore." NOT a regression: the T10-054 onboarding asks only when localStorage key `susie-reviewer` is empty; after the first entry the name persists deliberately (welcome-back greeting "Schön, dass Sie wieder da sind, <name>"). Browser-verified: with the key removed, the ask reappears ("Who am I working with?" + name input + Start). Owner decision needed if per-session asking (sessionStorage) or a "Not <name>? change" affordance is wanted — one-line change either way; not changed without directive.
+- Nothing committed/pushed (no human authorization). Working tree: frontend/susie.js, itsg/chat.py + runtime data (data/demo, .DS_Store) modified.
