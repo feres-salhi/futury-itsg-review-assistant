@@ -38,24 +38,34 @@
   <div class="brand-sub" data-i18n="brand.sub">Systemüberprüfung sozialversicherungsrechtlicher IT-Ergebnisse</div>
  </div>
  <nav aria-label="Prüfbereiche" data-i18n-aria-label="nav.aria">
-  <button data-view="cases" class="active" data-i18n="nav.cases">Prüffälle</button>
-  <button data-view="stories" data-i18n="nav.stories">Story-Suiten</button>
-  <button data-view="sources" data-i18n="nav.sources">Quellen &amp; Kriterien</button>
-  <button data-view="report" data-i18n="nav.report">Prüfbericht</button>
-  <button data-view="audit" data-i18n="nav.audit">Verlauf</button>
+  <button data-view="cases" class="active" title="Prüffälle">
+   <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 3h9l3 3v11H4z"/><path d="M7 9h6M7 12.5h6"/></svg>
+   <span class="nav-label" data-i18n="nav.cases">Prüffälle</span><small class="nav-sub" data-i18n="nav.casesSub">Soll/Ist-Vergleich je Fall</small></button>
+  <button data-view="stories" title="Story-Suiten">
+   <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="14" height="12" rx="2"/><path d="M7 8h6M7 11h4"/></svg>
+   <span class="nav-label" data-i18n="nav.stories">Story-Suiten</span><small class="nav-sub" data-i18n="nav.storiesSub">Szenarien mit erwarteter Abweichung</small></button>
+  <button data-view="sources" title="Quellen & Kriterien">
+   <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="6.5"/><path d="M10 6.5V10l2.5 2"/></svg>
+   <span class="nav-label" data-i18n="nav.sources">Quellen &amp; Kriterien</span><small class="nav-sub" data-i18n="nav.sourcesSub">Rechtsgrundlagen und Regel-Basis</small></button>
+  <button data-view="report" title="Prüfbericht">
+   <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h10v14H5z"/><path d="M8 7h4M8 10h4M8 13h2.5"/></svg>
+   <span class="nav-label" data-i18n="nav.report">Prüfbericht</span><small class="nav-sub" data-i18n="nav.reportSub">Belege, Maßnahmen, Freigabe-Status</small></button>
+  <button data-view="audit" title="Verlauf">
+   <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10a6 6 0 1 1 1.76 4.24M4 10V6m0 4h4"/></svg>
+   <span class="nav-label" data-i18n="nav.audit">Verlauf</span><small class="nav-sub" data-i18n="nav.auditSub">Jede Gate-Entscheidung mit Zeitstempel</small></button>
+  <a class="nav-ext" href="susie.html" title="Zurück in den SÜSIE-Modus">
+   <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6.5A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5v8a2.5 2.5 0 0 1-2.5 2.5H12l-4.5 3.5V17H6.5A2.5 2.5 0 0 1 4 14.5z" transform="scale(0.85) translate(1.5 1.5)"/><path d="M3 17l3-3" transform="scale(0.85) translate(1.5 1.5)"/></svg>
+   <span class="nav-label" data-i18n="nav.susie">SÜSIE-Modus</span><small class="nav-sub" data-i18n="nav.susieSub">Zurück zur Assistentin: Prüffälle, Prüfbericht &amp; Siegel</small></a>
  </nav>
  <div class="quick-controls">
-  <button type="button" class="icon-button" id="theme-cycle" aria-label="Darstellung wechseln" data-i18n-aria-label="themeCycle.aria">
-   <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="7.2"/><path d="M10 2.8v14.4M10 2.8a7.2 7.2 0 0 1 0 14.4" fill="currentColor" stroke="none" opacity=".28"/><path d="M3.4 7.6h13.2M3.4 12.4h13.2" opacity=".45"/></svg>
+  <button type="button" class="ghost-lang" id="lang-toggle" aria-label="Sprache wechseln" data-i18n-aria-label="settings.language" title="Sprache / Language">DE</button>
+  <button type="button" class="ghost-icon" id="theme-toggle" aria-label="Hell / Dunkel umschalten" data-i18n-aria-label="themeToggle.aria" title="Hell / Dunkel umschalten">
+   <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3.5v2M10 14.5v2M3.5 10h2M14.5 10h2M5.3 5.3l1.4 1.4M13.3 13.3l1.4 1.4M14.7 5.3l-1.4 1.4M6.7 13.3l-1.4 1.4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="10" cy="10" r="3" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
   </button>
-  <div class="segmented lang-seg" role="group" aria-label="Sprache" data-i18n-aria-label="settings.language">
-   <button type="button" data-set-lang="en" aria-pressed="false">EN</button>
-   <button type="button" data-set-lang="de" aria-pressed="true">DE</button>
-  </div>
- </div>
- <div class="rail-bottom">
-  <details class="appearance" id="settings" open>
-   <summary data-i18n="settings.title">Einstellungen</summary>
+  <details class="appearance" id="settings">
+   <summary class="ghost-icon settings-btn" data-i18n-aria-label="settings.title" title="Einstellungen">
+    <svg viewBox="0 0 20 20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 6h14M3 10h14M3 14h14"/><circle cx="8" cy="6" r="1.8" fill="var(--surface)"/><circle cx="13" cy="10" r="1.8" fill="var(--surface)"/><circle cx="7" cy="14" r="1.8" fill="var(--surface)"/></svg>
+   </summary>
    <div class="appearance-content">
     <fieldset><legend data-i18n="appearance.theme">Lesethema</legend>
      <div class="segmented">
@@ -92,7 +102,6 @@
     <p id="appearance-status" role="status" aria-live="polite">Casual · Hell · Deutsch</p>
    </div>
   </details>
-  <footer><span data-i18n="footer.org">Arbeitsbereich ITSG</span><br><span data-i18n="footer.view">Prüferansicht · Konzeptdemo</span></footer>
  </div>
 </aside>
 <main class="workspace" id="main-content" tabindex="-1">
@@ -208,7 +217,7 @@
  <span class="mark" aria-hidden="true"></span>
  <span class="bottom-brand">SÜSIE</span>
  <span class="bottom-sep" aria-hidden="true"></span>
- <span id="bottom-note" class="bottom-note" data-i18n="bottom.note">Synthetische Daten · keine Konformitäts- oder Rechtsauffassung</span>
+ <span id="bottom-note" class="bottom-note" data-i18n="bottom.note">Synthetische Daten — ohne Konformitätsaussage und ohne Rechtsberatung</span>
  <span class="bottom-spacer"></span>
  <span id="bridge-dot" class="bridge-dot" title="Bridge-Verbindung"></span>
  <span id="bridge-label" class="bridge-label">Verbinde …</span>

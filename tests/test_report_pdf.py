@@ -186,8 +186,8 @@ class ReportLayoutRegressionTests(unittest.TestCase):
             }])
             report_pdf.generate_report_pdf(artifact, root / "out.pdf")
             with fitz.open(root / "out.pdf") as doc:
-                pg = next(p for p in doc if p.search_for("ALIGNMENT-PROBE"))
-                title = pg.search_for("ALIGNMENT-PROBE")[0]
+                pg = next(p for p in doc if p.search_for("01  ALIGNMENT-PROBE"))
+                title = pg.search_for("01  ALIGNMENT-PROBE")[0]
                 statuses = pg.search_for("MISMATCH")
                 self.assertTrue(any(abs(r.y0 - title.y0) < 5 for r in statuses))
                 self.assertIn("SRCV-PROBE", pg.get_text())

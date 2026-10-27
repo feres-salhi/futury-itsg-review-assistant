@@ -12,14 +12,20 @@
    'skip': 'Zum Prüfbereich springen',
    'brand.sub': 'Systemüberprüfung sozialversicherungsrechtlicher IT-Ergebnisse',
    'nav.aria': 'Prüfbereiche',
-   'nav.cases': 'Prüffälle', 'nav.stories': 'Story-Suiten', 'nav.sources': 'Quellen & Kriterien', 'nav.report': 'Prüfbericht', 'nav.audit': 'Verlauf',
-   'nav.susie': 'SÜSIE-Modus', 'bottom.note': 'Synthetische Daten · keine Konformitäts- oder Rechtsauffassung',
+   'nav.cases': 'Prüffälle', 'nav.casesSub': 'Soll/Ist-Vergleich je Fall', 'nav.susie': 'SÜSIE-Modus', 'nav.susieSub': 'Zurück zur Assistentin: Prüffälle, Prüfbericht & Siegel', 'nav.stories': 'Story-Suiten', 'nav.storiesSub': 'Szenarien mit erwarteter Abweichung', 'nav.sources': 'Quellen & Kriterien', 'nav.sourcesSub': 'Rechtsgrundlagen und Regel-Basis', 'nav.report': 'Prüfbericht', 'nav.reportSub': 'Belege, Maßnahmen, Freigabe-Status', 'nav.audit': 'Verlauf', 'nav.auditSub': 'Jede Gate-Entscheidung mit Zeitstempel',
+   'bottom.note': 'Synthetische Daten — ohne Konformitätsaussage und ohne Rechtsberatung',
    'story.1': 'Arbeitsunfall/Reha statt Krankheit', 'story.3': 'Kurze Krankheitstage ohne Bescheinigung',
-   'story.4': 'Antwort der Kasse (61) auf die 41', 'story.6': 'Storno und Korrektur einer 01',
-   'stories.title': 'Story-Suiten', 'stories.subtitle': 'Szenariobasierte Prüffälle nach Story und Kategorie.',
+   'story.4': 'Antwort der Kasse (61) auf die 41', 'story.6': 'Storno und Korrektur einer Meldung (Abgabegrund 01)',
+   'stories.title': 'Story-Suiten', 'stories.subtitle': 'Szenariobasierte Prüffälle nach Story und Kategorie. Stories 2 und 5 sind nicht Teil dieser Demo-Suite.',
    'stories.offlineNote': 'Story-Suiten sind nur mit Backend-Verbindung verfügbar.',
    'stories.categoriesTitle': 'Kategorien',
-   'stories.story': 'Story', 'stories.category': 'Kategorie', 'stories.count': 'Anzahl', 'stories.mustFlag': 'Soll-Kennzeichnung',
+   'stories.story': 'Story', 'stories.category': 'Kategorie', 'stories.count': 'Anzahl Prüffälle', 'stories.mustFlag': 'Erwartete Abweichung',
+   'stories.countUnit': 'Prüffälle',
+   'cat.current AU is a work accident': 'Aktuelle AU ist ein Arbeitsunfall',
+   'cat.rehab stay, mixed prior reasons': 'Reha-Aufenthalt, gemischte Vorerkrankungsgründe',
+   'cat.no certification for current AU': 'Keine Bescheinigung für die aktuelle AU',
+   'cat.prior illnesses present': 'Vorerkrankungen vorhanden',
+   'cat.no prior illnesses': 'Keine Vorerkrankungen',
    'stories.search': 'Suitenfälle suchen', 'stories.searchPlaceholder': 'Prüffall oder Kategorie eingeben',
    'stories.filterAria': 'Nach Story filtern', 'stories.filterAll': 'Alle Stories', 'stories.storyLabel': 'Story {n}',
    'stories.defectsOnly': 'nur Fehlerfälle',
@@ -43,6 +49,7 @@
    'report.pdfDone': 'Formalreport (PDF) heruntergeladen. Maschinell erzeugt von SÜSIE · Freigabe bleibt gesperrt.',
    'report.pdfFailed': 'PDF-Generierung fehlgeschlagen (Backend).', 'report.pdfOffline': 'Formalreport (PDF) ist nur mit Backend-Verbindung verfügbar.',
    'themeCycle.aria': 'Darstellung wechseln',
+   'themeToggle.aria': 'Hell / Dunkel umschalten',
    'themeCycle.title': 'Darstellung wechseln ({next})',
    'settings.title': 'Einstellungen', 'settings.language': 'Sprache',
    'appearance.theme': 'Lesethema', 'theme.casual': 'Casual', 'theme.contrast': 'Hoher Kontrast',
@@ -119,7 +126,7 @@
    'noscript': 'JavaScript ist ausgeschaltet. Die angezeigten Prüffälle können gelesen werden; Filter, Notizen, Sprach- und Themenwechsel benötigen JavaScript.',
    'disclaimer': 'SÜSIE unterstützt die Prüfung. Fachliche Entscheidungen und Freigaben bleiben beim Menschen.',
    'kind.normal': 'Normalfall', 'kind.boundary': 'Abweichungsfall', 'kind.invalid': 'Fehlende Eingabe', 'kind.vorerkrankung': 'Vorerkrankungsfall',
-   'status.pass': 'Übereinstimmung', 'status.mismatch': 'Abweichung', 'status.noteval': 'Nicht auswertbar',
+   'status.pass': 'Bestanden', 'status.mismatch': 'Abweichung', 'status.noteval': 'Nicht bewertet',
    'reason.tc1': 'Soll- und Istwert stimmen im synthetischen Beispiel überein. Die fachliche Freigabe steht noch aus.',
    'reason.tc2': 'Der Istwert liegt 0,36 € unter dem Sollwert. Abweichung anhand der Quelle fachlich prüfen.',
    'reason.tc3': 'DATUM-AB fehlt. Eingabe ergänzen, bevor dieser Prüffall ausgewertet werden kann.',
@@ -133,14 +140,20 @@
    'skip': 'Skip to the review area',
    'brand.sub': 'Systematic review of social-insurance IT results',
    'nav.aria': 'Review areas',
-   'nav.cases': 'Cases', 'nav.stories': 'Story suites', 'nav.sources': 'Sources & criteria', 'nav.report': 'Report', 'nav.audit': 'History',
-   'nav.susie': 'SÜSIE mode', 'bottom.note': 'Synthetic data · no conformance or legal claim',
+   'nav.cases': 'Cases', 'nav.casesSub': 'Expected vs. transmitted per case', 'nav.susie': 'SÜSIE mode', 'nav.susieSub': 'Back to the assistant: cases, report & seal', 'nav.stories': 'Story suites', 'nav.storiesSub': 'Scenarios with an expected deviation', 'nav.sources': 'Sources & criteria', 'nav.sourcesSub': 'Legal basis and rule foundation', 'nav.report': 'Report', 'nav.reportSub': 'Evidence, actions, release status', 'nav.audit': 'History', 'nav.auditSub': 'Every gate decision, timestamped',
+   'bottom.note': 'Synthetic data — no conformance claim, no legal advice',
    'story.1': 'Work accident or rehab instead of illness', 'story.3': 'Short sick days without a certificate',
-   'story.4': "The insurer's reply (61) to the 41", 'story.6': 'Cancel and correct a 01',
-   'stories.title': 'Story suites', 'stories.subtitle': 'Scenario-based cases grouped by story and category.',
+   'story.4': "The insurer's reply (61) to the prior-illness query (41)", 'story.6': 'Cancel and correct a 01',
+   'stories.title': 'Story suites', 'stories.subtitle': 'Scenario-based cases grouped by story and category. Stories 2 and 5 are not part of this demo suite.',
    'stories.offlineNote': 'Story suites are only available with a backend connection.',
    'stories.categoriesTitle': 'Categories',
-   'stories.story': 'Story', 'stories.category': 'Category', 'stories.count': 'Count', 'stories.mustFlag': 'Must flag',
+   'stories.story': 'Story', 'stories.category': 'Category', 'stories.count': 'Cases', 'stories.mustFlag': 'Expected deviation',
+   'stories.countUnit': 'cases',
+   'cat.current AU is a work accident': 'Current incapacity is a work accident',
+   'cat.rehab stay, mixed prior reasons': 'Rehab stay, mixed prior reasons',
+   'cat.no certification for current AU': 'No certificate for the current incapacity',
+   'cat.prior illnesses present': 'Prior illnesses present',
+   'cat.no prior illnesses': 'No prior illnesses',
    'stories.search': 'Search suite cases', 'stories.searchPlaceholder': 'Enter case or category',
    'stories.filterAria': 'Filter by story', 'stories.filterAll': 'All stories', 'stories.storyLabel': 'Story {n}',
    'stories.defectsOnly': 'defects only',
@@ -161,7 +174,7 @@
    'report.runs.generate': 'Generate new review report (offline)', 'report.runs.running': 'Generating …',
    'report.runs.done': 'Review report generated: {id}.', 'report.runs.failed': 'Failed to generate review report: {error}',
    'themeCycle.aria': 'Cycle appearance',
-   'themeCycle.title': 'Cycle appearance ({next})',
+   'themeToggle.aria': 'Toggle light / dark',
    'settings.title': 'Settings', 'settings.language': 'Language',
    'appearance.theme': 'Reading theme', 'theme.casual': 'Casual', 'theme.contrast': 'High contrast',
    'appearance.mode': 'Colour mode', 'mode.light': 'Light', 'mode.dark': 'Dark',
@@ -253,6 +266,12 @@
 
  const langNames = {de: 'Deutsch', en: 'English'};
  let lang = ROOT.dataset.lang === 'en' ? 'en' : 'de';
+ /* Boot in German unless the URL explicitly asks for English — the advanced
+    mode must never surprise a German reviewer with an English UI (T10-042). */
+ try {
+  const bootLang = new URLSearchParams(location.search).get('lang');
+  if (bootLang === 'en') {lang = 'en';ROOT.dataset.lang = 'en';ROOT.lang = 'en';}
+ } catch {}
  const t = (key, vars) => {
   let text = (I18N[lang] && I18N[lang][key]) ?? I18N.de[key] ?? key;
   if (vars) for (const [name, value] of Object.entries(vars)) text = text.split('{' + name + '}').join(String(value));
@@ -281,6 +300,24 @@
  const literal = (parent, tagName, className, text) => {
   const node = document.createElement(tagName);if (className) node.className = className;node.textContent = text;parent.append(node);return node;
  };
+ /* wire-format field codes -> human words (T10-042; unknown codes stay as-is) */
+ const FIELD_LABELS = {
+  'ABGABEGRUND': {de: 'Abgabegrund', en: 'Submission reason'},
+  'KORR-ABGABEGRUND': {de: 'Korrektur-Abgabegrund', en: 'Correction submission reason'},
+  'MM-ALLGEMEIN': {de: 'Meldemerkmale — allgemein', en: 'Reporting features — general'},
+  'MM-ENTGELT': {de: 'Meldemerkmale — Entgelt', en: 'Reporting features — pay'},
+  'MM-ZEITKG': {de: 'Meldemerkmale — Zeitkrankengeld', en: 'Reporting features — sickness benefit'},
+  'MM-VOER': {de: 'Meldemerkmale — Vorerkrankung', en: 'Reporting features — prior illness'},
+  'DATUM-AB': {de: 'Datum ab', en: 'Valid-from date'},
+  'DATUM-EGZBIS': {de: 'Datum Entgeltersatz bis', en: 'Benefit-until date'},
+  'EAZ-BEGINN-1': {de: 'Beginn Entgeltersatzleistung (Zeitraum 1)', en: 'Benefit start (period 1)'},
+  'EAZ-ENDE-1': {de: 'Ende Entgeltersatzleistung (Zeitraum 1)', en: 'Benefit end (period 1)'},
+  'BRUTTO-1': {de: 'Bruttoentgelt (Zeitraum 1)', en: 'Gross pay (period 1)'},
+  'NETTO-1': {de: 'Nettoentgelt (Zeitraum 1)', en: 'Net pay (period 1)'},
+  'WAEHREEL-BRUTTO': {de: 'Währungseinheit Brutto', en: 'Currency unit gross'},
+  'VOER-ANFRAGE-AUSGELOEST': {de: 'Vorerkrankungsanfrage ausgelöst', en: 'Prior-illness query triggered'}
+ };
+ const fieldLabel = key => (FIELD_LABELS[key] || {})[lang] || key;
 
  /* ------------------------------- appearance ------------------------------- */
  const APPEARANCE_ORDER = [['casual', 'light'], ['casual', 'dark'], ['contrast', 'dark'], ['contrast', 'light']];
@@ -297,6 +334,8 @@
   qa('[data-set-theme]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.setTheme === theme)));
   qa('[data-set-mode]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.setMode === mode)));
   qa('[data-set-lang]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.setLang === lang)));
+  const langToggle = q('#lang-toggle');
+  if (langToggle) {langToggle.textContent = lang.toUpperCase();langToggle.title = lang === 'de' ? 'Language: German — wechseln zu English' : 'Language: English — switch to German';}
   const status = t('appearance.status', {theme: t('theme.' + theme), mode: t('mode.' + mode), lang: langNames[lang]});
   const statusNode = q('#appearance-status');if (statusNode) statusNode.textContent = status;
   const index = APPEARANCE_ORDER.findIndex(([th, mo]) => th === theme && mo === mode);
@@ -312,6 +351,7 @@
   if (theme) ROOT.dataset.theme = theme;
   if (mode) ROOT.dataset.mode = mode;
   persistAppearance({theme: ROOT.dataset.theme, mode: ROOT.dataset.mode});
+  try { localStorage.setItem('susie-ui-theme', ROOT.dataset.mode); } catch {}  // theme unity with the SÜSIE app
   const url = new URL(location.href);
   url.searchParams.set('theme', ROOT.dataset.theme);url.searchParams.set('mode', ROOT.dataset.mode);
   history.replaceState(history.state, '', url);
@@ -428,6 +468,20 @@
   const node = q('#api-status');if (!node) return;
   node.className = 'api-status' + (kind ? ' ' + kind : '');node.textContent = text;
  }
+ function offlineState() {
+  /* No fabricated findings when the bridge is down — an empty, honest state. */
+  const base = syntheticState();
+  base.cases = [];
+  base.stories = {ok: false, cases: [], categories: [], by_story: {}};
+  base.reviews = []; base.harness = null;
+  return base;
+ }
+ function showOfflineBanner() {
+  if (q('.offline-banner')) return;
+  const banner = literal(document.querySelector('main') || document.body, 'div', 'offline-banner',
+   '⚠ Keine Verbindung zum SÜSIE-Bridge — die angezeigten Prüffälle sind LEER. (Keine Beispieldaten als Ersatz: nichts zu sehen ist ehrlicher als Falsches.)');
+  banner.setAttribute('role', 'alert');
+ }
  async function loadBackend({silent} = {}) {
   try {
    const response = await apiFetch('/api/state');
@@ -439,8 +493,9 @@
    if (!silent) setApiStatus('ok', t('api.status.connected', {store: shortStore(), events: state.backend ? state.backend.events : 0}));
    return true;
   } catch {
-   applyState(syntheticState());
+   applyState(offlineState());
    setBackendBadge(false);
+   showOfflineBanner();
    if (!silent) setApiStatus('err', t('api.status.offline'));
    return false;
   }
@@ -506,13 +561,16 @@
    literal(cellCase, 'small', null, t('kind.' + item.kindKey));
    const draftMark = literal(cellCase, 'span', 'draft-mark', t('report.draftMark'));draftMark.hidden = true;
    cellCase.prepend(link);
-   const cellField = document.createElement('td');cellField.dataset.label = t('th.field');cellField.textContent = primary ? primary.key : '—';
+   const cellField = document.createElement('td');cellField.dataset.label = t('th.field');
+   if (primary) {cellField.textContent = primary.key;literal(cellField, 'small', null, fieldLabel(primary.key));}
+   else cellField.textContent = '—';
    const cellExpected = document.createElement('td');cellExpected.className = 'num';cellExpected.dataset.label = t('th.expected');
    cellExpected.textContent = primary ? (primary.expected ?? t('detail.noValue')) : t('detail.noValue');
    const cellObserved = document.createElement('td');cellObserved.className = 'num';cellObserved.dataset.label = t('th.observed');
    cellObserved.textContent = primary ? (primary.observed ?? t('detail.missing')) : (item.statusKey === 'noteval' ? t('detail.missing') : t('detail.noValue'));
    const cellResult = document.createElement('td');cellResult.dataset.label = t('th.result');
    const badge = literal(cellResult, 'span', 'badge ' + item.statusKey, t('status.' + item.statusKey));
+   badge.title = t('status.' + item.statusKey) + ' (Notencode: ' + (item.status || item.statusKey) + ')';
    row.append(cellCase, cellField, cellExpected, cellObserved, cellResult);
    row.onclick = () => selectCase(index, {scroll: true});
    link.onclick = event => {event.stopPropagation();selectCase(index, {focus: true, scroll: true});};
@@ -524,10 +582,11 @@
   const item = state.cases[selected];if (!item) return;
   const title = q('#detail-title');title.textContent = item.id + ' · ' + t('kind.' + item.kindKey);
   const badge = q('#detail-badge');badge.className = 'badge ' + item.statusKey;badge.textContent = t('status.' + item.statusKey);
+  badge.title = t('status.' + item.statusKey) + ' (Notencode: ' + (item.status || item.statusKey) + ')';
   const primary = item.fields.find(field => field.primary);
   const expectedLabel = q('#detail-expected-label'), observedLabel = q('#detail-observed-label');
-  expectedLabel.textContent = t('detail.expectedLabel', {field: primary ? primary.key : '—'});
-  observedLabel.textContent = t('detail.observedLabel', {field: primary ? primary.key : '—'});
+  expectedLabel.textContent = t('detail.expectedLabel', {field: primary ? fieldLabel(primary.key) : '—'});
+  observedLabel.textContent = t('detail.observedLabel', {field: primary ? fieldLabel(primary.key) : '—'});
   q('#detail-expected-value').textContent = primary ? (primary.expected ?? t('detail.noValue')) : t('detail.noValue');
   q('#detail-observed-value').textContent = primary
    ? (primary.observed ?? (item.statusKey === 'noteval' ? t('detail.missing') : t('detail.noValue')))
@@ -536,7 +595,7 @@
    const container = q(panel);container.replaceChildren();
    item.fields.filter(field => !field.primary && (field.expected != null || field.observed != null)).forEach(field => {
     const row = document.createElement('div');row.className = 'kv-row' + (field.match === false ? ' bad' : '');
-    literal(row, 'span', 'k', field.key);
+    literal(row, 'span', 'k', field.key === fieldLabel(field.key) ? field.key : field.key + ' — ' + fieldLabel(field.key));
     literal(row, 'span', 'v', String((side === 'expected' ? field.expected : field.observed) ?? '—'));
     container.append(row);
    });
@@ -698,7 +757,7 @@
    literal(card, 'small', null, t('stories.storyLabel', {n}));
    const name = literal(card, 'h2', 'story-card-name', t('story.' + n));
    name.id = 'story-card-name-' + n;
-   literal(card, 'div', 'value', count == null ? t('detail.noValue') : String(count));
+   literal(card, 'div', 'value', count == null ? t('detail.noValue') : count + ' ' + t('stories.countUnit'));
   });
   literal(paper, 'h2', null, t('stories.categoriesTitle'));
   const catWrap = literal(paper, 'div', 'table-wrap');
@@ -711,10 +770,15 @@
   (data.categories || []).forEach(category => {
    const row = catBody.insertRow();
    const cellStory = row.insertCell();cellStory.dataset.label = t('stories.story');cellStory.textContent = t('stories.storyLabel', {n: category.story});
-   const cellCat = row.insertCell();cellCat.dataset.label = t('stories.category');cellCat.textContent = category.category || '—';
+   const cellCat = row.insertCell();cellCat.dataset.label = t('stories.category');
+   const catKey = 'cat.' + (category.category || '');
+   const catMapped = (I18N[lang] && I18N[lang][catKey]) ?? I18N.de[catKey];
+   cellCat.textContent = catMapped || (category.category || '—');
+   if (catMapped) cellCat.title = category.category || '';
    const cellCount = row.insertCell();cellCount.dataset.label = t('stories.count');cellCount.className = 'num';cellCount.textContent = String(category.count ?? 0);
    const cellFlag = row.insertCell();cellFlag.dataset.label = t('stories.mustFlag');
-   literal(cellFlag, 'span', 'badge ' + (category.must_flag != null ? 'bad' : 'neutral'), category.must_flag != null ? category.must_flag : t('stories.none'));
+   const flagLabel = category.must_flag === true ? t('stories.yes') : category.must_flag === false ? t('stories.no') : t('stories.none');
+   literal(cellFlag, 'span', 'badge ' + (category.must_flag === true ? 'bad' : 'neutral'), flagLabel);
   });
   const bar = literal(paper, 'div', 'bar');
   const searchLabel = literal(bar, 'label', 'search-field');
@@ -1202,12 +1266,11 @@
   // Appearance + language + settings
   qa('[data-set-theme], [data-set-mode]').forEach(button => button.addEventListener('click', () =>
    setAppearance(button.dataset.setTheme, button.dataset.setMode)));
-  qa('[data-set-lang]').forEach(button => button.addEventListener('click', () => setLanguage(button.dataset.setLang)));
-  q('#theme-cycle').onclick = () => {
-   const index = APPEARANCE_ORDER.findIndex(([theme, mode]) => theme === ROOT.dataset.theme && mode === ROOT.dataset.mode);
-   const [theme, mode] = APPEARANCE_ORDER[(index + 1) % APPEARANCE_ORDER.length];
-   setAppearance(theme, mode);
-  };
+  const langToggle = q('#lang-toggle');
+  if (langToggle) langToggle.addEventListener('click', () => setLanguage(lang === 'de' ? 'en' : 'de'));
+  // SÜSIE direction: one light/dark toggle (contrast theme remains in settings)
+  q('#theme-toggle').onclick = () =>
+   setAppearance(ROOT.dataset.theme, ROOT.dataset.mode === 'dark' ? 'light' : 'dark');
   const logoFailure = () => {q('.brand-logo').hidden = true;q('.brand-fallback').hidden = false;};
   q('.brand-logo').addEventListener('error', logoFailure);
   if (q('.brand-logo').complete && !q('.brand-logo').naturalWidth) logoFailure();

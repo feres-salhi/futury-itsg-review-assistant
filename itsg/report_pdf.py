@@ -21,8 +21,20 @@ from . import llm
 from .candidates import ROLE_REPORT_EXPLAINER, new_run
 from .timeutil import utc_now
 
-REPORT_PDF_VERSION = "itsg.report_pdf/0.2.0"
+REPORT_PDF_VERSION = "itsg.report_pdf/0.3.0"
 MODEL_REPORT_EXPLAINER = llm.MODEL_EXTRACTOR  # gateway GLM chat model (human's "glm 5.3" routing)
+
+# Wire-format field codes -> human words for the executive summary (T10-042).
+_FIELD_HUMAN = {
+    "ABGABEGRUND": "Abgabegrund",
+    "KORR-ABGABEGRUND": "Korrektur-Abgabegrund",
+    "EAZ-BEGINN-1": "Beginn der Entgeltersatzleistung (Zeitraum 1)",
+    "EAZ-ENDE-1": "Ende der Entgeltersatzleistung (Zeitraum 1)",
+    "VOER-ANFRAGE-AUSGELOEST": "Vorerkrankungsanfrage ausgelöst",
+    "DATUM-AB": "Datum ab",
+    "DATUM-EGZBIS": "Datum Entgeltersatz bis",
+}
+_MISMATCH_FIELD_RE = re.compile(r"([A-Z0-9\-]+):\s*expected\s+'([^']*)',\s*observed\s+'([^']*)'")
 
 SUSIE_LOGO = Path(__file__).resolve().parent.parent / "frontend" / "assets" / "susie-logo-380.png"
 
@@ -153,6 +165,40 @@ def draft_summary_live(artifact: dict, findings: list[dict], task_id: str,
         return run
 
 
+def _recommended_actions(results: list[dict]) -> list[str]:
+    """Deterministic recommended actions derived ONLY from the result rows
+    (no model, no invented values) — the 'what should we do' of the summary."""
+    recs = []
+    for row in results:
+        status = row.get("result_status")
+        case_id = row.get("case_id", "")
+        reason = str(row.get("reason", ""))
+        if status == "MISMATCH":
+            m = _MISMATCH_FIELD_RE.search(reason)
+            if m:
+                field, expected, observed = m.groups()
+                label = _FIELD_HUMAN.get(field, field)
+                recs.append(
+                    f"Fall {case_id}: Feld \"{label}\" im Abrechnungsprogramm prüfen und "
+                    f"korrigieren — erwartet {expected}, übermittelt {observed}. "
+                    f"Test danach wiederholen.")
+            else:
+                # No field detail parsed: point at the finding, never echo the
+                # full reason here (the summary stays short; details live in 02).
+                recs.append(
+                    f"Fall {case_id}: Abweichung im Abrechnungsprogramm prüfen und der "
+                    f"Test wiederholen; Details im Befund (Abschnitt 02).")
+        elif status == "NOT_EVALUATED":
+            short_reason = reason if len(reason) <= 100 else reason[:97] + "…"
+            recs.append(
+                f"Fall {case_id}: vollständige Eingaben bereitstellen und den Test "
+                f"erneut ausführen ({short_reason}).")
+    if not recs:
+        recs.append("Keine Korrekturen erforderlich. Die Freigabe bleibt an den "
+                    "menschlichen Freigabeprozess gebunden (Gate G6).")
+    return recs
+
+
 def generate_report_pdf(artifact_path: str | Path, out_path: str | Path,
                         client_name: str | None = None, client_logo: str | Path | None = None,
                         susie_logo: str | Path | None = None, generated_at: str | None = None,
@@ -234,8 +280,25 @@ def generate_report_pdf(artifact_path: str | Path, out_path: str | Path,
     gap(5)
     text(f"Bericht-ID: {artifact.get('report_id', '')}", 9, color=muted)
     text(f"Erstellt: {generated_label}", 9, color=muted)
-    gap(22)
-    # Deterministic overview remains available without a model or credentials.
+    gap(18)
+
+    # 00 Vorbemerkung — purpose, scope, basis (deterministic preface).
+    heading("00", "Vorbemerkung")
+    text("Dieser Bericht dokumentiert die Systemüberprüfung eines Entgeltabrechnungsprogramms "
+         "im Scope der Entgeltersatzleistungen (z. B. Krankengeld, Mutterschaftsgeld). "
+         "Geprüft wurde, ob die vom Programm übermittelten Datensätze mit den offiziellen "
+         "Erwartungswerten der GKV-Spezifikationen übereinstimmen. Grundlage sind die im "
+         "Anhang (Abschnitt D) genannten Prüfgrundlagen mit Quellenangabe und Prüfsumme; "
+         "jeder Befund ist über die Belegkette bis zur Fundstelle im Originaldokument "
+         "nachvollziehbar.")
+    gap(4)
+    text("Alle Prüfdaten sind synthetisch (fabrizierte Demodaten). Der Bericht ist maschinell "
+         "erzeugt, trifft keine Rechts- oder Zertifizierungsaussage und ersetzt nicht die "
+         "Prüfung durch qualifiziertes Personal.", 9, color=muted)
+    gap(6)
+
+    # 01 Executive summary — verdict, TL;DR, recommended actions (deterministic).
+    heading("01", "Zusammenfassung und Empfehlung")
     has_defect = counts.get("MISMATCH", 0) > 0
     unknown = sum(v for k, v in counts.items() if k not in ("PASS", "MISMATCH"))
     verdict = ("Abweichungen festgestellt" if has_defect else
@@ -250,6 +313,32 @@ def generate_report_pdf(artifact_path: str | Path, out_path: str | Path,
     text(f"{len(results)} Prüfaspekte   /   {counts.get('PASS', 0)} PASS   /   "
          f"{counts.get('MISMATCH', 0)} MISMATCH   /   {unknown} offen", 9, indent=12)
     y += 20
+    # TL;DR — one sentence a decision-maker can act on.
+    mismatch_rows = [r for r in results if r.get("result_status") == "MISMATCH"]
+    n_mm = counts.get("MISMATCH", 0)
+    tldr = (f"Das Wichtigste zuerst: {verdict}. Von {len(results)} geprüften Aspekten "
+            f"bestehen {counts.get('PASS', 0)}; {n_mm} "
+            f"{'weicht' if n_mm == 1 else 'weichen'} von der offiziellen Erwartung ab, "
+            f"{unknown} {'ist' if unknown == 1 else 'sind'} nicht bewertbar.")
+    if mismatch_rows:
+        first = mismatch_rows[0]
+        m = _MISMATCH_FIELD_RE.search(str(first.get("reason", "")))
+        # Name the focused case; echo a field label only when parsed — never
+        # raw reason text (the summary must not duplicate finding content).
+        if m:
+            tldr += f" Fokus: Fall {first.get('case_id', '')} ({_FIELD_HUMAN.get(m.group(1), m.group(1))})."
+        else:
+            tldr += f" Fokus: Fall {first.get('case_id', '')} — Details in Abschnitt 02."
+    gap(6)
+    text("TL;DR", 8, "hebo", accent)
+    text(tldr, 10.5, "hebo")
+    gap(10)
+    text("Empfohlene Maßnahmen", 11, "hebo")
+    gap(6)
+    for i, rec in enumerate(_recommended_actions(results), 1):
+        text(f"{i}. {rec}", 10, indent=8)
+        gap(3)
+    gap(6)
     text("Synthetische Demonstration. Keine Rechts- oder Zertifizierungsaussage. "
          "Freigabe bleibt gesperrt.", 9, color=muted)
     for label, value in artifact.get("context") or []:
@@ -262,7 +351,7 @@ def generate_report_pdf(artifact_path: str | Path, out_path: str | Path,
         text(str(label), 8, "hebo", muted)
         text(str(value), 9.5)
 
-    heading("01", "Prüfergebnisse")
+    heading("02", "Befunde im Detail")
     text("Die folgenden Befunde geben die deterministischen Prüfergebnisse wieder. "
          "PASS gilt ausschließlich für den jeweils genannten Prüfaspekt.", 9, color=muted)
     gap(12)
@@ -300,7 +389,7 @@ def generate_report_pdf(artifact_path: str | Path, out_path: str | Path,
         gap(15)
 
     if summary:
-        heading("02", "Ergänzende Zusammenfassung")
+        heading("03", "Ergänzende Zusammenfassung")
         text("KI-Entwurf - ungeprüft", 9, "hebo", accent)
         gap(7)
         text(summary)

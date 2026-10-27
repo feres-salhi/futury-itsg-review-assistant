@@ -217,3 +217,106 @@ button{overflow-wrap:break-word}input,select{max-width:100%}.search-field,.statu
 @media(max-width:700px){.run-stats{grid-template-columns:1fr 1fr}.run-stat{padding:12px}.story-cards{grid-template-columns:1fr 1fr;gap:12px}}
 @media(max-width:360px){.story-cards,.run-stats{grid-template-columns:1fr}}
 @media print{.report-runs{break-inside:avoid;border-top:1px solid #888}.story-cards{gap:8px}}
+
+/* ---- T10-042 wave 3: offline banner + aligned side-by-side rows ---- */
+.offline-banner {
+  margin: 12px 18px; padding: 10px 14px;
+  border: 1px solid #c8133f; border-left-width: 4px; border-radius: 10px;
+  background: rgba(200, 19, 63, .08);
+  font-size: 13px; font-weight: 600;
+}
+.evidence .kv-row { min-height: 30px; align-items: center; }
+.evidence .cite { min-height: 3.4em; }
+
+/* ============================================================
+   SÜSIE shell unity (owner directive, wave 4): the rail mirrors
+   the SÜSIE sidebar exactly — same surface, same logo card with
+   glow, same pill nav. No second design language.
+   ============================================================ */
+.rail {
+  background: var(--surface);
+  border-right: 1px solid var(--line);
+  backdrop-filter: none;  /* a blur here would clip the fixed settings popover */
+}
+.brand { padding: 14px 10px; border: 1px solid var(--line); border-radius: 14px;
+  background: var(--surface); position: relative; overflow: hidden; }
+.brand::before { content: ""; position: absolute; inset: -3px; border-radius: 16px;
+  background: radial-gradient(60% 90% at 50% 50%, rgba(200, 19, 63, .22), transparent 72%);
+  animation: rail-glow 3.2s ease-in-out infinite; pointer-events: none; }
+.brand > * { position: relative; }
+@keyframes rail-glow { 0%, 100% { opacity: .5; } 50% { opacity: .85; } }
+.brand .brand-logo { display: block; margin: 0 auto; width: 150px; height: auto; }
+:root[data-mode="dark"] .brand .brand-logo { filter: brightness(0) invert(1); }
+.brand-sub { display: block; margin-top: 8px; font-size: 11px; line-height: 1.35;
+  color: var(--ink-2, #626260); text-align: center; }
+.rail nav { display: grid; gap: 4px; }
+.rail nav button { border: none; background: transparent; border-radius: 10px;
+  padding: 10px 12px; text-align: left; font-weight: 500; }
+.rail nav button:hover { background: var(--active); }
+.rail nav button.active { color: var(--accent-ink); background: var(--accent-soft); font-weight: 700; }
+@media (prefers-reduced-motion: reduce) { .brand::before { animation: none; } }
+
+/* ---- round-3 unity: nav rows like SÜSIE, one connection badge, controls slot ---- */
+.rail nav button { display: grid; grid-template-columns: 20px 1fr; column-gap: 10px; align-items: center; }
+.rail nav button .nav-sub { grid-column: 2; grid-row: 2; font-size: 11px; line-height: 1.3;
+  font-weight: 400; color: var(--muted); }
+.rail nav button.active .nav-sub { color: var(--accent-ink); }
+#backend-badge { display: none; }  /* the bottom bar already carries the connection status */
+.quick-controls { margin-top: auto; }
+
+/* ---- SÜSIE quick controls: ghost theme toggle + ghost language button ---- */
+.quick-controls { display: flex; gap: 8px; align-items: center; }
+.quick-controls .ghost-icon, .quick-controls .ghost-lang {
+  display: grid; place-items: center;
+  min-height: 34px; height: 34px;
+  border: 1px solid var(--line); border-radius: 10px;
+  background: transparent; color: var(--muted);
+  cursor: pointer; font-weight: 700;
+  transition: background .15s ease, color .15s ease;
+}
+.quick-controls .ghost-icon { width: 34px; padding: 0; }
+.quick-controls .ghost-icon svg { width: 17px; height: 17px; }
+.quick-controls .ghost-lang { min-width: 34px; padding: 0 8px; font-size: .76rem; letter-spacing: .04em; }
+.quick-controls .ghost-icon:hover, .quick-controls .ghost-lang:hover { background: var(--surface); color: var(--text); }
+.quick-controls .icon-button, .quick-controls .lang-seg { display: none; }  /* legacy, if any remains */
+
+/* back-navigation to the SÜSIE assistant app (same row pattern, external affordance) */
+.rail nav a.nav-ext {
+  display: grid; grid-template-columns: 20px 1fr; column-gap: 10px; align-items: center;
+  border: none; background: transparent; border-radius: 10px;
+  padding: 10px 12px; text-align: left; font-weight: 500;
+  color: var(--text); text-decoration: none; min-height: 44px;
+  transition: background .16s ease;
+}
+.rail nav a.nav-ext:hover { background: var(--hover, var(--active)); }
+.rail nav a.nav-ext .nav-sub { grid-column: 2; grid-row: 2; font-size: 11px; line-height: 1.3;
+  font-weight: 400; color: var(--muted); }
+
+/* ---- settings as a gear button in the [theme | lang | settings] row ---- */
+.quick-controls { position: relative; }
+.quick-controls .appearance { position: static; padding: 0; border: none; }
+.quick-controls summary.settings-btn {
+  list-style: none; width: 34px; height: 34px; padding: 0;
+  display: grid; place-items: center;
+  border: 1px solid var(--line); border-radius: 10px;
+  background: transparent; color: var(--muted); cursor: pointer;
+  transition: background .15s ease, color .15s ease;
+}
+.quick-controls summary.settings-btn::-webkit-details-marker { display: none; }
+.quick-controls summary.settings-btn:hover { background: var(--surface); color: var(--text); }
+.quick-controls summary.settings-btn svg { width: 17px; height: 17px; }
+/* fixed, not absolute: the rail is a scroll container and would clip a
+   300px popover inside its ~224px column — fixed escapes that clipping */
+.quick-controls .appearance-content {
+  position: fixed; left: 14px; bottom: calc(var(--bottom-h, 42px) + 58px);
+  width: min(320px, calc(100vw - 28px)); max-height: min(68vh, 520px); overflow-y: auto;
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: 14px; box-shadow: var(--shadow-paper);
+  padding: 14px; z-index: 60; padding-top: 14px;
+}
+
+/* ---- embedded in the SÜSIE app (?embed=1): the SÜSIE shell is the chrome ---- */
+html.embed .rail, html.embed .bottom-bar, html.embed .backdrop,
+html.embed .skip-link, html.embed .topline { display: none !important; }
+html.embed .shell { grid-template-columns: 1fr; }
+html.embed .workspace { padding: 20px 24px 24px; }

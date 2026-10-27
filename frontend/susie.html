@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>SÜSIE — Prüfakte</title>
+  <title>SÜSIE — Prüfassistent</title>
   <link rel="stylesheet" href="susie.css" />
 </head>
 <body data-theme="auto">
@@ -39,20 +39,32 @@
       <nav class="side-nav" aria-label="Hauptnavigation">
         <button class="side-link active" data-view="cases">
           <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 3h9l3 3v11H4z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M7 9h6M7 12.5h6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
-          <span>Fälle</span>
+          <span>Prüffälle</span>
+          <small class="side-sub"></small>
         </button>
         <button class="side-link" data-view="report">
           <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 3h10v14H5z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M8 7h4M8 10h4M8 13h2.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
-          <span>Protokoll</span>
+          <span>Prüfbericht</span>
+          <small class="side-sub"></small>
         </button>
         <button class="side-link" data-view="sources">
           <svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="6.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M10 6.5V10l2.5 2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
           <span>Quellen</span>
+          <small class="side-sub"></small>
         </button>
-        <a class="side-ext" href="pruefakte.html" title="Prüfakte — erweiterter Modus">
-          <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 6h14M3 10h14M3 14h14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="7.5" cy="6" r="1.8" fill="var(--surface)" stroke="currentColor" stroke-width="1.5"/><circle cx="12.5" cy="10" r="1.8" fill="var(--surface)" stroke="currentColor" stroke-width="1.5"/><circle cx="6.5" cy="14" r="1.8" fill="var(--surface)" stroke="currentColor" stroke-width="1.5"/></svg>
-          <span>Erweiterter Modus</span>
-        </a>
+<div class="side-group" role="group" id="side-group">
+          <button type="button" class="side-group-toggle" id="side-group-toggle" aria-expanded="true" aria-controls="side-group-items">
+            <span class="side-group-title" data-i18n="advGroup">Prüfakte · Experten</span>
+            <span class="chevron" aria-hidden="true">▾</span>
+          </button>
+          <div id="side-group-items" class="side-group-items">
+            <button class="side-adv" data-adv="cases"><span data-i18n="advCases">Prüffälle-Tabelle</span></button>
+            <button class="side-adv" data-adv="stories"><span data-i18n="advStories">Story-Suiten</span></button>
+            <button class="side-adv" data-adv="sources"><span data-i18n="advSources">Quellen &amp; Kriterien</span></button>
+            <button class="side-adv" data-adv="report"><span data-i18n="advReport">Prüfakte-Bericht</span></button>
+            <button class="side-adv" data-adv="audit"><span data-i18n="advAudit">Verlauf</span></button>
+          </div>
+        </div>
       </nav>
 
       <div class="side-foot">
@@ -70,18 +82,34 @@
 
         <header class="topbar">
           <div>
-            <h1 id="topbar-title">Fälle</h1>
+            <h1 id="topbar-title">Prüffälle</h1>
             <p class="topbar-sub" id="topbar-sub">Systemüberprüfung sozialversicherungsrechtlicher IT-Ergebnisse</p>
           </div>
           <div id="case-summary" class="summary-chips" aria-live="polite"></div>
         </header>
+        <div id="trust-strip" class="trust-strip" hidden></div>
 
         <!-- Cases view -->
         <section id="view-cases" class="view">
+          <div class="case-actions">
+            <button type="button" id="btn-gen-cases" class="case-act">
+              <strong data-i18n="genCasesTitle">Testfälle aus dem Gesetz erstellen</strong>
+              <span data-i18n="genCasesSub">Gesetz → Anforderung → Testfälle, ausgeführt von den KI-Rollen — erst mit Ihrer Freigabe</span>
+            </button>
+            <button type="button" id="btn-run-compare" class="case-act case-act-quiet">
+              <strong data-i18n="runCompareTitle">Abgleich mit Softwareausgabe starten</strong>
+              <span data-i18n="runCompareSub">Deterministischer Feldvergleich gegen die offizielle Erwartung — Sekunden, ohne KI</span>
+            </button>
+          </div>
           <div id="case-list" class="case-list"></div>
         </section>
 
-        <!-- Report view -->
+                <!-- Prüfakte (advanced) views — rendered inside the SÜSIE shell -->
+        <section id="view-advanced" class="view" hidden>
+          <iframe id="advanced-frame" title="Prüfakte — Expertenansicht"></iframe>
+        </section>
+
+<!-- Report view -->
         <section id="view-report" class="view" hidden>
           <div id="report-body"></div>
         </section>
@@ -123,6 +151,8 @@
 
   <!-- ============ Chat agent FAB (bottom-right flyover) ============ -->
   <button id="susie-fab" class="susie-fab" hidden aria-label="SÜSIE Assistentin öffnen" title="SÜSIE Assistentin öffnen">
+    <span class="fab-ripple" aria-hidden="true"></span>
+    <span class="fab-ripple r2" aria-hidden="true"></span>
     <span class="fab-glow" aria-hidden="true"></span>
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6.5A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5v8a2.5 2.5 0 0 1-2.5 2.5H12l-4.5 3.5V17H6.5A2.5 2.5 0 0 1 4 14.5z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="9" cy="10.5" r="1" fill="currentColor"/><circle cx="12" cy="10.5" r="1" fill="currentColor"/><circle cx="15" cy="10.5" r="1" fill="currentColor"/></svg>
   </button>
@@ -132,7 +162,7 @@
     <span class="mark" aria-hidden="true"></span>
     <span class="bottom-brand">SÜSIE</span>
     <span class="bottom-sep" aria-hidden="true"></span>
-    <span id="bottom-note" class="bottom-note">Synthetische Daten · keine Konformitäts- oder Rechtsauffassung</span>
+    <span id="bottom-note" class="bottom-note">Synthetische Daten — ohne Konformitätsaussage und ohne Rechtsberatung</span>
     <span class="bottom-spacer"></span>
     <span id="bridge-dot" class="bridge-dot" title="Bridge-Verbindung"></span>
     <span id="bridge-label" class="bridge-label">Verbinde …</span>
