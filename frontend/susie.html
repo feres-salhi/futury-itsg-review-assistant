@@ -73,18 +73,12 @@
               <span data-i18n="verlauf">Verlauf</span>
               <small class="side-sub"></small>
             </button>
-            <button class="side-link side-sub-link" data-view="stories" data-help="nav-stories">
-              <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3.5 6.5h13M3.5 10h13M3.5 13.5h8.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
-              <span data-i18n="stories">Story-Suiten</span>
-              <small class="side-sub"></small>
-            </button>
           </div>
         </div>
       </nav>
 
       <div class="side-foot">
-        <button id="font-smaller" class="ghost-lang" title="Kleinere Schrift" aria-label="Kleinere Schrift" data-help="font-smaller">A−</button>
-        <button id="font-larger" class="ghost-lang" title="Größere Schrift" aria-label="Größere Schrift" data-help="font-larger">A+</button>
+        <button id="font-toggle" class="ghost-lang" title="Schriftgröße" aria-label="Schriftgröße umschalten" data-help="font-toggle">A</button>
         <button id="lang-toggle" class="ghost-lang" title="Sprache / Language" data-help="lang-toggle">DE</button>
         <button id="whats-this" class="ghost-icon" title="Was ist das? — Erklärmodus" aria-pressed="false" data-help="whats-this">
           <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7.2 7.2a2.9 2.9 0 1 1 4.3 2.55c-.9.5-1.5 1.05-1.5 2.05v.4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="10" cy="15.2" r="1" fill="currentColor"/></svg>
@@ -150,10 +144,6 @@
         <section id="view-verlauf" class="view" hidden>
           <div id="verlauf-body" data-help="verlauf-body"></div>
         </section>
-
-        <section id="view-stories" class="view" hidden>
-          <div id="stories-body" data-help="stories-body"></div>
-        </section>
       </div>
 
       <!-- ============ Fullscreen SÜSIE mode ============ -->
@@ -198,7 +188,7 @@
     <span class="mark" aria-hidden="true"></span>
     <span class="bottom-brand">SÜSIE</span>
     <span class="bottom-sep" aria-hidden="true"></span>
-    <span id="bottom-note" class="bottom-note" data-help="foot-synthetic">Synthetische Daten — ohne Konformitätsaussage und ohne Rechtsberatung</span>
+    <span id="bottom-note" class="bottom-note" data-help="foot-synthetic" data-build="2026-10-27.r2">Synthetische Daten — ohne Konformitätsaussage und ohne Rechtsberatung</span>
     <span id="foot-notes" class="foot-notes" aria-live="polite"></span>
     <span class="bottom-spacer"></span>
     <button id="privacy-badge" class="privacy-badge" title="Datenschutz-Status" aria-expanded="false" aria-controls="privacy-panel" hidden data-help="privacy-badge">

@@ -7,6 +7,7 @@
 (() => {
   // ---------- tiny DOM helpers (literal text only — no innerHTML for data) ----------
   const $ = (id) => document.getElementById(id);
+  window.SUSIE = window.SUSIE || {}; window.SUSIE.build = BUILD;
   const el = (tag, cls, text) => {
     const n = document.createElement(tag);
     if (cls) n.className = cls;
@@ -41,7 +42,6 @@
       governance: "Governance",
       freigaben: "Freigaben", freigabenSub: "Offene menschliche Entscheidungen: Quellen, Entwürfe und Berichtsschritte, die auf Ihre Freigabe warten",
       verlauf: "Verlauf", verlaufSub: "Jede Entscheidung und jeder KI-Lauf mit Name, Zeitstempel und Begründung — die Vier-Augen-Akte",
-      stories: "Story-Suiten", storiesSub: "Szenario-Fälle mit erwarteter Abweichung — zum Durchklicken und Nachvollziehen",
       govOffline: "Verbindung zum Bridge-Server fehlt — Governance-Daten sind nur mit Backend verfügbar.",
       freigabenNone: "Nichts offen — alle Entscheidungen sind getroffen.",
       govRationalePh: "Begründung (Pflicht) …",
@@ -56,15 +56,6 @@
       verlaufAll: "Alles",
       verlaufEmpty: "Noch keine Ereignisse protokolliert.",
       verlaufMore: "Weitere laden",
-      storiesError: "Story-Suiten konnten nicht geladen werden",
-      storiesEmpty: "Keine Story-Suiten im Store.",
-      storiesSearchPh: "Story-Suiten durchsuchen …",
-      storiesSort: "Sortierung",
-      storiesSortId: "Nach ID",
-      storiesSortDev: "Nach erwarteter Abweichung",
-      storiesDev: "Erwartete Abweichung",
-      storiesNoDev: "Keine Abweichung erwartet",
-      storiesNoMatch: "Kein Treffer — Suchbegriff anpassen.",
       regExpand: "Les Ansicht vergrößern",
       regCollapse: "Les Ansicht verkleinern",
       openCaseAria: "im Prüfbericht öffnen",
@@ -188,7 +179,6 @@
       governance: "Governance",
       freigaben: "Approvals", freigabenSub: "Open human decisions: sources, drafts and report steps waiting for your approval",
       verlauf: "History", verlaufSub: "Every decision and AI run with name, timestamp and rationale — the four-eyes record",
-      stories: "Story suites", storiesSub: "Scenario cases with an expected deviation — browse and verify",
       govOffline: "Connection to the bridge server is down — governance data is only available with the backend.",
       freigabenNone: "Nothing open — all decisions have been made.",
       govRationalePh: "Rationale (required) …",
@@ -203,15 +193,6 @@
       verlaufAll: "Everything",
       verlaufEmpty: "No events recorded yet.",
       verlaufMore: "Load more",
-      storiesError: "Story suites could not be loaded",
-      storiesEmpty: "No story suites in the store.",
-      storiesSearchPh: "Search the story suites …",
-      storiesSort: "Sort order",
-      storiesSortId: "By ID",
-      storiesSortDev: "By expected deviation",
-      storiesDev: "Expected deviation",
-      storiesNoDev: "No deviation expected",
-      storiesNoMatch: "No match — adjust the search term.",
       regExpand: "Enlarge reader",
       regCollapse: "Shrink reader",
       openCaseAria: "open in the report",
@@ -796,7 +777,7 @@
   function showView(v) {
     if (v !== S.view) { S.viewStack = S.viewStack || []; S.viewStack.push(S.view); }
     S.view = v;
-    for (const id of ["cases", "report", "sources", "regulations", "freigaben", "verlauf", "stories"]) $(`view-${id}`).hidden = id !== v;
+    for (const id of ["cases", "report", "sources", "regulations", "freigaben", "verlauf"]) $(`view-${id}`).hidden = id !== v;
     $("case-summary").hidden = v !== "cases";  // the case counts mean nothing elsewhere
     document.body.dataset.view = v;
     if (v === "regulations" && !S.regLoaded) loadRegulations();
@@ -1477,65 +1458,6 @@
     }
   }
 
-  function renderStories() {
-    const body = $("stories-body"); body.textContent = "";
-    const st = S.appState || {};
-    const stories = st.stories;
-    if (!stories || stories.ok === false) {
-      const empty = el("div", "empty", stories && stories.error ? `${t("storiesError")} (${stories.error})` : t("storiesEmpty"));
-      body.appendChild(empty);
-      return;
-    }
-    const cases = Array.isArray(stories.cases) ? stories.cases : [];
-    if (!cases.length) { body.appendChild(el("div", "empty", t("storiesEmpty"))); return; }
-
-    // Controls built once; typing keeps focus (only the list node re-renders).
-    const bar = el("div", "gov-bar stories-bar");
-    const search = el("input", "gov-input stories-search");
-    search.type = "search"; search.placeholder = t("storiesSearchPh"); search.setAttribute("aria-label", t("storiesSearchPh"));
-    search.value = S.storiesFilter || "";
-    const sortSel = el("select", "gov-filter");
-    sortSel.setAttribute("aria-label", t("storiesSort"));
-    for (const [val, key] of [["id", "storiesSortId"], ["dev", "storiesSortDev"]]) {
-      const opt = el("option", "", t(key));
-      opt.value = val; sortSel.appendChild(opt);
-    }
-    sortSel.value = S.storiesSort || "id";
-    const counter = el("span", "gov-count", "");
-    const list = el("div", "stories-list");
-    bar.appendChild(search); bar.appendChild(sortSel); bar.appendChild(counter);
-    body.appendChild(bar); body.appendChild(list);
-
-    const draw = () => {
-      const q = (S.storiesFilter || "").toLowerCase();
-      let rows = cases.filter((c) => !q || JSON.stringify(c).toLowerCase().includes(q));
-      if (S.storiesSort === "dev") rows = rows.slice().sort((a, b) => String(b.expected_deviation ?? "").localeCompare(String(a.expected_deviation ?? ""), undefined, { numeric: true }));
-      counter.textContent = `${rows.length} / ${cases.length}`;
-      list.textContent = "";
-      if (!rows.length) { list.appendChild(el("div", "empty", t("storiesNoMatch"))); return; }
-      for (const story of rows) {
-        const row = el("button", "card story-row");
-        row.type = "button";
-        row.appendChild(el("span", "card-title", story.id || story.story_id || "—"));
-        const dev = story.expected_deviation ?? story.expected?.deviation ?? "";
-        if (dev !== "" && dev != null) {
-          const db = el("span", `badge ${String(dev).toUpperCase() === "NONE" || dev === false ? "badge-pass" : "badge-mismatch"}`,
-            String(dev).toUpperCase() === "NONE" || dev === false ? t("storiesNoDev") : `${t("storiesDev")}: ${dev}`);
-          row.appendChild(db);
-        }
-        const desc = story.description || story.scenario || story.summary || "";
-        if (desc) row.appendChild(el("p", "card-meta", String(desc)));
-        row.addEventListener("click", () => {
-          const open = row.classList.toggle("open");
-          row.setAttribute("aria-expanded", open ? "true" : "false");
-        });
-        list.appendChild(row);
-      }
-    };
-    search.addEventListener("input", () => { S.storiesFilter = search.value; draw(); });
-    sortSel.addEventListener("change", () => { S.storiesSort = sortSel.value; draw(); });
-    draw();
-  }
 
   // =========================================================================
   // Regulations browser (T10-045): browse + search the indexed law corpus,
@@ -2256,7 +2178,7 @@
     LANG = LANG === "de" ? "en" : "de";
     store.set("susie-ui-lang", LANG);
     applyI18n();
-    withViewGuard("cases", renderCases); withViewGuard("report", renderReport); withViewGuard("sources", renderSources); withViewGuard("stories", renderStories); withViewGuard("trust", renderTrust);
+    withViewGuard("cases", renderCases); withViewGuard("report", renderReport); withViewGuard("sources", renderSources);; withViewGuard("trust", renderTrust);
     // empty chat surfaces re-greet in the new language; an ongoing thread stays
     for (const root of [$("chat-overlay"), $("chat-full")]) {
       const logEl = root.querySelector(".chat-log");
@@ -2640,7 +2562,7 @@
         S.appState = body;
         if (sig !== lastStateSig) {
           lastStateSig = sig;
-          withViewGuard("cases", renderCases); withViewGuard("report", renderReport); withViewGuard("sources", renderSources); withViewGuard("stories", renderStories); withViewGuard("trust", renderTrust);
+          withViewGuard("cases", renderCases); withViewGuard("report", renderReport); withViewGuard("sources", renderSources);; withViewGuard("trust", renderTrust);
         }
       }
     } catch {
