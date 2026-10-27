@@ -31,10 +31,12 @@ Endpoints (127.0.0.1 only by default):
                       performs real gateway calls — the demo driver itself
                       stays fail-closed: missing credentials become recorded
                       error runs, never fabricated output)
-  POST /api/review/run → body {} (or {"scope": ...}, ignored) runs the repo's
-                      own deterministic offline run_review.py as a subprocess
-                      (lock-serialized, 120 s timeout) and returns the fresh
-                      RPT-* report as a "review" entry; failure → {"ok": false}
+  POST /api/review/run → body {} (or {"scope": ...}, ignored) re-runs the EAZ
+                      deterministic review (itsg.eaz_import over
+                      data/eaz_cases.json — the source-of-truth corpus — as a
+                      lock-serialized subprocess, 120 s timeout), writes a
+                      fresh RPT-* report and returns it as a "review" entry;
+                      failure → {"ok": false}
   POST /api/chat    → body {"session_id", "message", "reviewer": ""} runs one
                       SÜSIE chat turn (app-state context, corpus hits via the
                       --index FTS file, session history) and persists one
@@ -65,6 +67,7 @@ import sys
 import threading
 import time
 import urllib.parse
+from collections import Counter
 from datetime import datetime
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -394,24 +397,64 @@ def load_harness() -> dict | None:
     }
 
 
+def _write_eaz_review_report(store_root: Path, reports_dir: Path,
+                             cases_path: Path) -> Path:
+    """Project the store's EAZ findings (source of truth: data/eaz_cases.json)
+    onto one fresh reports/RPT-*.json in the shape _review_entry expects."""
+    records = Store(store_root)._load_records()  # noqa: SLF001 (repo-internal, same as eaz_import)
+    findings = sorted((f for f in records.get("finding", {}).values()
+                       if isinstance(f, dict)),
+                      key=lambda f: str(f.get("id", "")))
+    counts = Counter(str(f.get("status", "")) for f in findings)
+    order = ("BLOCKED", "MISMATCH", "NEEDS_REVIEW", "NOT EVALUATED", "PASS")
+    overall = next((s for s in order if counts.get(s)), "PASS")
+    now = datetime.now()
+    report_id = "RPT-" + now.strftime("%Y%m%d-%H%M%S")
+    report = {
+        "report": {"id": report_id,
+                   "created_at": now.strftime("%d.%m.%Y %H:%M"),
+                   "scope": "DTA EEL – §3.1 Beispielpapier sick-leave cases (EAZ corpus)",
+                   "template": "SYNTHETIC – no official ITSG report form found; no compliance claim",
+                   "overall_status": overall,
+                   "counts": {s: counts.get(s, 0) for s in order}},
+        "test_case": {"id": f"EAZ-{len(findings)}-cases", "source": cases_path.name,
+                      "inputs": {"corpus": str(cases_path)}},
+        "execution": {"id": "RUN-EAZ-" + report_id[4:], "file": cases_path.name,
+                      "observed": {}, "observed_sources": {}},
+        "findings": [{"id": f.get("id"), "status": f.get("status"),
+                      "reason": f.get("reason"), "links": f.get("links", [])}
+                     for f in findings],
+        "robustness": {"result": None, "reason": None, "attacks": []},
+        "review": {"reviewer": None, "decision": "pending", "timestamp": None},
+        "trace_url": None,
+    }
+    reports_dir.mkdir(parents=True, exist_ok=True)
+    path = reports_dir / f"{report_id}.json"
+    path.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n",
+                    encoding="utf-8")
+    return path
+
+
 def run_review_once() -> dict:
-    """Run the repo's own deterministic offline run_review.py (serialized,
-    bounded) and return the fresh report as a review entry."""
-    script = Path(SUSIEHandler.review_script_path)
+    """Re-run the deterministic EAZ review (itsg.eaz_import: the 30 §3.1-style
+    sick-leave cases through itsg.comparator, report re-rendered) serialized and
+    bounded, then write a fresh reports/RPT-*.json and return it as a review
+    entry. The EAZ corpus (data/eaz_cases.json) is the source of truth; the
+    legacy Vorerkrankung run_review.py path is no longer executed here."""
+    cases_path = Path(SUSIEHandler.eaz_cases_path)
+    store_root = Path(SUSIEHandler.store_root)
     reports_dir = Path(SUSIEHandler.reports_path)
-    started = time.time()
     with _review_lock:
-        proc = subprocess.run([sys.executable, str(script)], cwd=str(ROOT),
-                              capture_output=True, text=True, timeout=REVIEW_RUN_TIMEOUT_S)
+        proc = subprocess.run(
+            [sys.executable, "-m", "itsg.eaz_import", "--cases", str(cases_path),
+             "--store", str(store_root)],
+            cwd=str(ROOT), capture_output=True, text=True,
+            timeout=REVIEW_RUN_TIMEOUT_S)
     if proc.returncode != 0:
-        raise RuntimeError(f"run_review.py failed (rc={proc.returncode}): "
+        raise RuntimeError(f"itsg.eaz_import failed (rc={proc.returncode}): "
                            f"{(proc.stderr or proc.stdout or '')[-500:]}")
-    fresh = [p for p in reports_dir.glob("RPT-*.json")
-             if p.is_file() and p.stat().st_mtime > started]
-    if not fresh:
-        raise RuntimeError("run_review.py produced no new RPT-*.json report")
-    newest = max(fresh, key=lambda p: p.stat().st_mtime)
-    return _review_entry(newest, json.loads(newest.read_text(encoding="utf-8")))
+    fresh = _write_eaz_review_report(store_root, reports_dir, cases_path)
+    return _review_entry(fresh, json.loads(fresh.read_text(encoding="utf-8")))
 
 
 def load_seal(store_root: Path) -> dict | None:
@@ -790,6 +833,7 @@ class SUSIEHandler(BaseHTTPRequestHandler):
     # paths); tests may point them at temp fixtures.
     story_cases_path = ROOT / "data" / "story_cases.json"
     reports_path = ROOT / "reports"
+    eaz_cases_path = ROOT / "data" / "eaz_cases.json"
     review_script_path = ROOT / "run_review.py"
     server_version = "SUSIE-bridge/0.1"
 
@@ -834,6 +878,12 @@ class SUSIEHandler(BaseHTTPRequestHandler):
         elif path == "/api/state":
             try:
                 self._send_json(build_state(self.store_root))
+            except Exception as exc:  # bridge must never leak a broken store as data
+                self._send_json({"ok": False, "error": f"store unreadable: {exc}"}, status=500)
+        elif path == "/api/governance":
+            try:
+                from .governance import collect_governance
+                self._send_json(collect_governance(self.store_root))
             except Exception as exc:  # bridge must never leak a broken store as data
                 self._send_json({"ok": False, "error": f"store unreadable: {exc}"}, status=500)
         elif path == "/api/chat/history":
@@ -923,7 +973,7 @@ class SUSIEHandler(BaseHTTPRequestHandler):
                 self._send_json({"ok": False, "error": f"seal failed: {exc}"}, status=500)
             return
         # /api/review/run — body is ignored beyond validity ({"scope": ...} is
-        # accepted and discarded); only the repo's own run_review.py runs.
+        # accepted and discarded); only the EAZ review (itsg.eaz_import) runs.
         if path == "/api/review/run":
             try:
                 self._send_json({"ok": True, "review": run_review_once()})
