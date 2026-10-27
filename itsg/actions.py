@@ -43,7 +43,8 @@ from .timeutil import utc_now
 
 READ_ONLY_ACTIONS = (
     "select_case", "open_evidence", "filter_cases", "jump_to_source",
-    "show_comparison", "switch_mode",
+    "show_comparison", "switch_mode", "start_over", "go_back",
+    "next_case", "prev_case",
 )
 MUTATING_ACTIONS = (
     "save_note", "export_report", "run_comparison", "initiate_review_flow",
@@ -181,8 +182,11 @@ def _execute_mutating(action_id: str, params: dict, store_root: Path, reviewer: 
         }
     if action_id == "run_comparison":
         from . import demo  # lazy: keeps the heavy demo stack out of chat imports
-        demo.run_demo(store_root, live=False, fresh=False)
-        return {"executed": True, "mode": "server"}
+        # live=True re-runs the demo with real gateway calls (AI roles draft
+        # requirement + test-case candidates); offline remains the default.
+        live = bool(params.get("live", False))
+        demo.run_demo(store_root, live=live, fresh=False)
+        return {"executed": True, "mode": "server", "live": live}
     # initiate_review_flow opens the review dialog client-side; nothing to record here.
     return {"executed": True, "mode": "client"}
 

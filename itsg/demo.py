@@ -47,6 +47,7 @@ from .records import (
 from .renderer import render
 from .secrets import SecretsStore
 from .store import Store
+from .timeutil import utc_now
 from .vorerkrankung import Episode, evaluate
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -54,6 +55,10 @@ FIXTURES = ROOT / "fixtures"
 REVIEWER = "human-owner (solo mode, provisional §9 default #7)"
 OFFLINE_AUTHOR = "coding-agent offline draft (no LLM call)"
 LIVE_AUTHOR = "susie-llm-client"
+# Bounded per role (owner decision for the live demo): a stalled gateway call
+# degrades into an honest error run after this many seconds instead of holding
+# the confirmed action for minutes per role. Fallback text is recorded openly.
+LIVE_ROLE_TIMEOUT_S = 60
 
 _OFFLINE_REQUIREMENT_TEXT = (
     "Die Vorerkrankungsanfrage (Abgabegrund 41) darf nur ausgelöst werden, wenn eine "
@@ -91,7 +96,8 @@ def _offline_run(role: str, task_id: str, input_ids: list[str], result: dict,
 
 
 def _live_run(role: str, task_id: str, input_ids: list[str], user_content: str) -> dict:
-    return run_role(role, task_id, input_ids, user_content, author=LIVE_AUTHOR).to_dict()
+    return run_role(role, task_id, input_ids, user_content, author=LIVE_AUTHOR,
+                    timeout=LIVE_ROLE_TIMEOUT_S).to_dict()
 
 
 # -- candidates ---------------------------------------------------------------
@@ -355,23 +361,27 @@ def run_demo(store_root: Path, live: bool, fresh: bool, seal: bool = False,
           f"Zitat: {result.citation[:58]}…")
 
     # 6. Fabricated executions → comparator -------------------------------------
+    executed_at = utc_now()
     executions = [
-        ExecutionRecord(id="RUN-1", test_case_id="TC-1", vendor="Demo only (fabricated)",
+        ExecutionRecord(id="RUN-1", test_case_id="TC-1", vendor="Demo-Payroll (fabrizierte Daten)",
                         software_version="demo-0.1", observed=bp["expected"],
-                        evidence_ref="fixtures/bp_3_1_normal.json#expected"),
+                        evidence_ref="fixtures/bp_3_1_normal.json#expected",
+                        run_at=executed_at),
         # deliberate mismatch: base-example EAZ reported instead of the §3.2.1.4 value
-        ExecutionRecord(id="RUN-2", test_case_id="TC-2", vendor="Demo only (fabricated)",
+        ExecutionRecord(id="RUN-2", test_case_id="TC-2", vendor="Demo-Payroll (fabrizierte Daten)",
                         software_version="demo-0.1",
                         observed={"ABGABEGRUND": "01", "EAZ-BEGINN-1": "20XX0401",
                                   "EAZ-ENDE-1": "20XX0131"},
-                        evidence_ref="fixtures/bp_3_2_1_4_boundary.json#expected (deliberately altered)"),
-        ExecutionRecord(id="RUN-3", test_case_id="TC-3", vendor="Demo only (fabricated)",
+                        evidence_ref="fixtures/bp_3_2_1_4_boundary.json#expected (deliberately altered)",
+                        run_at=executed_at),
+        ExecutionRecord(id="RUN-3", test_case_id="TC-3", vendor="Demo-Payroll (fabrizierte Daten)",
                         software_version="demo-0.1", observed=None,
-                        evidence_ref=""),
-        ExecutionRecord(id="RUN-4", test_case_id="TC-4", vendor="Demo only (fabricated)",
+                        evidence_ref="", run_at=executed_at),
+        ExecutionRecord(id="RUN-4", test_case_id="TC-4", vendor="Demo-Payroll (fabrizierte Daten)",
                         software_version="demo-0.1",
                         observed={"ABGABEGRUND": "41", "VOER-ANFRAGE-AUSGELOEST": "J"},
-                        evidence_ref="fixtures/vorerkrankung_konstellation.json#expected"),
+                        evidence_ref="fixtures/vorerkrankung_konstellation.json#expected",
+                        run_at=executed_at),
     ]
     for ex in executions:
         _put(store, "execution", ex)

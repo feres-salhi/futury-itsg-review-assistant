@@ -198,7 +198,7 @@ class ActionRegistryTests(unittest.TestCase):
     def test_run_comparison_runs_offline_demo(self):
         tok = actions.propose("run_comparison", {}, "s1")["confirm_token"]
         out = actions.execute("run_comparison", {}, tok, self.store_root, "Amr")
-        self.assertEqual(out, {"executed": True, "mode": "server"})
+        self.assertEqual(out, {"executed": True, "mode": "server", "live": False})
         store = Store(self.store_root)
         self.assertTrue(store.all("report"))
         self.assertTrue(store.events())

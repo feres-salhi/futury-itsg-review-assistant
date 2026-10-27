@@ -253,6 +253,21 @@ def run_review_once() -> dict:
     return _review_entry(newest, json.loads(newest.read_text(encoding="utf-8")))
 
 
+def load_seal(store_root: Path) -> dict | None:
+    """Seal receipt info for the report artifact, if a --seal demo run left one."""
+    receipt_path = store_root / "report.artifact.json.receipt.json"
+    if not receipt_path.is_file():
+        return None
+    try:
+        receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+    except Exception:
+        return {"present": True, "run_id": "", "seq": None}
+    if not isinstance(receipt, dict):
+        return {"present": True, "run_id": "", "seq": None}
+    return {"present": True, "run_id": str(receipt.get("run_id", "")),
+            "seq": receipt.get("seq")}
+
+
 def build_state(store_root: Path) -> dict:
     """Assemble the UI payload from the store; empty store → empty draft state."""
     store = Store(store_root)
@@ -278,6 +293,7 @@ def build_state(store_root: Path) -> dict:
             "inputs": tc.get("inputs", {}),
             "evidence_ref": execution.get("evidence_ref", ""),
             "execution_id": execution.get("id", ""),
+            "run_at": execution.get("run_at", ""),
             "software": {
                 "vendor": execution.get("vendor", ""),
                 "version": execution.get("software_version", ""),
@@ -290,6 +306,7 @@ def build_state(store_root: Path) -> dict:
     source = next(iter(records.get("source", {}).values()), None)
     template = next(iter(records.get("template", {}).values()), None)
     criteria = list(records.get("criterion", {}).values())
+    requirements = list(records.get("requirement", {}).values())
     gates = list(records.get("gate", {}).values())
     state = {
         "ok": True,
@@ -302,6 +319,7 @@ def build_state(store_root: Path) -> dict:
         "source": source,
         "template": template,
         "criteria": criteria,
+        "requirements": requirements,
         "cases": cases,
         "report": {
             "id": report_record.get("id") if report_record else None,
@@ -324,6 +342,10 @@ def build_state(store_root: Path) -> dict:
         state["harness"] = load_harness()
     except Exception:
         state["harness"] = None
+    try:
+        state["seal"] = load_seal(store_root)
+    except Exception:
+        state["seal"] = None
     return state
 
 
@@ -339,6 +361,135 @@ def run_demo_into(store_root: Path, live: bool) -> dict:
 
 
 _pdf_lock = threading.Lock()
+
+# Live seal demo state (T10-042): the throwaway in-process receipt office is
+# kept alive between the "seal" and "tamper-demo" calls so the TAMPERED
+# verification runs against the SAME office and ledger as the receipt.
+_seal_office: dict | None = None
+_seal_demo_lock = threading.Lock()
+
+
+def run_seal_action(store_root: Path, action: str) -> dict:
+    """Live seal demo (owner directive: the seal USP must be visible on stage).
+
+    ``seal``         — receipt for the report artifact from a throwaway
+                       in-process ITSG receipt office (HMAC, hash-chained
+                       ledger in the store); the receipt file lands next to
+                       the artifact so /api/state surfaces it.
+    ``verify``       — re-verify the stored artifact against the receipt.
+    ``tamper-demo``  — flip one byte in a TEMP COPY and verify that against
+                       the receipt → TAMPERED. The store original is never
+                       modified; the demo is honest about that.
+
+    Any failure raises; the endpoint maps it to a JSON error — a failed seal
+    is evidence information, never fabricated success.
+    """
+    global _seal_office
+    import tempfile
+
+    from . import report_pdf
+
+    seal_dir = ROOT / "seal"
+    if not (seal_dir / "server.py").is_file():
+        raise RuntimeError("seal service not present in this checkout")
+    if str(seal_dir) not in sys.path:
+        sys.path.insert(0, str(seal_dir))
+    import secrets as _pysecrets
+    import threading as _threading
+
+    import client as seal_client
+    import server as seal_server
+    import verify as seal_verify
+
+    artifact = report_pdf.find_artifact(store_root)
+    state_file = store_root / "seal-current-run"
+
+    def _start_office() -> dict:
+        own_server = seal_server.make_server(
+            {"SEAL_SECRET": _pysecrets.token_hex(32),
+             "SEAL_VENDOR_TOKEN": _pysecrets.token_hex(16),
+             "SEAL_ADMIN_TOKEN": _pysecrets.token_hex(16),
+             "SEAL_LEDGER": str(store_root / "seal-ledger.jsonl")},
+            "127.0.0.1", 0)
+        _threading.Thread(target=own_server.serve_forever,
+                          kwargs={"poll_interval": 0.05}, daemon=True).start()
+        return {"url": f"http://127.0.0.1:{own_server.server_address[1]}",
+                "vendor": own_server.app.vendor_token,
+                "admin": own_server.app.admin_token}
+
+    with _seal_demo_lock:
+        if _seal_office is None:
+            _seal_office = _start_office()
+
+        if action == "seal":
+          for _attempt in (1, 2):
+            try:
+                run = seal_client.start_run(_seal_office["url"], _seal_office["vendor"],
+                                            state_file=state_file)
+                res = seal_client.submit(artifact, run_id=run["run_id"], url=_seal_office["url"],
+                                         token=_seal_office["vendor"], state_file=state_file)
+                check = seal_verify.verify_files(artifact, res["receipt_file"],
+                                                 url=_seal_office["url"], token=_seal_office["admin"])
+                out = {"action": "seal", "result": check["result"], "reason": check.get("reason", ""),
+                        "run_id": run["run_id"], "receipt_seq": res["receipt"].get("seq"),
+                        "receipt_file": res["receipt_file"], "artifact": artifact.name}
+                if _attempt == 2:
+                    out["note"] = ("Das frühere Siegel-Konto stammte aus einem anderen Demo-Lauf "
+                                   "(andere Schlüssel) und wurde archiviert — neuer Ledger, "
+                                   "erste Quittung dieser Sitzung.")
+                return out
+            except Exception as exc:
+                # Re-sealing the same artifact is a replay by design — the
+                # honest answer is to verify the EXISTING receipt instead.
+                if "already submitted" in str(exc).lower() or "replay" in str(exc).lower():
+                    receipt_file = artifact.with_name(artifact.name + ".receipt.json")
+                    if receipt_file.is_file():
+                        check = seal_verify.verify_files(
+                            artifact, receipt_file, url=_seal_office["url"],
+                            token=_seal_office["admin"])
+                        return {"action": "seal", "result": check["result"],
+                                "reason": check.get("reason", ""), "already_sealed": True,
+                                "note": "Dieser Bericht ist bereits versiegelt — die vorhandene "
+                                        "Quittung wurde geprüft (erneutes Siegeln desselben "
+                                        "Berichts wäre ein Replay und wird vom Dienst korrekt "
+                                        "abgelehnt).",
+                                "artifact": artifact.name}
+                # A ledger from an earlier demo run (different HMAC keys) is
+                # refused by the service — fail-closed is correct. Archive it
+                # honestly and retry ONCE with a fresh office + ledger.
+                if (_attempt == 1 and ("damaged" in str(exc).lower()
+                                       or "invalid mac" in str(exc).lower())):
+                    ledger = store_root / "seal-ledger.jsonl"
+                    if ledger.is_file():
+                        ledger.rename(store_root / f"seal-ledger-archived-{utc_now().replace(':', '')}.jsonl")
+                    _seal_office = _start_office()
+                    continue
+                raise
+        if action == "verify":
+            receipt_file = artifact.with_name(artifact.name + ".receipt.json")
+            if not receipt_file.is_file():
+                raise RuntimeError("no receipt yet — seal the artifact first")
+            check = seal_verify.verify_files(artifact, receipt_file,
+                                             url=_seal_office["url"], token=_seal_office["admin"])
+            return {"action": "verify", "result": check["result"], "reason": check.get("reason", "")}
+        if action == "tamper-demo":
+            receipt_file = artifact.with_name(artifact.name + ".receipt.json")
+            if not receipt_file.is_file():
+                raise RuntimeError("no receipt yet — seal the artifact first")
+            with tempfile.TemporaryDirectory() as tmp:
+                tampered = Path(tmp) / ("TAMPERED-" + artifact.name)
+                data = bytearray(artifact.read_bytes())
+                marker = data.find(b"20XX0101")
+                if marker < 0:
+                    marker = max(0, len(data) // 2)
+                data[marker] = (data[marker] + 1) % 256  # flip exactly one byte
+                tampered.write_bytes(bytes(data))
+                check = seal_verify.verify_files(tampered, receipt_file,
+                                                 url=_seal_office["url"], token=_seal_office["admin"])
+            return {"action": "tamper-demo", "result": check["result"],
+                    "reason": check.get("reason", ""),
+                    "note": "an einer Kopie simuliert — das Original im Store bleibt unverändert"}
+    raise ValueError(f"unknown seal action: {action!r}")
 
 
 def build_report_pdf(store_root: Path, live: bool = False,
@@ -468,6 +619,9 @@ class SUSIEHandler(BaseHTTPRequestHandler):
         self.send_response(200)
         self.send_header("Content-Type", MIME.get(target.suffix, "application/octet-stream"))
         self.send_header("Content-Length", str(len(body)))
+        # no-store for static files: a stale stylesheet/javascript mid-demo is
+        # worse than re-fetching a few KB from localhost
+        self.send_header("Cache-Control", "no-store")
         self.end_headers()
         self.wfile.write(body)
 
@@ -499,7 +653,7 @@ class SUSIEHandler(BaseHTTPRequestHandler):
     def do_POST(self) -> None:  # noqa: N802 (http.server API)
         path = self.path.split("?", 1)[0]
         if path not in ("/api/run", "/api/review/run", "/api/chat", "/api/action",
-                        "/api/report/pdf"):
+                        "/api/report/pdf", "/api/report/seal"):
             self._send_json({"ok": False, "error": "not found"}, status=404)
             return
         length = int(self.headers.get("Content-Length") or 0)
@@ -522,6 +676,18 @@ class SUSIEHandler(BaseHTTPRequestHandler):
             return
         if path == "/api/report/pdf":
             self._report_pdf(body)
+            return
+        if path == "/api/report/seal":
+            action = body.get("action", "")
+            if action not in ("seal", "verify", "tamper-demo"):
+                self._send_json({"ok": False,
+                                 "error": "action must be seal | verify | tamper-demo"}, status=400)
+                return
+            try:
+                self._send_json({"ok": True,
+                                 **run_seal_action(self.store_root, action)})
+            except Exception as exc:
+                self._send_json({"ok": False, "error": f"seal failed: {exc}"}, status=500)
             return
         # /api/review/run — body is ignored beyond validity ({"scope": ...} is
         # accepted and discarded); only the repo's own run_review.py runs.
