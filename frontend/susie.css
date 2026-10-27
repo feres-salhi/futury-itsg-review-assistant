@@ -123,16 +123,16 @@ h2 { font-size: 1.1rem; letter-spacing: -.01em; margin: 0 0 .5rem; }
 }
 
 .side-nav { display: flex; flex-direction: column; gap: 4px; margin-top: 22px; }
-.side-link {
+.side-link, .side-ext {
   display: flex; align-items: center; gap: 10px;
   padding: 9px 12px;
   border: none; border-radius: var(--radius-ctl);
   background: transparent; color: var(--ink-2);
-  text-align: left; font-weight: 500;
+  text-align: left; font-weight: 500; text-decoration: none;
   transition: background .15s var(--ease-out), color .15s var(--ease-out);
 }
-.side-link svg { width: 19px; height: 19px; flex: none; }
-.side-link:hover { background: var(--surface); color: var(--ink); }
+.side-link svg, .side-ext svg { width: 19px; height: 19px; flex: none; }
+.side-link:hover, .side-ext:hover { background: var(--surface); color: var(--ink); }
 .side-link.active { background: var(--accent-soft); color: var(--accent-ink); }
 .side-foot { margin-top: auto; display: flex; justify-content: flex-start; }
 
@@ -481,8 +481,8 @@ h2 { font-size: 1.1rem; letter-spacing: -.01em; margin: 0 0 .5rem; }
 @media (max-width: 900px) {
   .app { grid-template-columns: 68px 1fr; }
   .susie-logo-img { width: 44px; }
-  .side-link span { display: none; }
-  .side-link { justify-content: center; padding: 10px; }
+  .side-link span, .side-ext span { display: none; }
+  .side-link, .side-ext { justify-content: center; padding: 10px; }
   .susie-overlay { width: min(360px, calc(100vw - 24px)); }
 }
 @media (max-width: 640px) {

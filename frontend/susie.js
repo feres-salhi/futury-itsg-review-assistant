@@ -35,6 +35,7 @@
   const I18N = {
     de: {
       cases: "Fälle", report: "Protokoll", sources: "Quellen",
+      advanced: "Erweiterter Modus",
       topTitle: "Fälle",
       topSub: "Systemüberprüfung sozialversicherungsrechtlicher IT-Ergebnisse",
       ask: "Fragen Sie SÜSIE …", yourName: "Ihr Name …", start: "Starten",
@@ -64,6 +65,7 @@
     },
     en: {
       cases: "Cases", report: "Report", sources: "Sources",
+      advanced: "Advanced mode",
       topTitle: "Cases",
       topSub: "Systematic review of social-insurance IT results",
       ask: "Ask SÜSIE …", yourName: "Your name …", start: "Start",
@@ -126,6 +128,10 @@
     document.documentElement.lang = LANG;
     document.querySelectorAll(".side-link").forEach((b) => {
       b.querySelector("span").textContent = I18N[LANG][b.dataset.view];
+    });
+    document.querySelectorAll(".side-ext").forEach((a) => {
+      a.querySelector("span").textContent = t("advanced");
+      a.title = t("advanced") + " — Prüfakte";
     });
     $("topbar-title").textContent = t("topTitle");
     $("topbar-sub").textContent = t("topSub");
