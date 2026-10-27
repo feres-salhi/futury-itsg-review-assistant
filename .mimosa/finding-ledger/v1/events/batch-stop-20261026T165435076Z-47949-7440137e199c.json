@@ -1,0 +1,248 @@
+{
+  "schemaVersion": "mimosa-finding-ledger-batch/v1",
+  "batchId": "stop-20261026T165435076Z-47949-7440137e199c",
+  "runId": "20261026T165435076Z-47949-7440137e199c",
+  "runStatus": "inconclusive",
+  "coverage": {
+    "status": "partial",
+    "reasons": [
+      {
+        "code": "baseline_snapshot_unreadable",
+        "stage": "baseline-read",
+        "target": ".agents/skills/taste-skill/assets/base.js",
+        "detail": "file is missing from task baseline",
+        "affectsCompletion": true
+      },
+      {
+        "code": "baseline_snapshot_unreadable",
+        "stage": "baseline-read",
+        "target": ".agents/skills/taste-skill/assets/charts.js",
+        "detail": "file is missing from task baseline",
+        "affectsCompletion": true
+      },
+      {
+        "code": "baseline_snapshot_unreadable",
+        "stage": "baseline-read",
+        "target": ".agents/skills/taste-skill/assets/scenes/stage.js",
+        "detail": "file is missing from task baseline",
+        "affectsCompletion": true
+      },
+      {
+        "code": "baseline_snapshot_unreadable",
+        "stage": "baseline-read",
+        "target": ".agents/skills/impeccable/scripts/live-browser-dom.js",
+        "detail": "file is missing from task baseline",
+        "affectsCompletion": true
+      },
+      {
+        "code": "baseline_snapshot_unreadable",
+        "stage": "baseline-read",
+        "target": ".agents/skills/impeccable/scripts/live-browser-ignores.js",
+        "detail": "file is missing from task baseline",
+        "affectsCompletion": true
+      },
+      {
+        "code": "baseline_snapshot_unreadable",
+        "stage": "baseline-read",
+        "target": ".agents/skills/impeccable/scripts/live-browser-session.js",
+        "detail": "file is missing from task baseline",
+        "affectsCompletion": true
+      },
+      {
+        "code": "baseline_snapshot_unreadable",
+        "stage": "baseline-read",
+        "target": ".agents/skills/impeccable/scripts/live-browser.js",
+        "detail": "file is missing from task baseline",
+        "affectsCompletion": true
+      },
+      {
+        "code": "baseline_snapshot_unreadable",
+        "stage": "baseline-read",
+        "target": ".agents/skills/impeccable/scripts/modern-screenshot.umd.js",
+        "detail": "file is missing from task baseline",
+        "affectsCompletion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": ".agents/skills/taste-skill/assets/base.js",
+        "detail": "spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": ".agents/skills/taste-skill/assets/charts.js",
+        "detail": "spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": ".agents/skills/taste-skill/assets/scenes/stage.js",
+        "detail": "spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": ".agents/skills/impeccable/scripts/live-browser-dom.js",
+        "detail": "spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": ".agents/skills/impeccable/scripts/live-browser-ignores.js",
+        "detail": "spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": ".agents/skills/impeccable/scripts/live-browser-session.js",
+        "detail": "spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": ".agents/skills/impeccable/scripts/live-browser.js",
+        "detail": "spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": ".agents/skills/impeccable/scripts/modern-screenshot.umd.js",
+        "detail": "spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "baseline-read",
+        "target": ".agents/skills/taste-skill/assets/base.js",
+        "detail": "baseline_snapshot_unreadable: file is missing from task baseline",
+        "affectsCompletion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "baseline-read",
+        "target": ".agents/skills/taste-skill/assets/charts.js",
+        "detail": "baseline_snapshot_unreadable: file is missing from task baseline",
+        "affectsCompletion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "baseline-read",
+        "target": ".agents/skills/taste-skill/assets/scenes/stage.js",
+        "detail": "baseline_snapshot_unreadable: file is missing from task baseline",
+        "affectsCompletion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "baseline-read",
+        "target": ".agents/skills/impeccable/scripts/live-browser-dom.js",
+        "detail": "baseline_snapshot_unreadable: file is missing from task baseline",
+        "affectsCompletion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "baseline-read",
+        "target": ".agents/skills/impeccable/scripts/live-browser-ignores.js",
+        "detail": "baseline_snapshot_unreadable: file is missing from task baseline",
+        "affectsCompletion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "baseline-read",
+        "target": ".agents/skills/impeccable/scripts/live-browser-session.js",
+        "detail": "baseline_snapshot_unreadable: file is missing from task baseline",
+        "affectsCompletion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "baseline-read",
+        "target": ".agents/skills/impeccable/scripts/live-browser.js",
+        "detail": "baseline_snapshot_unreadable: file is missing from task baseline",
+        "affectsCompletion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "baseline-read",
+        "target": ".agents/skills/impeccable/scripts/modern-screenshot.umd.js",
+        "detail": "baseline_snapshot_unreadable: file is missing from task baseline",
+        "affectsCompletion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": ".agents/skills/taste-skill/assets/base.js",
+        "detail": "scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": ".agents/skills/taste-skill/assets/charts.js",
+        "detail": "scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": ".agents/skills/taste-skill/assets/scenes/stage.js",
+        "detail": "scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": ".agents/skills/impeccable/scripts/live-browser-dom.js",
+        "detail": "scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": ".agents/skills/impeccable/scripts/live-browser-ignores.js",
+        "detail": "scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": ".agents/skills/impeccable/scripts/live-browser-session.js",
+        "detail": "scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": ".agents/skills/impeccable/scripts/live-browser.js",
+        "detail": "scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": ".agents/skills/impeccable/scripts/modern-screenshot.umd.js",
+        "detail": "scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      }
+    ]
+  },
+  "source": {
+    "component": "zcode-hook",
+    "operationId": "Stop"
+  },
+  "revision": "090703782aaa5e63b113e39178a30fd5c0f5b039",
+  "diffHash": "b270fb1b65f5e545894e098c6b2e95bffc1f3cbbac5d4cb655e35bb734047db1",
+  "rulesVersion": "unavailable",
+  "sessionHash": "351a1abaeb98e7bd3b9ee11a9c5d3a3fa680463e75d8ee8f0865b35300c53a94",
+  "reportRef": ".mimosa/reports/task-review-session_0af5e4b32e7f6c8d0481cad3988e984b-20261026T165435076Z-47949-7440137e199c.json",
+  "events": [],
+  "observedFindingIds": [],
+  "verifiedFiles": [],
+  "recordedAt": "2026-10-26T16:54:36.073Z"
+}

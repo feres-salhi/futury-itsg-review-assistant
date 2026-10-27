@@ -1,4 +1,10 @@
-"""Header-based chunking of the three ITSG EEL specification PDFs into Markdown.
+"""Header-based chunking of the ITSG EEL specification PDFs into Markdown.
+
+ADOPTED IMPLEMENTATION (T10-031): authored by Team 10 teammates on `main`
+(snapshot futury_team_10-main.zip, 2026-10-26), audited and adopted verbatim
+by the backend session — see src/PROVENANCE.md for the audit evidence
+(0 words lost across all six documents when re-run against this repo's
+corpus; byte-identical chunk regeneration; 83/83 VB cross-references).
 
 PyMuPDF reads every text span with its position and font size. Rows are rebuilt
 from spans, running headers/footers are cut by y-position, and chunks are split
@@ -349,18 +355,24 @@ def main():
     for p in OUT.iterdir():  # empty the folder, keep it (Windows locks an open cwd)
         shutil.rmtree(p) if p.is_dir() else p.unlink()
     report, index, removed_all = {}, [], {}
-    with open(OUT / "chunks.jsonl", "w", encoding="utf-8") as jl:
-        for name, cfg in DOCS.items():
-            doc, toc, chunks, removed = chunk_doc(name, cfg)
-            (OUT / name).mkdir()
-            for c in chunks:
-                meta, md = to_markdown(name, cfg, c)
-                fname = f"{c['section']}.md"
-                (OUT / name / fname).write_text(md, encoding="utf-8")
-                jl.write(json.dumps({**meta, "text": c["text"], "path": f"{name}/{fname}"}, ensure_ascii=False) + "\n")
-                index.append((name, c["section"], c["title"], meta["page_start"], meta["page_end"], f"{name}/{fname}"))
-            report[name] = check(name, cfg, doc, toc, chunks)
-            removed_all[name] = removed.most_common(12)
+    jsonl_lines = []
+    for name, cfg in DOCS.items():
+        doc, toc, chunks, removed = chunk_doc(name, cfg)
+        doc_dir = (OUT / name).resolve()
+        doc_dir.mkdir()
+        for c in chunks:
+            meta, md = to_markdown(name, cfg, c)
+            # section numbers come from parsed PDF text; strip anything path-like before it becomes a filename
+            fname = re.sub(r"[^0-9A-Za-z._-]", "_", str(c["section"])) + ".md"
+            target = doc_dir / fname
+            if not target.resolve().is_relative_to(doc_dir):  # containment: never escape the chunks dir
+                raise ValueError(f"chunk filename escapes output dir: {fname!r}")
+            target.write_text(md, encoding="utf-8")
+            jsonl_lines.append(json.dumps({**meta, "text": c["text"], "path": f"{name}/{fname}"}, ensure_ascii=False) + "\n")
+            index.append((name, c["section"], c["title"], meta["page_start"], meta["page_end"], f"{name}/{fname}"))
+        report[name] = check(name, cfg, doc, toc, chunks)
+        removed_all[name] = removed.most_common(12)
+    (OUT / "chunks.jsonl").write_text("".join(jsonl_lines), encoding="utf-8")
     write_index(index)
     (OUT / "REPORT.json").write_text(json.dumps(dict(checks=report, removed_rows=removed_all), ensure_ascii=False, indent=1), encoding="utf-8")
     for name, r in report.items():

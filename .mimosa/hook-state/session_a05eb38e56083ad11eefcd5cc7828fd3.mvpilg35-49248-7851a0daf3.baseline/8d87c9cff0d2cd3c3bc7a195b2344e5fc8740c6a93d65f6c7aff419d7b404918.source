@@ -1,0 +1,33 @@
+"""Mandated-form report renderer (plan.md vertical slice, architecture.md §8).
+
+Contract for the implementation:
+
+  - render into the applicable official template version; preserve required
+    fields, labels, order, structure, units, date conventions, and output
+    type — never substitute a generic narrative;
+  - refuse (raise) when the template is unknown, unverified, superseded, or
+    date-inapplicable: blocked, not a compliant-looking report;
+  - field mapping is deterministic; an LLM may draft only explicitly
+    permitted explanatory fields;
+  - record template id/version/checksum, renderer version, and field-map
+    version on the ReportRecord.
+
+If no official form is verified, use the clearly labeled synthetic template
+in fixtures/ and leave compliance_claim False (no compliance claim).
+"""
+from __future__ import annotations
+
+from .records import FindingRecord, ReportRecord, TemplateRecord
+
+RENDERER_VERSION = "itsg.renderer/0.1.0"
+
+
+def render(
+    report_id: str,
+    template: TemplateRecord,
+    template_profile: dict,
+    findings: list[FindingRecord],
+    field_map_version: str = "unmapped",
+) -> ReportRecord:
+    """Render findings into the template structure. STUB — implemented with the demo slice."""
+    raise NotImplementedError("report rendering (demo vertical slice, plan.md step 6)")

@@ -1,0 +1,401 @@
+{
+  "schema_version": "mimosa-task-review/v2",
+  "run_id": "20261026T223037767Z-91700-d435effbf37a",
+  "run_status": "inconclusive",
+  "errors": [
+    {
+      "stage": "scan",
+      "target": "itsg/report_pdf.py",
+      "reason": "scanner_failed: spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "tests/test_report_pdf.py",
+      "reason": "scanner_failed: spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "itsg/webserver.py",
+      "reason": "scanner_failed: spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "tests/test_chat.py",
+      "reason": "scanner_failed: spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "itsg/candidates.py",
+      "reason": "scanner_failed: spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "itsg/chat.py",
+      "reason": "scanner_failed: spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "frontend/pruefakte.js",
+      "reason": "scanner_failed: spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT"
+    }
+  ],
+  "coverage": {
+    "schema_version": "mimosa-hook-coverage/v1",
+    "status": "partial",
+    "scope": "hook_observed_diff",
+    "baseline": {
+      "complete": true,
+      "captured_files": 100,
+      "candidate_limit": 5000,
+      "truncated": false,
+      "enumeration_error_count": 0,
+      "snapshot_error_count": 0,
+      "compensated_target_count": 7
+    },
+    "change_tracking": {
+      "touched_observed": 3,
+      "touched_retained": 3,
+      "truncated": false,
+      "bash_mutation": true,
+      "bash_discovered": 7,
+      "bash_discovery_limit": 80,
+      "bash_discovery_truncated": false
+    },
+    "candidates": {
+      "eligible_files": 7,
+      "selected_files": 7,
+      "limit": 20,
+      "truncated": false
+    },
+    "scanning": {
+      "required_files": 7,
+      "scanned_files": 0,
+      "skipped_files": 0,
+      "failed_files": 7,
+      "project_checks_required": 0,
+      "project_checks_completed": 0
+    },
+    "notification": {
+      "eligible_findings": 0,
+      "detailed_findings": 0,
+      "detail_limit": 3,
+      "truncated": false
+    },
+    "reason_counts": {
+      "scanner_failed": 7,
+      "project_check_failed": 7
+    },
+    "reasons": [
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "itsg/report_pdf.py",
+        "detail": "spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "tests/test_report_pdf.py",
+        "detail": "spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "itsg/webserver.py",
+        "detail": "spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "tests/test_chat.py",
+        "detail": "spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "itsg/candidates.py",
+        "detail": "spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "itsg/chat.py",
+        "detail": "spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "frontend/pruefakte.js",
+        "detail": "spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "itsg/report_pdf.py",
+        "detail": "scanner_failed: spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "tests/test_report_pdf.py",
+        "detail": "scanner_failed: spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "itsg/webserver.py",
+        "detail": "scanner_failed: spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "tests/test_chat.py",
+        "detail": "scanner_failed: spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "itsg/candidates.py",
+        "detail": "scanner_failed: spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "itsg/chat.py",
+        "detail": "scanner_failed: spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "frontend/pruefakte.js",
+        "detail": "scanner_failed: spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT",
+        "affects_completion": true
+      }
+    ],
+    "reasons_truncated": false
+  },
+  "generated_at": "2026-10-26T22:30:37.767Z",
+  "session_id": "session_10ef5f1b2df22d4570d5a4ea7413ae31",
+  "target": ".",
+  "revision": "69560c9a1c42af17e65fc00229b2aafc8d215f57",
+  "rules_version": "unavailable",
+  "diff_hash": "704f43273ff0cdc6c36649c7aa456a4226337af13a2f1874835cea830df0f576",
+  "diff": {
+    "algorithm": "sha256",
+    "changed_file_count": 7,
+    "changed_files": [
+      {
+        "file": "frontend/pruefakte.js",
+        "ranges": [
+          {
+            "start": 41,
+            "end": 43
+          },
+          {
+            "start": 229,
+            "end": 231
+          },
+          {
+            "start": 1164,
+            "end": 1182
+          }
+        ],
+        "before_hash": "2817c6930e62d295fdc5307ca06f701e84f2b865740afbc9c1a1ad0e9b019bff",
+        "after_hash": "4eb32dadfc7acaa91da1c3581a316f370112e9c4250f030201360b39b5db23e9"
+      },
+      {
+        "file": "itsg/candidates.py",
+        "ranges": [
+          {
+            "start": 57,
+            "end": 57
+          },
+          {
+            "start": 64,
+            "end": 64
+          },
+          {
+            "start": 72,
+            "end": 72
+          }
+        ],
+        "before_hash": "0e454e72a491602d5a91d9d5ca9f4034ea9493f364bb495c5a4f315604329520",
+        "after_hash": "ebcf9e34902b9d33f25e8ead8cef3d276a39b4944bb624a25cc4eb5d06865ee3"
+      },
+      {
+        "file": "itsg/chat.py",
+        "ranges": [
+          {
+            "start": 46,
+            "end": 77
+          },
+          {
+            "start": 88,
+            "end": 88
+          },
+          {
+            "start": 114,
+            "end": 115
+          }
+        ],
+        "before_hash": "f321145f073b3f75d75e929c4b4790807f792c08a95ec9e260abe8662991dc30",
+        "after_hash": "0a40867db509503682e6ee15bd65600236747873bd3174b7eb62f5b9aae33395"
+      },
+      {
+        "file": "itsg/report_pdf.py",
+        "ranges": [
+          {
+            "start": 183,
+            "end": 183
+          },
+          {
+            "start": 185,
+            "end": 186
+          },
+          {
+            "start": 195,
+            "end": 195
+          },
+          {
+            "start": 335,
+            "end": 337
+          },
+          {
+            "start": 343,
+            "end": 343
+          },
+          {
+            "start": 378,
+            "end": 378
+          },
+          {
+            "start": 411,
+            "end": 411
+          }
+        ],
+        "before_hash": "f7bd2f8c2b8110fb42b1094682f77cf7f26f65eeb5983248ccc2299cc74f4f1f",
+        "after_hash": "3784099e23dc6ccde1c6d987871a35768542ab2696ec80c65d3b07aa3fea6a70"
+      },
+      {
+        "file": "itsg/webserver.py",
+        "ranges": [
+          {
+            "start": 15,
+            "end": 21
+          },
+          {
+            "start": 341,
+            "end": 379
+          },
+          {
+            "start": 494,
+            "end": 495
+          },
+          {
+            "start": 501,
+            "end": 502
+          },
+          {
+            "start": 523,
+            "end": 525
+          },
+          {
+            "start": 559,
+            "end": 584
+          }
+        ],
+        "before_hash": "a844b26789c05a9bf20aef856fa44ea54bb334459effefd4e17466f99723f35c",
+        "after_hash": "518e894b4d7c2bb2e354daa06ad8d95a4a83ee93c6e8d6709bb09e4e1fef555a"
+      },
+      {
+        "file": "tests/test_chat.py",
+        "ranges": [
+          {
+            "start": 66,
+            "end": 80
+          }
+        ],
+        "before_hash": "299c8bcf7eb8626bc44b3796097af57f10930cf7914afa8703f5572cc0d24e51",
+        "after_hash": "36fe344fd643de73e9767957801c2f3189a2233ad0acadbdabbc9b509e787749"
+      },
+      {
+        "file": "tests/test_report_pdf.py",
+        "ranges": [
+          {
+            "start": 98,
+            "end": 98
+          },
+          {
+            "start": 100,
+            "end": 104
+          }
+        ],
+        "before_hash": "de6d7824ddc70af450f608b4dd6188cf156d94ce3405aadc8d0ac0c4a1edf33d",
+        "after_hash": "e87a81d0c0548051b9bba2148d5b85678d0530469d217eae26fcffeb0512d583"
+      }
+    ]
+  },
+  "timing": {
+    "started_at": "2026-10-26T22:30:34.776Z",
+    "completed_at": "2026-10-26T22:30:37.767Z",
+    "duration_ms": 2991,
+    "measurement": "hook_wall_clock"
+  },
+  "tokens": {
+    "input": 0,
+    "output": 0,
+    "total": 0,
+    "model_calls": 0,
+    "measurement": "known-zero"
+  },
+  "telemetry": {
+    "schemaVersion": "mimosa-gate-telemetry/v1",
+    "profile": "gate",
+    "operation": "Stop",
+    "outcome": "partial/INCONCLUSIVE",
+    "latencyMs": 2991,
+    "peakMemoryBytes": 108474368,
+    "memoryMeasurement": "max-observed-process-rss",
+    "scannedFiles": 0,
+    "cache": {
+      "hits": 0,
+      "misses": 0,
+      "measurement": "not-applicable"
+    },
+    "denyCount": 0,
+    "tokens": {
+      "input": 0,
+      "output": 0,
+      "total": 0,
+      "modelCalls": 0,
+      "measurement": "known-zero"
+    }
+  },
+  "finding_count": 0,
+  "rewake_finding_count": 0,
+  "evidence_boundary": {
+    "scan": "candidate",
+    "static_fix_verification": "observed_static_only",
+    "runtime_verification": "not_performed"
+  },
+  "finding_events": [],
+  "findings": [],
+  "artifacts": {
+    "immutable_report": ".mimosa/reports/task-review-session_10ef5f1b2df22d4570d5a4ea7413ae31-20261026T223037767Z-91700-d435effbf37a.json",
+    "latest_report": ".mimosa/reports/task-review-session_10ef5f1b2df22d4570d5a4ea7413ae31.json",
+    "history_summary": ".mimosa/history/run-20261026T223037767Z-91700-d435effbf37a.json"
+  }
+}

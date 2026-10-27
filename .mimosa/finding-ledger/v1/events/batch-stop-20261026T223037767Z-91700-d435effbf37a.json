@@ -1,0 +1,122 @@
+{
+  "schemaVersion": "mimosa-finding-ledger-batch/v1",
+  "batchId": "stop-20261026T223037767Z-91700-d435effbf37a",
+  "runId": "20261026T223037767Z-91700-d435effbf37a",
+  "runStatus": "inconclusive",
+  "coverage": {
+    "status": "partial",
+    "reasons": [
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "itsg/report_pdf.py",
+        "detail": "spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "tests/test_report_pdf.py",
+        "detail": "spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "itsg/webserver.py",
+        "detail": "spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "tests/test_chat.py",
+        "detail": "spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "itsg/candidates.py",
+        "detail": "spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "itsg/chat.py",
+        "detail": "spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "frontend/pruefakte.js",
+        "detail": "spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "itsg/report_pdf.py",
+        "detail": "scanner_failed: spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "tests/test_report_pdf.py",
+        "detail": "scanner_failed: spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "itsg/webserver.py",
+        "detail": "scanner_failed: spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "tests/test_chat.py",
+        "detail": "scanner_failed: spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "itsg/candidates.py",
+        "detail": "scanner_failed: spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "itsg/chat.py",
+        "detail": "scanner_failed: spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "frontend/pruefakte.js",
+        "detail": "scanner_failed: spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      }
+    ]
+  },
+  "source": {
+    "component": "zcode-hook",
+    "operationId": "Stop"
+  },
+  "revision": "69560c9a1c42af17e65fc00229b2aafc8d215f57",
+  "diffHash": "704f43273ff0cdc6c36649c7aa456a4226337af13a2f1874835cea830df0f576",
+  "rulesVersion": "unavailable",
+  "sessionHash": "0d07874ac1fc73013ef388ebdf4ffc8cf08b1943512c2ee35c1895ccf8107706",
+  "reportRef": ".mimosa/reports/task-review-session_10ef5f1b2df22d4570d5a4ea7413ae31-20261026T223037767Z-91700-d435effbf37a.json",
+  "events": [],
+  "observedFindingIds": [],
+  "verifiedFiles": [],
+  "recordedAt": "2026-10-26T22:30:38.675Z"
+}

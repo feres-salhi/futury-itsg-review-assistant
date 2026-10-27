@@ -1,0 +1,2127 @@
+{
+ "source": {
+  "SRC-BP": {
+   "id": "SRC-BP",
+   "title": "Beispielpapier DTA EEL — Beispielpapier §3.1",
+   "issuer": "GKV-Spitzenverband",
+   "version": "13.3",
+   "valid_from": "2027-01-01",
+   "checksum": "1355bfd7cbe71cf77e8f9573d747b2b9d86d23198daf91637c0eb42b60339386",
+   "status": "approved",
+   "notes": "offizielles Beispielkorpus; SHA-256 des Original-PDFs verifiziert"
+  }
+ },
+ "template": {
+  "TPL-SYNTH-1": {
+   "id": "TPL-SYNTH-1",
+   "official_form_id": null,
+   "version": "synthetic-0.1",
+   "valid_from": null,
+   "source_id": "TPL-SYNTH",
+   "checksum": "",
+   "status": "needs_review"
+  }
+ },
+ "requirement": {
+  "REQ-VOER-1": {
+   "id": "REQ-VOER-1",
+   "text": "Die Vorerkrankungsanfrage (Abgabegrund 41) darf nur ausgelöst werden, wenn eine AU-Bescheinigung für die aktuelle AU vorliegt, mindestens eine bescheinigte potentielle Vorerkrankung in den letzten 6 Monaten vor AU-Beginn im Datenbestand liegt und die kumulierten Vorzeiten der letzten 12 Monate zusammen mit der aktuellen AU zum Zeitpunkt der Meldung mindestens 30 Tage umfassen.",
+   "source_id": "SRC-VB",
+   "citation": "S. 135, §3.12 (VB DTA EEL V13.4)",
+   "status": "needs_review"
+  }
+ },
+ "criterion": {
+  "CRIT-EAZ-1": {
+   "id": "CRIT-EAZ-1",
+   "requirement_id": "REQ-VOER-1",
+   "description": "Für §3.1-Sachverhalte überträgt das Abrechnungsprogramm den offiziellen DSLW/DBAL/DBAE-Erwartungsdatensatz (Beispielpapier V13.3 §3.1 S. 9–11; Abwandlung §3.2.1.4 S. 12).",
+   "expected_basis": "Beispielpapier DTA EEL V13.3 (gültig ab 01.01.2027), §3.1, S. 9–11: DSLW (S. 9–10), DBAL (S. 10), DBAE (S. 11). Offizielle Erwartungswerte für die Abgabeseite des Entgeltabrechnungsprogramms (Transmit-Seite); keine Leistungsbeitragsbehauptung.",
+   "review_status": "approved"
+  }
+ },
+ "test_case": {
+  "EAZ-001": {
+   "id": "EAZ-001",
+   "criterion_id": "CRIT-EAZ-1",
+   "case_type": "normal",
+   "inputs": {
+    "brutto_monat": "4.400,00 EUR (festes monatliches Gehalt)",
+    "netto_monat": "2.697,12 EUR",
+    "urlaubsgeld": "0,00 EUR",
+    "weihnachtsgeld": "0,00 EUR",
+    "weitergezahltes_arbeitsentgelt_waehrend_eel": "0,00 EUR",
+    "elterneigenschaft": "nein",
+    "beginn_arbeitsunfaehigkeit": "Fr. 12.06.2026",
+    "ende_arbeitsunfaehigkeit": "offen",
+    "ende_entgeltfortzahlung": "Do. 23.07.2026",
+    "entgeltbescheinigung_erstellen_am": "Sa. 11.07.2026",
+    "abrechnung": "letzter Tag des Monats",
+    "letzter_abgerechneter_zeitraum_bei_au_beginn": "Mai 2026"
+   },
+   "expected": {
+    "ABGABEGRUND": "01",
+    "KORR-ABGABEGRUND": "00",
+    "MM-ALLGEMEIN": "J",
+    "MM-ENTGELT": "J",
+    "MM-ZEITKG": "N",
+    "MM-VOER": "N",
+    "DATUM-AB": "20260612",
+    "DATUM-EGZBIS": "20260723",
+    "EAZ-BEGINN-1": "20260501",
+    "EAZ-ENDE-1": "20260531",
+    "BRUTTO-1": "00440000",
+    "NETTO-1": "00269712",
+    "WAEHREEL-BRUTTO": "00000000"
+   },
+   "expected_basis": "Beispielpapier DTA EEL V13.3 (gültig ab 01.01.2027), §3.1 S. 9-11 - Feldzuordnung aus dem Sachverhalt per Code (harness/generate_eaz.py) · approved by Sohee Lee (2026-10-27, format + 2 sample cases)",
+   "review_status": "approved"
+  },
+  "EAZ-002": {
+   "id": "EAZ-002",
+   "criterion_id": "CRIT-EAZ-1",
+   "case_type": "normal",
+   "inputs": {
+    "brutto_monat": "6.000,00 EUR (festes monatliches Gehalt)",
+    "netto_monat": "3.728,79 EUR",
+    "urlaubsgeld": "500,00 EUR (im Juni)",
+    "weihnachtsgeld": "1.600,00 EUR (im Dezember)",
+    "weitergezahltes_arbeitsentgelt_waehrend_eel": "0,00 EUR",
+    "elterneigenschaft": "nein",
+    "beginn_arbeitsunfaehigkeit": "Mo. 11.05.2026",
+    "ende_arbeitsunfaehigkeit": "offen",
+    "ende_entgeltfortzahlung": "So. 21.06.2026",
+    "entgeltbescheinigung_erstellen_am": "Mi. 10.06.2026",
+    "abrechnung": "letzter Tag des Monats",
+    "letzter_abgerechneter_zeitraum_bei_au_beginn": "April 2026"
+   },
+   "expected": {
+    "ABGABEGRUND": "01",
+    "KORR-ABGABEGRUND": "00",
+    "MM-ALLGEMEIN": "J",
+    "MM-ENTGELT": "J",
+    "MM-ZEITKG": "N",
+    "MM-VOER": "N",
+    "DATUM-AB": "20260511",
+    "DATUM-EGZBIS": "20260621",
+    "EAZ-BEGINN-1": "20260401",
+    "EAZ-ENDE-1": "20260430",
+    "BRUTTO-1": "00600000",
+    "NETTO-1": "00372879",
+    "WAEHREEL-BRUTTO": "00000000"
+   },
+   "expected_basis": "Beispielpapier DTA EEL V13.3 (gültig ab 01.01.2027), §3.1 S. 9-11 - Feldzuordnung aus dem Sachverhalt per Code (harness/generate_eaz.py) · approved by Sohee Lee (2026-10-27, format + 2 sample cases)",
+   "review_status": "approved"
+  },
+  "EAZ-003": {
+   "id": "EAZ-003",
+   "criterion_id": "CRIT-EAZ-1",
+   "case_type": "invalid",
+   "inputs": {
+    "brutto_monat": "5.150,00 EUR (festes monatliches Gehalt)",
+    "netto_monat": "3.476,79 EUR",
+    "urlaubsgeld": "1.000,00 EUR (im Juli)",
+    "weihnachtsgeld": "0,00 EUR",
+    "weitergezahltes_arbeitsentgelt_waehrend_eel": "0,00 EUR",
+    "elterneigenschaft": "nein",
+    "beginn_arbeitsunfaehigkeit": "Sa. 20.06.2026",
+    "ende_arbeitsunfaehigkeit": "offen",
+    "ende_entgeltfortzahlung": "Fr. 31.07.2026",
+    "entgeltbescheinigung_erstellen_am": "Mo. 27.07.2026",
+    "abrechnung": "letzter Tag des Monats",
+    "letzter_abgerechneter_zeitraum_bei_au_beginn": "Mai 2026"
+   },
+   "expected": {
+    "ABGABEGRUND": "01",
+    "KORR-ABGABEGRUND": "00",
+    "MM-ALLGEMEIN": "J",
+    "MM-ENTGELT": "J",
+    "MM-ZEITKG": "N",
+    "MM-VOER": "N",
+    "DATUM-AB": "20260620",
+    "DATUM-EGZBIS": "20260731",
+    "EAZ-BEGINN-1": "20260501",
+    "EAZ-ENDE-1": "20260531",
+    "BRUTTO-1": "00515000",
+    "NETTO-1": "00347679",
+    "WAEHREEL-BRUTTO": "00000000"
+   },
+   "expected_basis": "Beispielpapier DTA EEL V13.3 (gültig ab 01.01.2027), §3.1 S. 9-11 - Feldzuordnung aus dem Sachverhalt per Code (harness/generate_eaz.py) · approved by Sohee Lee (2026-10-27, format + 2 sample cases)",
+   "review_status": "approved"
+  },
+  "EAZ-004": {
+   "id": "EAZ-004",
+   "criterion_id": "CRIT-EAZ-1",
+   "case_type": "invalid",
+   "inputs": {
+    "brutto_monat": "5.600,00 EUR (festes monatliches Gehalt)",
+    "netto_monat": "3.755,11 EUR",
+    "urlaubsgeld": "1.000,00 EUR (im Juli)",
+    "weihnachtsgeld": "1.600,00 EUR (im Dezember)",
+    "weitergezahltes_arbeitsentgelt_waehrend_eel": "0,00 EUR",
+    "elterneigenschaft": "nein",
+    "beginn_arbeitsunfaehigkeit": "Mi. 04.11.2026",
+    "ende_arbeitsunfaehigkeit": "offen",
+    "ende_entgeltfortzahlung": "Di. 15.12.2026",
+    "entgeltbescheinigung_erstellen_am": "Fr. 11.12.2026",
+    "abrechnung": "05. des Folgemonats",
+    "letzter_abgerechneter_zeitraum_bei_au_beginn": "September 2026"
+   },
+   "expected": {
+    "ABGABEGRUND": "01",
+    "KORR-ABGABEGRUND": "00",
+    "MM-ALLGEMEIN": "J",
+    "MM-ENTGELT": "J",
+    "MM-ZEITKG": "N",
+    "MM-VOER": "N",
+    "DATUM-AB": "20261104",
+    "DATUM-EGZBIS": "20261215",
+    "EAZ-BEGINN-1": "20260901",
+    "EAZ-ENDE-1": "20260930",
+    "BRUTTO-1": "00560000",
+    "NETTO-1": "00375511",
+    "WAEHREEL-BRUTTO": "00000000"
+   },
+   "expected_basis": "Beispielpapier DTA EEL V13.3 (gültig ab 01.01.2027), §3.1 S. 9-11 und §3.2.1.1 S. 11-12 - Feldzuordnung aus dem Sachverhalt per Code (harness/generate_eaz.py) · approved by Sohee Lee (2026-10-27, format + 2 sample cases)",
+   "review_status": "approved"
+  },
+  "EAZ-005": {
+   "id": "EAZ-005",
+   "criterion_id": "CRIT-EAZ-1",
+   "case_type": "normal",
+   "inputs": {
+    "brutto_monat": "2.700,00 EUR (festes monatliches Gehalt)",
+    "netto_monat": "1.630,09 EUR",
+    "urlaubsgeld": "1.000,00 EUR (im Juni)",
+    "weihnachtsgeld": "1.600,00 EUR (im November)",
+    "weitergezahltes_arbeitsentgelt_waehrend_eel": "0,00 EUR",
+    "elterneigenschaft": "nein",
+    "beginn_arbeitsunfaehigkeit": "Sa. 18.07.2026",
+    "ende_arbeitsunfaehigkeit": "offen",
+    "ende_entgeltfortzahlung": "Fr. 28.08.2026",
+    "entgeltbescheinigung_erstellen_am": "So. 23.08.2026",
+    "abrechnung": "letzter Tag des Monats",
+    "letzter_abgerechneter_zeitraum_bei_au_beginn": "Juni 2026"
+   },
+   "expected": {
+    "ABGABEGRUND": "01",
+    "KORR-ABGABEGRUND": "00",
+    "MM-ALLGEMEIN": "J",
+    "MM-ENTGELT": "J",
+    "MM-ZEITKG": "N",
+    "MM-VOER": "N",
+    "DATUM-AB": "20260718",
+    "DATUM-EGZBIS": "20260828",
+    "EAZ-BEGINN-1": "20260601",
+    "EAZ-ENDE-1": "20260630",
+    "BRUTTO-1": "00270000",
+    "NETTO-1": "00163009",
+    "WAEHREEL-BRUTTO": "00000000"
+   },
+   "expected_basis": "Beispielpapier DTA EEL V13.3 (gültig ab 01.01.2027), §3.1 S. 9-11 - Feldzuordnung aus dem Sachverhalt per Code (harness/generate_eaz.py) · approved by Sohee Lee (2026-10-27, format + 2 sample cases)",
+   "review_status": "approved"
+  },
+  "EAZ-006": {
+   "id": "EAZ-006",
+   "criterion_id": "CRIT-EAZ-1",
+   "case_type": "normal",
+   "inputs": {
+    "brutto_monat": "5.850,00 EUR (festes monatliches Gehalt)",
+    "netto_monat": "3.815,32 EUR",
+    "urlaubsgeld": "0,00 EUR",
+    "weihnachtsgeld": "2.000,00 EUR (im November)",
+    "weitergezahltes_arbeitsentgelt_waehrend_eel": "0,00 EUR",
+    "elterneigenschaft": "nein",
+    "beginn_arbeitsunfaehigkeit": "Fr. 09.01.2026",
+    "ende_arbeitsunfaehigkeit": "offen",
+    "ende_entgeltfortzahlung": "Do. 19.02.2026",
+    "entgeltbescheinigung_erstellen_am": "Sa. 14.02.2026",
+    "abrechnung": "letzter Tag des Monats",
+    "letzter_abgerechneter_zeitraum_bei_au_beginn": "Dezember 2025"
+   },
+   "expected": {
+    "ABGABEGRUND": "01",
+    "KORR-ABGABEGRUND": "00",
+    "MM-ALLGEMEIN": "J",
+    "MM-ENTGELT": "J",
+    "MM-ZEITKG": "N",
+    "MM-VOER": "N",
+    "DATUM-AB": "20260109",
+    "DATUM-EGZBIS": "20260219",
+    "EAZ-BEGINN-1": "20251201",
+    "EAZ-ENDE-1": "20251231",
+    "BRUTTO-1": "00585000",
+    "NETTO-1": "00381532",
+    "WAEHREEL-BRUTTO": "00000000"
+   },
+   "expected_basis": "Beispielpapier DTA EEL V13.3 (gültig ab 01.01.2027), §3.1 S. 9-11 - Feldzuordnung aus dem Sachverhalt per Code (harness/generate_eaz.py) · approved by Sohee Lee (2026-10-27, format + 2 sample cases)",
+   "review_status": "approved"
+  },
+  "EAZ-007": {
+   "id": "EAZ-007",
+   "criterion_id": "CRIT-EAZ-1",
+   "case_type": "normal",
+   "inputs": {
+    "brutto_monat": "6.350,00 EUR (festes monatliches Gehalt)",
+    "netto_monat": "3.891,17 EUR",
+    "urlaubsgeld": "500,00 EUR (im Juni)",
+    "weihnachtsgeld": "1.600,00 EUR (im Dezember)",
+    "weitergezahltes_arbeitsentgelt_waehrend_eel": "0,00 EUR",
+    "elterneigenschaft": "nein",
+    "beginn_arbeitsunfaehigkeit": "Mi. 20.05.2026",
+    "ende_arbeitsunfaehigkeit": "offen",
+    "ende_entgeltfortzahlung": "Di. 30.06.2026",
+    "entgeltbescheinigung_erstellen_am": "Sa. 27.06.2026",
+    "abrechnung": "letzter Tag des Monats",
+    "letzter_abgerechneter_zeitraum_bei_au_beginn": "April 2026"
+   },
+   "expected": {
+    "ABGABEGRUND": "01",
+    "KORR-ABGABEGRUND": "00",
+    "MM-ALLGEMEIN": "J",
+    "MM-ENTGELT": "J",
+    "MM-ZEITKG": "N",
+    "MM-VOER": "N",
+    "DATUM-AB": "20260520",
+    "DATUM-EGZBIS": "20260630",
+    "EAZ-BEGINN-1": "20260401",
+    "EAZ-ENDE-1": "20260430",
+    "BRUTTO-1": "00635000",
+    "NETTO-1": "00389117",
+    "WAEHREEL-BRUTTO": "00000000"
+   },
+   "expected_basis": "Beispielpapier DTA EEL V13.3 (gültig ab 01.01.2027), §3.1 S. 9-11 - Feldzuordnung aus dem Sachverhalt per Code (harness/generate_eaz.py) · approved by Sohee Lee (2026-10-27, format + 2 sample cases)",
+   "review_status": "approved"
+  },
+  "EAZ-008": {
+   "id": "EAZ-008",
+   "criterion_id": "CRIT-EAZ-1",
+   "case_type": "normal",
+   "inputs": {
+    "brutto_monat": "5.850,00 EUR (festes monatliches Gehalt)",
+    "netto_monat": "4.066,01 EUR",
+    "urlaubsgeld": "1.000,00 EUR (im Juli)",
+    "weihnachtsgeld": "1.600,00 EUR (im Dezember)",
+    "weitergezahltes_arbeitsentgelt_waehrend_eel": "0,00 EUR",
+    "elterneigenschaft": "nein",
+    "beginn_arbeitsunfaehigkeit": "Mo. 19.10.2026",
+    "ende_arbeitsunfaehigkeit": "offen",
+    "ende_entgeltfortzahlung": "So. 29.11.2026",
+    "entgeltbescheinigung_erstellen_am": "So. 22.11.2026",
+    "abrechnung": "letzter Tag des Monats",
+    "letzter_abgerechneter_zeitraum_bei_au_beginn": "September 2026"
+   },
+   "expected": {
+    "ABGABEGRUND": "01",
+    "KORR-ABGABEGRUND": "00",
+    "MM-ALLGEMEIN": "J",
+    "MM-ENTGELT": "J",
+    "MM-ZEITKG": "N",
+    "MM-VOER": "N",
+    "DATUM-AB": "20261019",
+    "DATUM-EGZBIS": "20261129",
+    "EAZ-BEGINN-1": "20260901",
+    "EAZ-ENDE-1": "20260930",
+    "BRUTTO-1": "00585000",
+    "NETTO-1": "00406601",
+    "WAEHREEL-BRUTTO": "00000000"
+   },
+   "expected_basis": "Beispielpapier DTA EEL V13.3 (gültig ab 01.01.2027), §3.1 S. 9-11 - Feldzuordnung aus dem Sachverhalt per Code (harness/generate_eaz.py) · approved by Sohee Lee (2026-10-27, format + 2 sample cases)",
+   "review_status": "approved"
+  },
+  "EAZ-009": {
+   "id": "EAZ-009",
+   "criterion_id": "CRIT-EAZ-1",
+   "case_type": "normal",
+   "inputs": {
+    "brutto_monat": "6.200,00 EUR (festes monatliches Gehalt)",
+    "netto_monat": "3.932,10 EUR",
+    "urlaubsgeld": "1.000,00 EUR (im Juli)",
+    "weihnachtsgeld": "1.600,00 EUR (im November)",
+    "weitergezahltes_arbeitsentgelt_waehrend_eel": "0,00 EUR",
+    "elterneigenschaft": "nein",
+    "beginn_arbeitsunfaehigkeit": "Sa. 14.02.2026",
+    "ende_arbeitsunfaehigkeit": "offen",
+    "ende_entgeltfortzahlung": "Fr. 27.03.2026",
+    "entgeltbescheinigung_erstellen_am": "So. 15.03.2026",
+    "abrechnung": "letzter Tag des Monats",
+    "letzter_abgerechneter_zeitraum_bei_au_beginn": "Januar 2026"
+   },
+   "expected": {
+    "ABGABEGRUND": "01",
+    "KORR-ABGABEGRUND": "00",
+    "MM-ALLGEMEIN": "J",
+    "MM-ENTGELT": "J",
+    "MM-ZEITKG": "N",
+    "MM-VOER": "N",
+    "DATUM-AB": "20260214",
+    "DATUM-EGZBIS": "20260327",
+    "EAZ-BEGINN-1": "20260101",
+    "EAZ-ENDE-1": "20260131",
+    "BRUTTO-1": "00620000",
+    "NETTO-1": "00393210",
+    "WAEHREEL-BRUTTO": "00000000"
+   },
+   "expected_basis": "Beispielpapier DTA EEL V13.3 (gültig ab 01.01.2027), §3.1 S. 9-11 - Feldzuordnung aus dem Sachverhalt per Code (harness/generate_eaz.py) · approved by Sohee Lee (2026-10-27, format + 2 sample cases)",
+   "review_status": "approved"
+  },
+  "EAZ-010": {
+   "id": "EAZ-010",
+   "criterion_id": "CRIT-EAZ-1",
+   "case_type": "normal",
+   "inputs": {
+    "brutto_monat": "2.500,00 EUR (festes monatliches Gehalt)",
+    "netto_monat": "1.632,14 EUR",
+    "urlaubsgeld": "1.000,00 EUR (im Juni)",
+    "weihnachtsgeld": "2.000,00 EUR (im November)",
+    "weitergezahltes_arbeitsentgelt_waehrend_eel": "0,00 EUR",
+    "elterneigenschaft": "nein",
+    "beginn_arbeitsunfaehigkeit": "Mi. 16.09.2026",
+    "ende_arbeitsunfaehigkeit": "offen",
+    "ende_entgeltfortzahlung": "Di. 27.10.2026",
+    "entgeltbescheinigung_erstellen_am": "So. 18.10.2026",
+    "abrechnung": "letzter Tag des Monats",
+    "letzter_abgerechneter_zeitraum_bei_au_beginn": "August 2026"
+   },
+   "expected": {
+    "ABGABEGRUND": "01",
+    "KORR-ABGABEGRUND": "00",
+    "MM-ALLGEMEIN": "J",
+    "MM-ENTGELT": "J",
+    "MM-ZEITKG": "N",
+    "MM-VOER": "N",
+    "DATUM-AB": "20260916",
+    "DATUM-EGZBIS": "20261027",
+    "EAZ-BEGINN-1": "20260801",
+    "EAZ-ENDE-1": "20260831",
+    "BRUTTO-1": "00250000",
+    "NETTO-1": "00163214",
+    "WAEHREEL-BRUTTO": "00000000"
+   },
+   "expected_basis": "Beispielpapier DTA EEL V13.3 (gültig ab 01.01.2027), §3.1 S. 9-11 - Feldzuordnung aus dem Sachverhalt per Code (harness/generate_eaz.py) · approved by Sohee Lee (2026-10-27, format + 2 sample cases)",
+   "review_status": "approved"
+  },
+  "EAZ-011": {
+   "id": "EAZ-011",
+   "criterion_id": "CRIT-EAZ-1",
+   "case_type": "normal",
+   "inputs": {
+    "brutto_monat": "2.150,00 EUR (festes monatliches Gehalt)",
+    "netto_monat": "1.436,41 EUR",
+    "urlaubsgeld": "500,00 EUR (im Juni)",
+    "weihnachtsgeld": "0,00 EUR",
+    "weitergezahltes_arbeitsentgelt_waehrend_eel": "0,00 EUR",
+    "elterneigenschaft": "nein",
+    "beginn_arbeitsunfaehigkeit": "Di. 02.06.2026",
+    "ende_arbeitsunfaehigkeit": "offen",
+    "ende_entgeltfortzahlung": "Mo. 13.07.2026",
+    "entgeltbescheinigung_erstellen_am": "Fr. 03.07.2026",
+    "abrechnung": "05. des Folgemonats",
+    "letzter_abgerechneter_zeitraum_bei_au_beginn": "April 2026"
+   },
+   "expected": {
+    "ABGABEGRUND": "01",
+    "KORR-ABGABEGRUND": "00",
+    "MM-ALLGEMEIN": "J",
+    "MM-ENTGELT": "J",
+    "MM-ZEITKG": "N",
+    "MM-VOER": "N",
+    "DATUM-AB": "20260602",
+    "DATUM-EGZBIS": "20260713",
+    "EAZ-BEGINN-1": "20260401",
+    "EAZ-ENDE-1": "20260430",
+    "BRUTTO-1": "00215000",
+    "NETTO-1": "00143641",
+    "WAEHREEL-BRUTTO": "00000000"
+   },
+   "expected_basis": "Beispielpapier DTA EEL V13.3 (gültig ab 01.01.2027), §3.1 S. 9-11 und §3.2.1.1 S. 11-12 - Feldzuordnung aus dem Sachverhalt per Code (harness/generate_eaz.py) · approved by Sohee Lee (2026-10-27, format + 2 sample cases)",
+   "review_status": "approved"
+  },
+  "EAZ-012": {
+   "id": "EAZ-012",
+   "criterion_id": "CRIT-EAZ-1",
+   "case_type": "normal",
+   "inputs": {
+    "brutto_monat": "3.100,00 EUR (festes monatliches Gehalt)",
+    "netto_monat": "2.038,07 EUR",
+    "urlaubsgeld": "500,00 EUR (im Juli)",
+    "weihnachtsgeld": "2.000,00 EUR (im November)",
+    "weitergezahltes_arbeitsentgelt_waehrend_eel": "0,00 EUR",
+    "elterneigenschaft": "nein",
+    "beginn_arbeitsunfaehigkeit": "Mo. 03.08.2026",
+    "ende_arbeitsunfaehigkeit": "offen",
+    "ende_entgeltfortzahlung": "So. 13.09.2026",
+    "entgeltbescheinigung_erstellen_am": "Mi. 09.09.2026",
+    "abrechnung": "05. des Folgemonats",
+    "letzter_abgerechneter_zeitraum_bei_au_beginn": "Juni 2026"
+   },
+   "expected": {
+    "ABGABEGRUND": "01",
+    "KORR-ABGABEGRUND": "00",
+    "MM-ALLGEMEIN": "J",
+    "MM-ENTGELT": "J",
+    "MM-ZEITKG": "N",
+    "MM-VOER": "N",
+    "DATUM-AB": "20260803",
+    "DATUM-EGZBIS": "20260913",
+    "EAZ-BEGINN-1": "20260601",
+    "EAZ-ENDE-1": "20260630",
+    "BRUTTO-1": "00310000",
+    "NETTO-1": "00203807",
+    "WAEHREEL-BRUTTO": "00000000"
+   },
+   "expected_basis": "Beispielpapier DTA EEL V13.3 (gültig ab 01.01.2027), §3.1 S. 9-11 und §3.2.1.1 S. 11-12 - Feldzuordnung aus dem Sachverhalt per Code (harness/generate_eaz.py) · approved by Sohee Lee (2026-10-27, format + 2 sample cases)",
+   "review_status": "approved"
+  },
+  "EAZ-013": {
+   "id": "EAZ-013",
+   "criterion_id": "CRIT-EAZ-1",
+   "case_type": "normal",
+   "inputs": {
+    "brutto_monat": "2.000,00 EUR (festes monatliches Gehalt)",
+    "netto_monat": "1.353,42 EUR",
+    "urlaubsgeld": "500,00 EUR (im Juli)",
+    "weihnachtsgeld": "1.600,00 EUR (im November)",
+    "weitergezahltes_arbeitsentgelt_waehrend_eel": "0,00 EUR",
+    "elterneigenschaft": "nein",
+    "beginn_arbeitsunfaehigkeit": "Do. 10.09.2026",
+    "ende_arbeitsunfaehigkeit": "offen",
+    "ende_entgeltfortzahlung": "Mi. 21.10.2026",
+    "entgeltbescheinigung_erstellen_am": "So. 11.10.2026",
+    "abrechnung": "letzter Tag des Monats",
+    "letzter_abgerechneter_zeitraum_bei_au_beginn": "August 2026"
+   },
+   "expected": {
+    "ABGABEGRUND": "01",
+    "KORR-ABGABEGRUND": "00",
+    "MM-ALLGEMEIN": "J",
+    "MM-ENTGELT": "J",
+    "MM-ZEITKG": "N",
+    "MM-VOER": "N",
+    "DATUM-AB": "20260910",
+    "DATUM-EGZBIS": "20261021",
+    "EAZ-BEGINN-1": "20260801",
+    "EAZ-ENDE-1": "20260831",
+    "BRUTTO-1": "00200000",
+    "NETTO-1": "00135342",
+    "WAEHREEL-BRUTTO": "00000000"
+   },
+   "expected_basis": "Beispielpapier DTA EEL V13.3 (gültig ab 01.01.2027), §3.1 S. 9-11 - Feldzuordnung aus dem Sachverhalt per Code (harness/generate_eaz.py) · approved by Sohee Lee (2026-10-27, format + 2 sample cases)",
+   "review_status": "approved"
+  },
+  "EAZ-014": {
+   "id": "EAZ-014",
+   "criterion_id": "CRIT-EAZ-1",
+   "case_type": "normal",
+   "inputs": {
+    "brutto_monat": "5.050,00 EUR (festes monatliches Gehalt)",
+    "netto_monat": "3.464,81 EUR",
+    "urlaubsgeld": "1.000,00 EUR (im Juni)",
+    "weihnachtsgeld": "0,00 EUR",
+    "weitergezahltes_arbeitsentgelt_waehrend_eel": "0,00 EUR",
+    "elterneigenschaft": "nein",
+    "beginn_arbeitsunfaehigkeit": "So. 12.04.2026",
+    "ende_arbeitsunfaehigkeit": "offen",
+    "ende_entgeltfortzahlung": "Sa. 23.05.2026",
+    "entgeltbescheinigung_erstellen_am": "Sa. 16.05.2026",
+    "abrechnung": "letzter Tag des Monats",
+    "letzter_abgerechneter_zeitraum_bei_au_beginn": "März 2026"
+   },
+   "expected": {
+    "ABGABEGRUND": "01",
+    "KORR-ABGABEGRUND": "00",
+    "MM-ALLGEMEIN": "J",
+    "MM-ENTGELT": "J",
+    "MM-ZEITKG": "N",
+    "MM-VOER": "N",
+    "DATUM-AB": "20260412",
+    "DATUM-EGZBIS": "20260523",
+    "EAZ-BEGINN-1": "20260301",
+    "EAZ-ENDE-1": "20260331",
+    "BRUTTO-1": "00505000",
+    "NETTO-1": "00346481",
+    "WAEHREEL-BRUTTO": "00000000"
+   },
+   "expected_basis": "Beispielpapier DTA EEL V13.3 (gültig ab 01.01.2027), §3.1 S. 9-11 - Feldzuordnung aus dem Sachverhalt per Code (harness/generate_eaz.py) · approved by Sohee Lee (2026-10-27, format + 2 sample cases)",
+   "review_status": "approved"
+  },
+  "EAZ-015": {
+   "id": "EAZ-015",
+   "criterion_id": "CRIT-EAZ-1",
+   "case_type": "normal",
+   "inputs": {
+    "brutto_monat": "4.800,00 EUR (festes monatliches Gehalt)",
+    "netto_monat": "3.129,42 EUR",
+    "urlaubsgeld": "500,00 EUR (im Juli)",
+    "weihnachtsgeld": "0,00 EUR",
+    "weitergezahltes_arbeitsentgelt_waehrend_eel": "0,00 EUR",
+    "elterneigenschaft": "nein",
+    "beginn_arbeitsunfaehigkeit": "Fr. 02.10.2026",
+    "ende_arbeitsunfaehigkeit": "offen",
+    "ende_entgeltfortzahlung": "Do. 12.11.2026",
+    "entgeltbescheinigung_erstellen_am": "Do. 05.11.2026",
+    "abrechnung": "letzter Tag des Monats",
+    "letzter_abgerechneter_zeitraum_bei_au_beginn": "September 2026"
+   },
+   "expected": {
+    "ABGABEGRUND": "01",
+    "KORR-ABGABEGRUND": "00",
+    "MM-ALLGEMEIN": "J",
+    "MM-ENTGELT": "J",
+    "MM-ZEITKG": "N",
+    "MM-VOER": "N",
+    "DATUM-AB": "20261002",
+    "DATUM-EGZBIS": "20261112",
+    "EAZ-BEGINN-1": "20260901",
+    "EAZ-ENDE-1": "20260930",
+    "BRUTTO-1": "00480000",
+    "NETTO-1": "00312942",
+    "WAEHREEL-BRUTTO": "00000000"
+   },
+   "expected_basis": "Beispielpapier DTA EEL V13.3 (gültig ab 01.01.2027), §3.1 S. 9-11 - Feldzuordnung aus dem Sachverhalt per Code (harness/generate_eaz.py) · approved by Sohee Lee (2026-10-27, format + 2 sample cases)",
+   "review_status": "approved"
+  },
+  "EAZ-016": {
+   "id": "EAZ-016",
+   "criterion_id": "CRIT-EAZ-1",
+   "case_type": "invalid",
+   "inputs": {
+    "brutto_monat": "2.450,00 EUR (festes monatliches Gehalt)",
+    "netto_monat": "1.472,68 EUR",
+    "urlaubsgeld": "1.000,00 EUR (im Juni)",
+    "weihnachtsgeld": "1.000,00 EUR (im November)",
+    "weitergezahltes_arbeitsentgelt_waehrend_eel": "0,00 EUR",
+    "elterneigenschaft": "nein",
+    "beginn_arbeitsunfaehigkeit": "Sa. 06.06.2026",
+    "ende_arbeitsunfaehigkeit": "offen",
+    "ende_entgeltfortzahlung": "Fr. 17.07.2026",
+    "entgeltbescheinigung_erstellen_am": "Di. 14.07.2026",
+    "abrechnung": "letzter Tag des Monats",
+    "letzter_abgerechneter_zeitraum_bei_au_beginn": "Mai 2026"
+   },
+   "expected": {
+    "ABGABEGRUND": "01",
+    "KORR-ABGABEGRUND": "00",
+    "MM-ALLGEMEIN": "J",
+    "MM-ENTGELT": "J",
+    "MM-ZEITKG": "N",
+    "MM-VOER": "N",
+    "DATUM-AB": "20260606",
+    "DATUM-EGZBIS": "20260717",
+    "EAZ-BEGINN-1": "20260501",
+    "EAZ-ENDE-1": "20260531",
+    "BRUTTO-1": "00245000",
+    "NETTO-1": "00147268",
+    "WAEHREEL-BRUTTO": "00000000"
+   },
+   "expected_basis": "Beispielpapier DTA EEL V13.3 (gültig ab 01.01.2027), §3.1 S. 9-11 - Feldzuordnung aus dem Sachverhalt per Code (harness/generate_eaz.py) · approved by Sohee Lee (2026-10-27, format + 2 sample cases)",
+   "review_status": "approved"
+  },
+  "EAZ-017": {
+   "id": "EAZ-017",
+   "criterion_id": "CRIT-EAZ-1",
+   "case_type": "invalid",
+   "inputs": {
+    "brutto_monat": "4.700,00 EUR (festes monatliches Gehalt)",
+    "netto_monat": "2.899,55 EUR",
+    "urlaubsgeld": "1.000,00 EUR (im Juli)",
+    "weihnachtsgeld": "1.000,00 EUR (im November)",
+    "weitergezahltes_arbeitsentgelt_waehrend_eel": "0,00 EUR",
+    "elterneigenschaft": "nein",
+    "beginn_arbeitsunfaehigkeit": "Sa. 03.01.2026",
+    "ende_arbeitsunfaehigkeit": "offen",
+    "ende_entgeltfortzahlung": "Fr. 13.02.2026",
+    "entgeltbescheinigung_erstellen_am": "Mo. 02.02.2026",
+    "abrechnung": "05. des Folgemonats",
+    "letzter_abgerechneter_zeitraum_bei_au_beginn": "November 2025"
+   },
+   "expected": {
+    "ABGABEGRUND": "01",
+    "KORR-ABGABEGRUND": "00",
+    "MM-ALLGEMEIN": "J",
+    "MM-ENTGELT": "J",
+    "MM-ZEITKG": "N",
+    "MM-VOER": "N",
+    "DATUM-AB": "20260103",
+    "DATUM-EGZBIS": "20260213",
+    "EAZ-BEGINN-1": "20251101",
+    "EAZ-ENDE-1": "20251130",
+    "BRUTTO-1": "00470000",
+    "NETTO-1": "00289955",
+    "WAEHREEL-BRUTTO": "00000000"
+   },
+   "expected_basis": "Beispielpapier DTA EEL V13.3 (gültig ab 01.01.2027), §3.1 S. 9-11 und §3.2.1.1 S. 11-12 - Feldzuordnung aus dem Sachverhalt per Code (harness/generate_eaz.py) · approved by Sohee Lee (2026-10-27, format + 2 sample cases)",
+   "review_status": "approved"
+  },
+  "EAZ-018": {
+   "id": "EAZ-018",
+   "criterion_id": "CRIT-EAZ-1",
+   "case_type": "normal",
+   "inputs": {
+    "brutto_monat": "4.200,00 EUR (festes monatliches Gehalt)",
+    "netto_monat": "2.780,16 EUR",
+    "urlaubsgeld": "1.500,00 EUR (im Juni)",
+    "weihnachtsgeld": "1.000,00 EUR (im November)",
+    "weitergezahltes_arbeitsentgelt_waehrend_eel": "0,00 EUR",
+    "elterneigenschaft": "nein",
+    "beginn_arbeitsunfaehigkeit": "Fr. 06.03.2026",
+    "ende_arbeitsunfaehigkeit": "offen",
+    "ende_entgeltfortzahlung": "Do. 16.04.2026",
+    "entgeltbescheinigung_erstellen_am": "Do. 09.04.2026",
+    "abrechnung": "letzter Tag des Monats",
+    "letzter_abgerechneter_zeitraum_bei_au_beginn": "Februar 2026"
+   },
+   "expected": {
+    "ABGABEGRUND": "01",
+    "KORR-ABGABEGRUND": "00",
+    "MM-ALLGEMEIN": "J",
+    "MM-ENTGELT": "J",
+    "MM-ZEITKG": "N",
+    "MM-VOER": "N",
+    "DATUM-AB": "20260306",
+    "DATUM-EGZBIS": "20260416",
+    "EAZ-BEGINN-1": "20260201",
+    "EAZ-ENDE-1": "20260228",
+    "BRUTTO-1": "00420000",
+    "NETTO-1": "00278016",
+    "WAEHREEL-BRUTTO": "00000000"
+   },
+   "expected_basis": "Beispielpapier DTA EEL V13.3 (gültig ab 01.01.2027), §3.1 S. 9-11 - Feldzuordnung aus dem Sachverhalt per Code (harness/generate_eaz.py) · approved by Sohee Lee (2026-10-27, format + 2 sample cases)",
+   "review_status": "approved"
+  },
+  "EAZ-019": {
+   "id": "EAZ-019",
+   "criterion_id": "CRIT-EAZ-1",
+   "case_type": "invalid",
+   "inputs": {
+    "brutto_monat": "6.400,00 EUR (festes monatliches Gehalt)",
+    "netto_monat": "4.129,92 EUR",
+    "urlaubsgeld": "0,00 EUR",
+    "weihnachtsgeld": "0,00 EUR",
+    "weitergezahltes_arbeitsentgelt_waehrend_eel": "0,00 EUR",
+    "elterneigenschaft": "nein",
+    "beginn_arbeitsunfaehigkeit": "Fr. 01.05.2026",
+    "ende_arbeitsunfaehigkeit": "offen",
+    "ende_entgeltfortzahlung": "Do. 11.06.2026",
+    "entgeltbescheinigung_erstellen_am": "Mi. 03.06.2026",
+    "abrechnung": "05. des Folgemonats",
+    "letzter_abgerechneter_zeitraum_bei_au_beginn": "März 2026"
+   },
+   "expected": {
+    "ABGABEGRUND": "01",
+    "KORR-ABGABEGRUND": "00",
+    "MM-ALLGEMEIN": "J",
+    "MM-ENTGELT": "J",
+    "MM-ZEITKG": "N",
+    "MM-VOER": "N",
+    "DATUM-AB": "20260501",
+    "DATUM-EGZBIS": "20260611",
+    "EAZ-BEGINN-1": "20260301",
+    "EAZ-ENDE-1": "20260331",
+    "BRUTTO-1": "00640000",
+    "NETTO-1": "00412992",
+    "WAEHREEL-BRUTTO": "00000000"
+   },
+   "expected_basis": "Beispielpapier DTA EEL V13.3 (gültig ab 01.01.2027), §3.1 S. 9-11 und §3.2.1.1 S. 11-12 - Feldzuordnung aus dem Sachverhalt per Code (harness/generate_eaz.py) · approved by Sohee Lee (2026-10-27, format + 2 sample cases)",
+   "review_status": "approved"
+  },
+  "EAZ-020": {
+   "id": "EAZ-020",
+   "criterion_id": "CRIT-EAZ-1",
+   "case_type": "normal",
+   "inputs": {
+    "brutto_monat": "2.900,00 EUR (festes monatliches Gehalt)",
+    "netto_monat": "1.982,61 EUR",
+    "urlaubsgeld": "0,00 EUR",
+    "weihnachtsgeld": "0,00 EUR",
+    "weitergezahltes_arbeitsentgelt_waehrend_eel": "0,00 EUR",
+    "elterneigenschaft": "nein",
+    "beginn_arbeitsunfaehigkeit": "Di. 10.11.2026",
+    "ende_arbeitsunfaehigkeit": "offen",
+    "ende_entgeltfortzahlung": "Mo. 21.12.2026",
+    "entgeltbescheinigung_erstellen_am": "So. 13.12.2026",
+    "abrechnung": "letzter Tag des Monats",
+    "letzter_abgerechneter_zeitraum_bei_au_beginn": "Oktober 2026"
+   },
+   "expected": {
+    "ABGABEGRUND": "01",
+    "KORR-ABGABEGRUND": "00",
+    "MM-ALLGEMEIN": "J",
+    "MM-ENTGELT": "J",
+    "MM-ZEITKG": "N",
+    "MM-VOER": "N",
+    "DATUM-AB": "20261110",
+    "DATUM-EGZBIS": "20261221",
+    "EAZ-BEGINN-1": "20261001",
+    "EAZ-ENDE-1": "20261031",
+    "BRUTTO-1": "00290000",
+    "NETTO-1": "00198261",
+    "WAEHREEL-BRUTTO": "00000000"
+   },
+   "expected_basis": "Beispielpapier DTA EEL V13.3 (gültig ab 01.01.2027), §3.1 S. 9-11 - Feldzuordnung aus dem Sachverhalt per Code (harness/generate_eaz.py) · approved by Sohee Lee (2026-10-27, format + 2 sample cases)",
+   "review_status": "approved"
+  },
+  "EAZ-021": {
+   "id": "EAZ-021",
+   "criterion_id": "CRIT-EAZ-1",
+   "case_type": "invalid",
+   "inputs": {
+    "brutto_monat": "4.450,00 EUR (festes monatliches Gehalt)",
+    "netto_monat": "3.025,55 EUR",
+    "urlaubsgeld": "500,00 EUR (im Juli)",
+    "weihnachtsgeld": "1.000,00 EUR (im Dezember)",
+    "weitergezahltes_arbeitsentgelt_waehrend_eel": "0,00 EUR",
+    "elterneigenschaft": "nein",
+    "beginn_arbeitsunfaehigkeit": "Sa. 18.04.2026",
+    "ende_arbeitsunfaehigkeit": "offen",
+    "ende_entgeltfortzahlung": "Fr. 29.05.2026",
+    "entgeltbescheinigung_erstellen_am": "So. 17.05.2026",
+    "abrechnung": "letzter Tag des Monats",
+    "letzter_abgerechneter_zeitraum_bei_au_beginn": "März 2026"
+   },
+   "expected": {
+    "ABGABEGRUND": "01",
+    "KORR-ABGABEGRUND": "00",
+    "MM-ALLGEMEIN": "J",
+    "MM-ENTGELT": "J",
+    "MM-ZEITKG": "N",
+    "MM-VOER": "N",
+    "DATUM-AB": "20260418",
+    "DATUM-EGZBIS": "20260529",
+    "EAZ-BEGINN-1": "20260301",
+    "EAZ-ENDE-1": "20260331",
+    "BRUTTO-1": "00445000",
+    "NETTO-1": "00302555",
+    "WAEHREEL-BRUTTO": "00000000"
+   },
+   "expected_basis": "Beispielpapier DTA EEL V13.3 (gültig ab 01.01.2027), §3.1 S. 9-11 - Feldzuordnung aus dem Sachverhalt per Code (harness/generate_eaz.py) · approved by Sohee Lee (2026-10-27, format + 2 sample cases)",
+   "review_status": "approved"
+  },
+  "EAZ-022": {
+   "id": "EAZ-022",
+   "criterion_id": "CRIT-EAZ-1",
+   "case_type": "normal",
+   "inputs": {
+    "brutto_monat": "4.650,00 EUR (festes monatliches Gehalt)",
+    "netto_monat": "3.008,67 EUR",
+    "urlaubsgeld": "1.500,00 EUR (im Juni)",
+    "weihnachtsgeld": "2.000,00 EUR (im November)",
+    "weitergezahltes_arbeitsentgelt_waehrend_eel": "0,00 EUR",
+    "elterneigenschaft": "nein",
+    "beginn_arbeitsunfaehigkeit": "Fr. 07.08.2026",
+    "ende_arbeitsunfaehigkeit": "offen",
+    "ende_entgeltfortzahlung": "Do. 17.09.2026",
+    "entgeltbescheinigung_erstellen_am": "So. 06.09.2026",
+    "abrechnung": "letzter Tag des Monats",
+    "letzter_abgerechneter_zeitraum_bei_au_beginn": "Juli 2026"
+   },
+   "expected": {
+    "ABGABEGRUND": "01",
+    "KORR-ABGABEGRUND": "00",
+    "MM-ALLGEMEIN": "J",
+    "MM-ENTGELT": "J",
+    "MM-ZEITKG": "N",
+    "MM-VOER": "N",
+    "DATUM-AB": "20260807",
+    "DATUM-EGZBIS": "20260917",
+    "EAZ-BEGINN-1": "20260701",
+    "EAZ-ENDE-1": "20260731",
+    "BRUTTO-1": "00465000",
+    "NETTO-1": "00300867",
+    "WAEHREEL-BRUTTO": "00000000"
+   },
+   "expected_basis": "Beispielpapier DTA EEL V13.3 (gültig ab 01.01.2027), §3.1 S. 9-11 - Feldzuordnung aus dem Sachverhalt per Code (harness/generate_eaz.py) · approved by Sohee Lee (2026-10-27, format + 2 sample cases)",
+   "review_status": "approved"
+  },
+  "EAZ-023": {
+   "id": "EAZ-023",
+   "criterion_id": "CRIT-EAZ-1",
+   "case_type": "normal",
+   "inputs": {
+    "brutto_monat": "2.300,00 EUR (festes monatliches Gehalt)",
+    "netto_monat": "1.510,53 EUR",
+    "urlaubsgeld": "500,00 EUR (im Juni)",
+    "weihnachtsgeld": "2.000,00 EUR (im November)",
+    "weitergezahltes_arbeitsentgelt_waehrend_eel": "0,00 EUR",
+    "elterneigenschaft": "nein",
+    "beginn_arbeitsunfaehigkeit": "Di. 17.02.2026",
+    "ende_arbeitsunfaehigkeit": "offen",
+    "ende_entgeltfortzahlung": "Mo. 30.03.2026",
+    "entgeltbescheinigung_erstellen_am": "Do. 19.03.2026",
+    "abrechnung": "letzter Tag des Monats",
+    "letzter_abgerechneter_zeitraum_bei_au_beginn": "Januar 2026"
+   },
+   "expected": {
+    "ABGABEGRUND": "01",
+    "KORR-ABGABEGRUND": "00",
+    "MM-ALLGEMEIN": "J",
+    "MM-ENTGELT": "J",
+    "MM-ZEITKG": "N",
+    "MM-VOER": "N",
+    "DATUM-AB": "20260217",
+    "DATUM-EGZBIS": "20260330",
+    "EAZ-BEGINN-1": "20260101",
+    "EAZ-ENDE-1": "20260131",
+    "BRUTTO-1": "00230000",
+    "NETTO-1": "00151053",
+    "WAEHREEL-BRUTTO": "00000000"
+   },
+   "expected_basis": "Beispielpapier DTA EEL V13.3 (gültig ab 01.01.2027), §3.1 S. 9-11 - Feldzuordnung aus dem Sachverhalt per Code (harness/generate_eaz.py) · approved by Sohee Lee (2026-10-27, format + 2 sample cases)",
+   "review_status": "approved"
+  },
+  "EAZ-024": {
+   "id": "EAZ-024",
+   "criterion_id": "CRIT-EAZ-1",
+   "case_type": "invalid",
+   "inputs": {
+    "brutto_monat": "4.550,00 EUR (festes monatliches Gehalt)",
+    "netto_monat": "2.811,60 EUR",
+    "urlaubsgeld": "500,00 EUR (im Juni)",
+    "weihnachtsgeld": "0,00 EUR",
+    "weitergezahltes_arbeitsentgelt_waehrend_eel": "0,00 EUR",
+    "elterneigenschaft": "nein",
+    "beginn_arbeitsunfaehigkeit": "Mi. 03.06.2026",
+    "ende_arbeitsunfaehigkeit": "offen",
+    "ende_entgeltfortzahlung": "Di. 14.07.2026",
+    "entgeltbescheinigung_erstellen_am": "Do. 09.07.2026",
+    "abrechnung": "05. des Folgemonats",
+    "letzter_abgerechneter_zeitraum_bei_au_beginn": "April 2026"
+   },
+   "expected": {
+    "ABGABEGRUND": "01",
+    "KORR-ABGABEGRUND": "00",
+    "MM-ALLGEMEIN": "J",
+    "MM-ENTGELT": "J",
+    "MM-ZEITKG": "N",
+    "MM-VOER": "N",
+    "DATUM-AB": "20260603",
+    "DATUM-EGZBIS": "20260714",
+    "EAZ-BEGINN-1": "20260401",
+    "EAZ-ENDE-1": "20260430",
+    "BRUTTO-1": "00455000",
+    "NETTO-1": "00281160",
+    "WAEHREEL-BRUTTO": "00000000"
+   },
+   "expected_basis": "Beispielpapier DTA EEL V13.3 (gültig ab 01.01.2027), §3.1 S. 9-11 und §3.2.1.1 S. 11-12 - Feldzuordnung aus dem Sachverhalt per Code (harness/generate_eaz.py) · approved by Sohee Lee (2026-10-27, format + 2 sample cases)",
+   "review_status": "approved"
+  },
+  "EAZ-025": {
+   "id": "EAZ-025",
+   "criterion_id": "CRIT-EAZ-1",
+   "case_type": "normal",
+   "inputs": {
+    "brutto_monat": "4.000,00 EUR (festes monatliches Gehalt)",
+    "netto_monat": "2.661,71 EUR",
+    "urlaubsgeld": "1.000,00 EUR (im Juli)",
+    "weihnachtsgeld": "0,00 EUR",
+    "weitergezahltes_arbeitsentgelt_waehrend_eel": "0,00 EUR",
+    "elterneigenschaft": "nein",
+    "beginn_arbeitsunfaehigkeit": "Fr. 02.10.2026",
+    "ende_arbeitsunfaehigkeit": "offen",
+    "ende_entgeltfortzahlung": "Do. 12.11.2026",
+    "entgeltbescheinigung_erstellen_am": "So. 01.11.2026",
+    "abrechnung": "letzter Tag des Monats",
+    "letzter_abgerechneter_zeitraum_bei_au_beginn": "September 2026"
+   },
+   "expected": {
+    "ABGABEGRUND": "01",
+    "KORR-ABGABEGRUND": "00",
+    "MM-ALLGEMEIN": "J",
+    "MM-ENTGELT": "J",
+    "MM-ZEITKG": "N",
+    "MM-VOER": "N",
+    "DATUM-AB": "20261002",
+    "DATUM-EGZBIS": "20261112",
+    "EAZ-BEGINN-1": "20260901",
+    "EAZ-ENDE-1": "20260930",
+    "BRUTTO-1": "00400000",
+    "NETTO-1": "00266171",
+    "WAEHREEL-BRUTTO": "00000000"
+   },
+   "expected_basis": "Beispielpapier DTA EEL V13.3 (gültig ab 01.01.2027), §3.1 S. 9-11 - Feldzuordnung aus dem Sachverhalt per Code (harness/generate_eaz.py) · approved by Sohee Lee (2026-10-27, format + 2 sample cases)",
+   "review_status": "approved"
+  },
+  "EAZ-026": {
+   "id": "EAZ-026",
+   "criterion_id": "CRIT-EAZ-1",
+   "case_type": "invalid",
+   "inputs": {
+    "brutto_monat": "4.800,00 EUR (festes monatliches Gehalt)",
+    "netto_monat": "3.126,20 EUR",
+    "urlaubsgeld": "1.000,00 EUR (im Juli)",
+    "weihnachtsgeld": "2.000,00 EUR (im Dezember)",
+    "weitergezahltes_arbeitsentgelt_waehrend_eel": "0,00 EUR",
+    "elterneigenschaft": "nein",
+    "beginn_arbeitsunfaehigkeit": "Mi. 13.05.2026",
+    "ende_arbeitsunfaehigkeit": "offen",
+    "ende_entgeltfortzahlung": "Di. 23.06.2026",
+    "entgeltbescheinigung_erstellen_am": "Fr. 19.06.2026",
+    "abrechnung": "letzter Tag des Monats",
+    "letzter_abgerechneter_zeitraum_bei_au_beginn": "April 2026"
+   },
+   "expected": {
+    "ABGABEGRUND": "01",
+    "KORR-ABGABEGRUND": "00",
+    "MM-ALLGEMEIN": "J",
+    "MM-ENTGELT": "J",
+    "MM-ZEITKG": "N",
+    "MM-VOER": "N",
+    "DATUM-AB": "20260513",
+    "DATUM-EGZBIS": "20260623",
+    "EAZ-BEGINN-1": "20260401",
+    "EAZ-ENDE-1": "20260430",
+    "BRUTTO-1": "00480000",
+    "NETTO-1": "00312620",
+    "WAEHREEL-BRUTTO": "00000000"
+   },
+   "expected_basis": "Beispielpapier DTA EEL V13.3 (gültig ab 01.01.2027), §3.1 S. 9-11 - Feldzuordnung aus dem Sachverhalt per Code (harness/generate_eaz.py) · approved by Sohee Lee (2026-10-27, format + 2 sample cases)",
+   "review_status": "approved"
+  },
+  "EAZ-027": {
+   "id": "EAZ-027",
+   "criterion_id": "CRIT-EAZ-1",
+   "case_type": "normal",
+   "inputs": {
+    "brutto_monat": "5.750,00 EUR (festes monatliches Gehalt)",
+    "netto_monat": "3.554,69 EUR",
+    "urlaubsgeld": "1.500,00 EUR (im Juni)",
+    "weihnachtsgeld": "0,00 EUR",
+    "weitergezahltes_arbeitsentgelt_waehrend_eel": "0,00 EUR",
+    "elterneigenschaft": "nein",
+    "beginn_arbeitsunfaehigkeit": "Fr. 04.09.2026",
+    "ende_arbeitsunfaehigkeit": "offen",
+    "ende_entgeltfortzahlung": "Do. 15.10.2026",
+    "entgeltbescheinigung_erstellen_am": "Fr. 02.10.2026",
+    "abrechnung": "05. des Folgemonats",
+    "letzter_abgerechneter_zeitraum_bei_au_beginn": "Juli 2026"
+   },
+   "expected": {
+    "ABGABEGRUND": "01",
+    "KORR-ABGABEGRUND": "00",
+    "MM-ALLGEMEIN": "J",
+    "MM-ENTGELT": "J",
+    "MM-ZEITKG": "N",
+    "MM-VOER": "N",
+    "DATUM-AB": "20260904",
+    "DATUM-EGZBIS": "20261015",
+    "EAZ-BEGINN-1": "20260701",
+    "EAZ-ENDE-1": "20260731",
+    "BRUTTO-1": "00575000",
+    "NETTO-1": "00355469",
+    "WAEHREEL-BRUTTO": "00000000"
+   },
+   "expected_basis": "Beispielpapier DTA EEL V13.3 (gültig ab 01.01.2027), §3.1 S. 9-11 und §3.2.1.1 S. 11-12 - Feldzuordnung aus dem Sachverhalt per Code (harness/generate_eaz.py) · approved by Sohee Lee (2026-10-27, format + 2 sample cases)",
+   "review_status": "approved"
+  },
+  "EAZ-028": {
+   "id": "EAZ-028",
+   "criterion_id": "CRIT-EAZ-1",
+   "case_type": "invalid",
+   "inputs": {
+    "brutto_monat": "4.700,00 EUR (festes monatliches Gehalt)",
+    "netto_monat": "2.897,08 EUR",
+    "urlaubsgeld": "500,00 EUR (im Juli)",
+    "weihnachtsgeld": "2.000,00 EUR (im November)",
+    "weitergezahltes_arbeitsentgelt_waehrend_eel": "0,00 EUR",
+    "elterneigenschaft": "nein",
+    "beginn_arbeitsunfaehigkeit": "So. 01.03.2026",
+    "ende_arbeitsunfaehigkeit": "offen",
+    "ende_entgeltfortzahlung": "Sa. 11.04.2026",
+    "entgeltbescheinigung_erstellen_am": "Mi. 01.04.2026",
+    "abrechnung": "05. des Folgemonats",
+    "letzter_abgerechneter_zeitraum_bei_au_beginn": "Januar 2026"
+   },
+   "expected": {
+    "ABGABEGRUND": "01",
+    "KORR-ABGABEGRUND": "00",
+    "MM-ALLGEMEIN": "J",
+    "MM-ENTGELT": "J",
+    "MM-ZEITKG": "N",
+    "MM-VOER": "N",
+    "DATUM-AB": "20260301",
+    "DATUM-EGZBIS": "20260411",
+    "EAZ-BEGINN-1": "20260101",
+    "EAZ-ENDE-1": "20260131",
+    "BRUTTO-1": "00470000",
+    "NETTO-1": "00289708",
+    "WAEHREEL-BRUTTO": "00000000"
+   },
+   "expected_basis": "Beispielpapier DTA EEL V13.3 (gültig ab 01.01.2027), §3.1 S. 9-11 und §3.2.1.1 S. 11-12 - Feldzuordnung aus dem Sachverhalt per Code (harness/generate_eaz.py) · approved by Sohee Lee (2026-10-27, format + 2 sample cases)",
+   "review_status": "approved"
+  },
+  "EAZ-029": {
+   "id": "EAZ-029",
+   "criterion_id": "CRIT-EAZ-1",
+   "case_type": "invalid",
+   "inputs": {
+    "brutto_monat": "1.900,00 EUR (festes monatliches Gehalt)",
+    "netto_monat": "1.168,14 EUR",
+    "urlaubsgeld": "0,00 EUR",
+    "weihnachtsgeld": "1.600,00 EUR (im Dezember)",
+    "weitergezahltes_arbeitsentgelt_waehrend_eel": "0,00 EUR",
+    "elterneigenschaft": "nein",
+    "beginn_arbeitsunfaehigkeit": "Sa. 13.06.2026",
+    "ende_arbeitsunfaehigkeit": "offen",
+    "ende_entgeltfortzahlung": "Fr. 24.07.2026",
+    "entgeltbescheinigung_erstellen_am": "Sa. 11.07.2026",
+    "abrechnung": "letzter Tag des Monats",
+    "letzter_abgerechneter_zeitraum_bei_au_beginn": "Mai 2026"
+   },
+   "expected": {
+    "ABGABEGRUND": "01",
+    "KORR-ABGABEGRUND": "00",
+    "MM-ALLGEMEIN": "J",
+    "MM-ENTGELT": "J",
+    "MM-ZEITKG": "N",
+    "MM-VOER": "N",
+    "DATUM-AB": "20260613",
+    "DATUM-EGZBIS": "20260724",
+    "EAZ-BEGINN-1": "20260501",
+    "EAZ-ENDE-1": "20260531",
+    "BRUTTO-1": "00190000",
+    "NETTO-1": "00116814",
+    "WAEHREEL-BRUTTO": "00000000"
+   },
+   "expected_basis": "Beispielpapier DTA EEL V13.3 (gültig ab 01.01.2027), §3.1 S. 9-11 - Feldzuordnung aus dem Sachverhalt per Code (harness/generate_eaz.py) · approved by Sohee Lee (2026-10-27, format + 2 sample cases)",
+   "review_status": "approved"
+  },
+  "EAZ-030": {
+   "id": "EAZ-030",
+   "criterion_id": "CRIT-EAZ-1",
+   "case_type": "normal",
+   "inputs": {
+    "brutto_monat": "4.650,00 EUR (festes monatliches Gehalt)",
+    "netto_monat": "2.801,44 EUR",
+    "urlaubsgeld": "0,00 EUR",
+    "weihnachtsgeld": "0,00 EUR",
+    "weitergezahltes_arbeitsentgelt_waehrend_eel": "0,00 EUR",
+    "elterneigenschaft": "nein",
+    "beginn_arbeitsunfaehigkeit": "So. 11.01.2026",
+    "ende_arbeitsunfaehigkeit": "offen",
+    "ende_entgeltfortzahlung": "Sa. 21.02.2026",
+    "entgeltbescheinigung_erstellen_am": "Sa. 14.02.2026",
+    "abrechnung": "letzter Tag des Monats",
+    "letzter_abgerechneter_zeitraum_bei_au_beginn": "Dezember 2025"
+   },
+   "expected": {
+    "ABGABEGRUND": "01",
+    "KORR-ABGABEGRUND": "00",
+    "MM-ALLGEMEIN": "J",
+    "MM-ENTGELT": "J",
+    "MM-ZEITKG": "N",
+    "MM-VOER": "N",
+    "DATUM-AB": "20260111",
+    "DATUM-EGZBIS": "20260221",
+    "EAZ-BEGINN-1": "20251201",
+    "EAZ-ENDE-1": "20251231",
+    "BRUTTO-1": "00465000",
+    "NETTO-1": "00280144",
+    "WAEHREEL-BRUTTO": "00000000"
+   },
+   "expected_basis": "Beispielpapier DTA EEL V13.3 (gültig ab 01.01.2027), §3.1 S. 9-11 - Feldzuordnung aus dem Sachverhalt per Code (harness/generate_eaz.py) · approved by Sohee Lee (2026-10-27, format + 2 sample cases)",
+   "review_status": "approved"
+  }
+ },
+ "execution": {
+  "RUN-EAZ-001": {
+   "id": "RUN-EAZ-001",
+   "test_case_id": "EAZ-001",
+   "vendor": "synthetic payroll output (Team 10 harness)",
+   "software_version": "harness",
+   "observed": {
+    "ABGABEGRUND": "01",
+    "KORR-ABGABEGRUND": "00",
+    "MM-ALLGEMEIN": "J",
+    "MM-ENTGELT": "J",
+    "MM-ZEITKG": "N",
+    "MM-VOER": "N",
+    "DATUM-AB": "20260612",
+    "DATUM-EGZBIS": "20260723",
+    "EAZ-BEGINN-1": "20260501",
+    "EAZ-ENDE-1": "20260531",
+    "BRUTTO-1": "00440000",
+    "NETTO-1": "00269712",
+    "WAEHREEL-BRUTTO": "00000000"
+   },
+   "evidence_ref": "eaz_cases.json#EAZ-001",
+   "run_at": "2026-10-27T09:12:11+00:00"
+  },
+  "RUN-EAZ-002": {
+   "id": "RUN-EAZ-002",
+   "test_case_id": "EAZ-002",
+   "vendor": "synthetic payroll output (Team 10 harness)",
+   "software_version": "harness",
+   "observed": {
+    "ABGABEGRUND": "01",
+    "KORR-ABGABEGRUND": "00",
+    "MM-ALLGEMEIN": "J",
+    "MM-ENTGELT": "J",
+    "MM-ZEITKG": "N",
+    "MM-VOER": "N",
+    "DATUM-AB": "20260511",
+    "DATUM-EGZBIS": "20260621",
+    "EAZ-BEGINN-1": "20260401",
+    "EAZ-ENDE-1": "20260430",
+    "BRUTTO-1": "00600000",
+    "NETTO-1": "00372879",
+    "WAEHREEL-BRUTTO": "00000000"
+   },
+   "evidence_ref": "eaz_cases.json#EAZ-002",
+   "run_at": "2026-10-27T09:12:11+00:00"
+  },
+  "RUN-EAZ-003": {
+   "id": "RUN-EAZ-003",
+   "test_case_id": "EAZ-003",
+   "vendor": "synthetic payroll output (Team 10 harness)",
+   "software_version": "harness",
+   "observed": {
+    "ABGABEGRUND": "01",
+    "KORR-ABGABEGRUND": "00",
+    "MM-ALLGEMEIN": "J",
+    "MM-ENTGELT": "J",
+    "MM-ZEITKG": "N",
+    "MM-VOER": "N",
+    "DATUM-AB": "20260620",
+    "DATUM-EGZBIS": "20260731",
+    "EAZ-BEGINN-1": "20260601",
+    "EAZ-ENDE-1": "20260630",
+    "BRUTTO-1": "00515000",
+    "NETTO-1": "00347679",
+    "WAEHREEL-BRUTTO": "00000000"
+   },
+   "evidence_ref": "eaz_cases.json#EAZ-003",
+   "run_at": "2026-10-27T09:12:11+00:00"
+  },
+  "RUN-EAZ-004": {
+   "id": "RUN-EAZ-004",
+   "test_case_id": "EAZ-004",
+   "vendor": "synthetic payroll output (Team 10 harness)",
+   "software_version": "harness",
+   "observed": {
+    "ABGABEGRUND": "01",
+    "KORR-ABGABEGRUND": "00",
+    "MM-ALLGEMEIN": "J",
+    "MM-ENTGELT": "J",
+    "MM-ZEITKG": "N",
+    "MM-VOER": "J",
+    "DATUM-AB": "20261104",
+    "DATUM-EGZBIS": "20261215",
+    "EAZ-BEGINN-1": "20260901",
+    "EAZ-ENDE-1": "20260930",
+    "BRUTTO-1": "00560000",
+    "NETTO-1": "00375511",
+    "WAEHREEL-BRUTTO": "00000000"
+   },
+   "evidence_ref": "eaz_cases.json#EAZ-004",
+   "run_at": "2026-10-27T09:12:11+00:00"
+  },
+  "RUN-EAZ-005": {
+   "id": "RUN-EAZ-005",
+   "test_case_id": "EAZ-005",
+   "vendor": "synthetic payroll output (Team 10 harness)",
+   "software_version": "harness",
+   "observed": {
+    "ABGABEGRUND": "01",
+    "KORR-ABGABEGRUND": "00",
+    "MM-ALLGEMEIN": "J",
+    "MM-ENTGELT": "J",
+    "MM-ZEITKG": "N",
+    "MM-VOER": "N",
+    "DATUM-AB": "20260718",
+    "DATUM-EGZBIS": "20260828",
+    "EAZ-BEGINN-1": "20260601",
+    "EAZ-ENDE-1": "20260630",
+    "BRUTTO-1": "00270000",
+    "NETTO-1": "00163009",
+    "WAEHREEL-BRUTTO": "00000000"
+   },
+   "evidence_ref": "eaz_cases.json#EAZ-005",
+   "run_at": "2026-10-27T09:12:11+00:00"
+  },
+  "RUN-EAZ-006": {
+   "id": "RUN-EAZ-006",
+   "test_case_id": "EAZ-006",
+   "vendor": "synthetic payroll output (Team 10 harness)",
+   "software_version": "harness",
+   "observed": {
+    "ABGABEGRUND": "01",
+    "KORR-ABGABEGRUND": "00",
+    "MM-ALLGEMEIN": "J",
+    "MM-ENTGELT": "J",
+    "MM-ZEITKG": "N",
+    "MM-VOER": "N",
+    "DATUM-AB": "20260109",
+    "DATUM-EGZBIS": "20260219",
+    "EAZ-BEGINN-1": "20251201",
+    "EAZ-ENDE-1": "20251231",
+    "BRUTTO-1": "00585000",
+    "NETTO-1": "00381532",
+    "WAEHREEL-BRUTTO": "00000000"
+   },
+   "evidence_ref": "eaz_cases.json#EAZ-006",
+   "run_at": "2026-10-27T09:12:11+00:00"
+  },
+  "RUN-EAZ-007": {
+   "id": "RUN-EAZ-007",
+   "test_case_id": "EAZ-007",
+   "vendor": "synthetic payroll output (Team 10 harness)",
+   "software_version": "harness",
+   "observed": {
+    "ABGABEGRUND": "01",
+    "KORR-ABGABEGRUND": "00",
+    "MM-ALLGEMEIN": "J",
+    "MM-ENTGELT": "J",
+    "MM-ZEITKG": "N",
+    "MM-VOER": "N",
+    "DATUM-AB": "20260520",
+    "DATUM-EGZBIS": "20260630",
+    "EAZ-BEGINN-1": "20260401",
+    "EAZ-ENDE-1": "20260430",
+    "BRUTTO-1": "00635000",
+    "NETTO-1": "00389117",
+    "WAEHREEL-BRUTTO": "00000000"
+   },
+   "evidence_ref": "eaz_cases.json#EAZ-007",
+   "run_at": "2026-10-27T09:12:11+00:00"
+  },
+  "RUN-EAZ-008": {
+   "id": "RUN-EAZ-008",
+   "test_case_id": "EAZ-008",
+   "vendor": "synthetic payroll output (Team 10 harness)",
+   "software_version": "harness",
+   "observed": {
+    "ABGABEGRUND": "01",
+    "KORR-ABGABEGRUND": "00",
+    "MM-ALLGEMEIN": "J",
+    "MM-ENTGELT": "J",
+    "MM-ZEITKG": "N",
+    "MM-VOER": "N",
+    "DATUM-AB": "20261019",
+    "DATUM-EGZBIS": "20261129",
+    "EAZ-BEGINN-1": "20260901",
+    "EAZ-ENDE-1": "20260930",
+    "BRUTTO-1": "00585000",
+    "NETTO-1": "00406601",
+    "WAEHREEL-BRUTTO": "00000000"
+   },
+   "evidence_ref": "eaz_cases.json#EAZ-008",
+   "run_at": "2026-10-27T09:12:11+00:00"
+  },
+  "RUN-EAZ-009": {
+   "id": "RUN-EAZ-009",
+   "test_case_id": "EAZ-009",
+   "vendor": "synthetic payroll output (Team 10 harness)",
+   "software_version": "harness",
+   "observed": {
+    "ABGABEGRUND": "01",
+    "KORR-ABGABEGRUND": "00",
+    "MM-ALLGEMEIN": "J",
+    "MM-ENTGELT": "J",
+    "MM-ZEITKG": "N",
+    "MM-VOER": "N",
+    "DATUM-AB": "20260214",
+    "DATUM-EGZBIS": "20260327",
+    "EAZ-BEGINN-1": "20260101",
+    "EAZ-ENDE-1": "20260131",
+    "BRUTTO-1": "00620000",
+    "NETTO-1": "00393210",
+    "WAEHREEL-BRUTTO": "00000000"
+   },
+   "evidence_ref": "eaz_cases.json#EAZ-009",
+   "run_at": "2026-10-27T09:12:11+00:00"
+  },
+  "RUN-EAZ-010": {
+   "id": "RUN-EAZ-010",
+   "test_case_id": "EAZ-010",
+   "vendor": "synthetic payroll output (Team 10 harness)",
+   "software_version": "harness",
+   "observed": {
+    "ABGABEGRUND": "01",
+    "KORR-ABGABEGRUND": "00",
+    "MM-ALLGEMEIN": "J",
+    "MM-ENTGELT": "J",
+    "MM-ZEITKG": "N",
+    "MM-VOER": "N",
+    "DATUM-AB": "20260916",
+    "DATUM-EGZBIS": "20261027",
+    "EAZ-BEGINN-1": "20260801",
+    "EAZ-ENDE-1": "20260831",
+    "BRUTTO-1": "00250000",
+    "NETTO-1": "00163214",
+    "WAEHREEL-BRUTTO": "00000000"
+   },
+   "evidence_ref": "eaz_cases.json#EAZ-010",
+   "run_at": "2026-10-27T09:12:11+00:00"
+  },
+  "RUN-EAZ-011": {
+   "id": "RUN-EAZ-011",
+   "test_case_id": "EAZ-011",
+   "vendor": "synthetic payroll output (Team 10 harness)",
+   "software_version": "harness",
+   "observed": {
+    "ABGABEGRUND": "01",
+    "KORR-ABGABEGRUND": "00",
+    "MM-ALLGEMEIN": "J",
+    "MM-ENTGELT": "J",
+    "MM-ZEITKG": "N",
+    "MM-VOER": "N",
+    "DATUM-AB": "20260602",
+    "DATUM-EGZBIS": "20260713",
+    "EAZ-BEGINN-1": "20260401",
+    "EAZ-ENDE-1": "20260430",
+    "BRUTTO-1": "00215000",
+    "NETTO-1": "00143641",
+    "WAEHREEL-BRUTTO": "00000000"
+   },
+   "evidence_ref": "eaz_cases.json#EAZ-011",
+   "run_at": "2026-10-27T09:12:11+00:00"
+  },
+  "RUN-EAZ-012": {
+   "id": "RUN-EAZ-012",
+   "test_case_id": "EAZ-012",
+   "vendor": "synthetic payroll output (Team 10 harness)",
+   "software_version": "harness",
+   "observed": {
+    "ABGABEGRUND": "01",
+    "KORR-ABGABEGRUND": "00",
+    "MM-ALLGEMEIN": "J",
+    "MM-ENTGELT": "J",
+    "MM-ZEITKG": "N",
+    "MM-VOER": "N",
+    "DATUM-AB": "20260803",
+    "DATUM-EGZBIS": "20260913",
+    "EAZ-BEGINN-1": "20260601",
+    "EAZ-ENDE-1": "20260630",
+    "BRUTTO-1": "00310000",
+    "NETTO-1": "00203807",
+    "WAEHREEL-BRUTTO": "00000000"
+   },
+   "evidence_ref": "eaz_cases.json#EAZ-012",
+   "run_at": "2026-10-27T09:12:11+00:00"
+  },
+  "RUN-EAZ-013": {
+   "id": "RUN-EAZ-013",
+   "test_case_id": "EAZ-013",
+   "vendor": "synthetic payroll output (Team 10 harness)",
+   "software_version": "harness",
+   "observed": {
+    "ABGABEGRUND": "01",
+    "KORR-ABGABEGRUND": "00",
+    "MM-ALLGEMEIN": "J",
+    "MM-ENTGELT": "J",
+    "MM-ZEITKG": "N",
+    "MM-VOER": "N",
+    "DATUM-AB": "20260910",
+    "DATUM-EGZBIS": "20261021",
+    "EAZ-BEGINN-1": "20260801",
+    "EAZ-ENDE-1": "20260831",
+    "BRUTTO-1": "00200000",
+    "NETTO-1": "00135342",
+    "WAEHREEL-BRUTTO": "00000000"
+   },
+   "evidence_ref": "eaz_cases.json#EAZ-013",
+   "run_at": "2026-10-27T09:12:11+00:00"
+  },
+  "RUN-EAZ-014": {
+   "id": "RUN-EAZ-014",
+   "test_case_id": "EAZ-014",
+   "vendor": "synthetic payroll output (Team 10 harness)",
+   "software_version": "harness",
+   "observed": {
+    "ABGABEGRUND": "01",
+    "KORR-ABGABEGRUND": "00",
+    "MM-ALLGEMEIN": "J",
+    "MM-ENTGELT": "J",
+    "MM-ZEITKG": "N",
+    "MM-VOER": "N",
+    "DATUM-AB": "20260412",
+    "DATUM-EGZBIS": "20260523",
+    "EAZ-BEGINN-1": "20260301",
+    "EAZ-ENDE-1": "20260331",
+    "BRUTTO-1": "00505000",
+    "NETTO-1": "00346481",
+    "WAEHREEL-BRUTTO": "00000000"
+   },
+   "evidence_ref": "eaz_cases.json#EAZ-014",
+   "run_at": "2026-10-27T09:12:11+00:00"
+  },
+  "RUN-EAZ-015": {
+   "id": "RUN-EAZ-015",
+   "test_case_id": "EAZ-015",
+   "vendor": "synthetic payroll output (Team 10 harness)",
+   "software_version": "harness",
+   "observed": {
+    "ABGABEGRUND": "01",
+    "KORR-ABGABEGRUND": "00",
+    "MM-ALLGEMEIN": "J",
+    "MM-ENTGELT": "J",
+    "MM-ZEITKG": "N",
+    "MM-VOER": "N",
+    "DATUM-AB": "20261002",
+    "DATUM-EGZBIS": "20261112",
+    "EAZ-BEGINN-1": "20260901",
+    "EAZ-ENDE-1": "20260930",
+    "BRUTTO-1": "00480000",
+    "NETTO-1": "00312942",
+    "WAEHREEL-BRUTTO": "00000000"
+   },
+   "evidence_ref": "eaz_cases.json#EAZ-015",
+   "run_at": "2026-10-27T09:12:11+00:00"
+  },
+  "RUN-EAZ-016": {
+   "id": "RUN-EAZ-016",
+   "test_case_id": "EAZ-016",
+   "vendor": "synthetic payroll output (Team 10 harness)",
+   "software_version": "harness",
+   "observed": {
+    "ABGABEGRUND": "01",
+    "KORR-ABGABEGRUND": "00",
+    "MM-ALLGEMEIN": "J",
+    "MM-ENTGELT": "J",
+    "MM-ZEITKG": "N",
+    "MM-VOER": "N",
+    "DATUM-AB": "20260606",
+    "DATUM-EGZBIS": "20260717",
+    "EAZ-BEGINN-1": "20260501",
+    "EAZ-ENDE-1": "20260530",
+    "BRUTTO-1": "00245000",
+    "NETTO-1": "00147268",
+    "WAEHREEL-BRUTTO": "00000000"
+   },
+   "evidence_ref": "eaz_cases.json#EAZ-016",
+   "run_at": "2026-10-27T09:12:11+00:00"
+  },
+  "RUN-EAZ-017": {
+   "id": "RUN-EAZ-017",
+   "test_case_id": "EAZ-017",
+   "vendor": "synthetic payroll output (Team 10 harness)",
+   "software_version": "harness",
+   "observed": {
+    "ABGABEGRUND": "01",
+    "KORR-ABGABEGRUND": "00",
+    "MM-ALLGEMEIN": "J",
+    "MM-ENTGELT": "J",
+    "MM-ZEITKG": "N",
+    "MM-VOER": "N",
+    "DATUM-AB": "20260103",
+    "DATUM-EGZBIS": "20260213",
+    "EAZ-BEGINN-1": "20251201",
+    "EAZ-ENDE-1": "20251231",
+    "BRUTTO-1": "00470000",
+    "NETTO-1": "00289955",
+    "WAEHREEL-BRUTTO": "00000000"
+   },
+   "evidence_ref": "eaz_cases.json#EAZ-017",
+   "run_at": "2026-10-27T09:12:11+00:00"
+  },
+  "RUN-EAZ-018": {
+   "id": "RUN-EAZ-018",
+   "test_case_id": "EAZ-018",
+   "vendor": "synthetic payroll output (Team 10 harness)",
+   "software_version": "harness",
+   "observed": {
+    "ABGABEGRUND": "01",
+    "KORR-ABGABEGRUND": "00",
+    "MM-ALLGEMEIN": "J",
+    "MM-ENTGELT": "J",
+    "MM-ZEITKG": "N",
+    "MM-VOER": "N",
+    "DATUM-AB": "20260306",
+    "DATUM-EGZBIS": "20260416",
+    "EAZ-BEGINN-1": "20260201",
+    "EAZ-ENDE-1": "20260228",
+    "BRUTTO-1": "00420000",
+    "NETTO-1": "00278016",
+    "WAEHREEL-BRUTTO": "00000000"
+   },
+   "evidence_ref": "eaz_cases.json#EAZ-018",
+   "run_at": "2026-10-27T09:12:11+00:00"
+  },
+  "RUN-EAZ-019": {
+   "id": "RUN-EAZ-019",
+   "test_case_id": "EAZ-019",
+   "vendor": "synthetic payroll output (Team 10 harness)",
+   "software_version": "harness",
+   "observed": {
+    "ABGABEGRUND": "01",
+    "KORR-ABGABEGRUND": "00",
+    "MM-ALLGEMEIN": "J",
+    "MM-ENTGELT": "J",
+    "MM-ZEITKG": "N",
+    "MM-VOER": "N",
+    "DATUM-AB": "20260501",
+    "DATUM-EGZBIS": "20260611",
+    "EAZ-BEGINN-1": "20260301",
+    "EAZ-ENDE-1": "20260331",
+    "BRUTTO-1": "00740000",
+    "NETTO-1": "00412992",
+    "WAEHREEL-BRUTTO": "00000000"
+   },
+   "evidence_ref": "eaz_cases.json#EAZ-019",
+   "run_at": "2026-10-27T09:12:11+00:00"
+  },
+  "RUN-EAZ-020": {
+   "id": "RUN-EAZ-020",
+   "test_case_id": "EAZ-020",
+   "vendor": "synthetic payroll output (Team 10 harness)",
+   "software_version": "harness",
+   "observed": {
+    "ABGABEGRUND": "01",
+    "KORR-ABGABEGRUND": "00",
+    "MM-ALLGEMEIN": "J",
+    "MM-ENTGELT": "J",
+    "MM-ZEITKG": "N",
+    "MM-VOER": "N",
+    "DATUM-AB": "20261110",
+    "DATUM-EGZBIS": "20261221",
+    "EAZ-BEGINN-1": "20261001",
+    "EAZ-ENDE-1": "20261031",
+    "BRUTTO-1": "00290000",
+    "NETTO-1": "00198261",
+    "WAEHREEL-BRUTTO": "00000000"
+   },
+   "evidence_ref": "eaz_cases.json#EAZ-020",
+   "run_at": "2026-10-27T09:12:11+00:00"
+  },
+  "RUN-EAZ-021": {
+   "id": "RUN-EAZ-021",
+   "test_case_id": "EAZ-021",
+   "vendor": "synthetic payroll output (Team 10 harness)",
+   "software_version": "harness",
+   "observed": {
+    "ABGABEGRUND": "01",
+    "KORR-ABGABEGRUND": "00",
+    "MM-ALLGEMEIN": "J",
+    "MM-ENTGELT": "J",
+    "MM-ZEITKG": "N",
+    "MM-VOER": "N",
+    "DATUM-AB": "20260418",
+    "DATUM-EGZBIS": "20260530",
+    "EAZ-BEGINN-1": "20260301",
+    "EAZ-ENDE-1": "20260331",
+    "BRUTTO-1": "00445000",
+    "NETTO-1": "00302555",
+    "WAEHREEL-BRUTTO": "00000000"
+   },
+   "evidence_ref": "eaz_cases.json#EAZ-021",
+   "run_at": "2026-10-27T09:12:11+00:00"
+  },
+  "RUN-EAZ-022": {
+   "id": "RUN-EAZ-022",
+   "test_case_id": "EAZ-022",
+   "vendor": "synthetic payroll output (Team 10 harness)",
+   "software_version": "harness",
+   "observed": {
+    "ABGABEGRUND": "01",
+    "KORR-ABGABEGRUND": "00",
+    "MM-ALLGEMEIN": "J",
+    "MM-ENTGELT": "J",
+    "MM-ZEITKG": "N",
+    "MM-VOER": "N",
+    "DATUM-AB": "20260807",
+    "DATUM-EGZBIS": "20260917",
+    "EAZ-BEGINN-1": "20260701",
+    "EAZ-ENDE-1": "20260731",
+    "BRUTTO-1": "00465000",
+    "NETTO-1": "00300867",
+    "WAEHREEL-BRUTTO": "00000000"
+   },
+   "evidence_ref": "eaz_cases.json#EAZ-022",
+   "run_at": "2026-10-27T09:12:11+00:00"
+  },
+  "RUN-EAZ-023": {
+   "id": "RUN-EAZ-023",
+   "test_case_id": "EAZ-023",
+   "vendor": "synthetic payroll output (Team 10 harness)",
+   "software_version": "harness",
+   "observed": {
+    "ABGABEGRUND": "01",
+    "KORR-ABGABEGRUND": "00",
+    "MM-ALLGEMEIN": "J",
+    "MM-ENTGELT": "J",
+    "MM-ZEITKG": "N",
+    "MM-VOER": "N",
+    "DATUM-AB": "20260217",
+    "DATUM-EGZBIS": "20260330",
+    "EAZ-BEGINN-1": "20260101",
+    "EAZ-ENDE-1": "20260131",
+    "BRUTTO-1": "00230000",
+    "NETTO-1": "00151053",
+    "WAEHREEL-BRUTTO": "00000000"
+   },
+   "evidence_ref": "eaz_cases.json#EAZ-023",
+   "run_at": "2026-10-27T09:12:11+00:00"
+  },
+  "RUN-EAZ-024": {
+   "id": "RUN-EAZ-024",
+   "test_case_id": "EAZ-024",
+   "vendor": "synthetic payroll output (Team 10 harness)",
+   "software_version": "harness",
+   "observed": {
+    "ABGABEGRUND": "01",
+    "KORR-ABGABEGRUND": "00",
+    "MM-ALLGEMEIN": "J",
+    "MM-ENTGELT": "J",
+    "MM-ZEITKG": "N",
+    "MM-VOER": "N",
+    "DATUM-AB": "20260603",
+    "DATUM-EGZBIS": "20260713",
+    "EAZ-BEGINN-1": "20260401",
+    "EAZ-ENDE-1": "20260430",
+    "BRUTTO-1": "00455000",
+    "NETTO-1": "00281160",
+    "WAEHREEL-BRUTTO": "00000000"
+   },
+   "evidence_ref": "eaz_cases.json#EAZ-024",
+   "run_at": "2026-10-27T09:12:11+00:00"
+  },
+  "RUN-EAZ-025": {
+   "id": "RUN-EAZ-025",
+   "test_case_id": "EAZ-025",
+   "vendor": "synthetic payroll output (Team 10 harness)",
+   "software_version": "harness",
+   "observed": {
+    "ABGABEGRUND": "01",
+    "KORR-ABGABEGRUND": "00",
+    "MM-ALLGEMEIN": "J",
+    "MM-ENTGELT": "J",
+    "MM-ZEITKG": "N",
+    "MM-VOER": "N",
+    "DATUM-AB": "20261002",
+    "DATUM-EGZBIS": "20261112",
+    "EAZ-BEGINN-1": "20260901",
+    "EAZ-ENDE-1": "20260930",
+    "BRUTTO-1": "00400000",
+    "NETTO-1": "00266171",
+    "WAEHREEL-BRUTTO": "00000000"
+   },
+   "evidence_ref": "eaz_cases.json#EAZ-025",
+   "run_at": "2026-10-27T09:12:11+00:00"
+  },
+  "RUN-EAZ-026": {
+   "id": "RUN-EAZ-026",
+   "test_case_id": "EAZ-026",
+   "vendor": "synthetic payroll output (Team 10 harness)",
+   "software_version": "harness",
+   "observed": {
+    "ABGABEGRUND": "01",
+    "KORR-ABGABEGRUND": "00",
+    "MM-ALLGEMEIN": "J",
+    "MM-ENTGELT": "J",
+    "MM-ZEITKG": "N",
+    "MM-VOER": "N",
+    "DATUM-AB": "20260513",
+    "DATUM-EGZBIS": "20260623",
+    "EAZ-BEGINN-1": "20260401",
+    "EAZ-ENDE-1": "20260430",
+    "BRUTTO-1": "00480000",
+    "NETTO-1": "00003126",
+    "WAEHREEL-BRUTTO": "00000000"
+   },
+   "evidence_ref": "eaz_cases.json#EAZ-026",
+   "run_at": "2026-10-27T09:12:11+00:00"
+  },
+  "RUN-EAZ-027": {
+   "id": "RUN-EAZ-027",
+   "test_case_id": "EAZ-027",
+   "vendor": "synthetic payroll output (Team 10 harness)",
+   "software_version": "harness",
+   "observed": {
+    "ABGABEGRUND": "01",
+    "KORR-ABGABEGRUND": "00",
+    "MM-ALLGEMEIN": "J",
+    "MM-ENTGELT": "J",
+    "MM-ZEITKG": "N",
+    "MM-VOER": "N",
+    "DATUM-AB": "20260904",
+    "DATUM-EGZBIS": "20261015",
+    "EAZ-BEGINN-1": "20260701",
+    "EAZ-ENDE-1": "20260731",
+    "BRUTTO-1": "00575000",
+    "NETTO-1": "00355469",
+    "WAEHREEL-BRUTTO": "00000000"
+   },
+   "evidence_ref": "eaz_cases.json#EAZ-027",
+   "run_at": "2026-10-27T09:12:11+00:00"
+  },
+  "RUN-EAZ-028": {
+   "id": "RUN-EAZ-028",
+   "test_case_id": "EAZ-028",
+   "vendor": "synthetic payroll output (Team 10 harness)",
+   "software_version": "harness",
+   "observed": {
+    "ABGABEGRUND": "01",
+    "KORR-ABGABEGRUND": "00",
+    "MM-ALLGEMEIN": "J",
+    "MM-ENTGELT": "J",
+    "MM-ZEITKG": "N",
+    "MM-VOER": "N",
+    "DATUM-AB": "20260302",
+    "DATUM-EGZBIS": "20260411",
+    "EAZ-BEGINN-1": "20260101",
+    "EAZ-ENDE-1": "20260131",
+    "BRUTTO-1": "00470000",
+    "NETTO-1": "00289708",
+    "WAEHREEL-BRUTTO": "00000000"
+   },
+   "evidence_ref": "eaz_cases.json#EAZ-028",
+   "run_at": "2026-10-27T09:12:11+00:00"
+  },
+  "RUN-EAZ-029": {
+   "id": "RUN-EAZ-029",
+   "test_case_id": "EAZ-029",
+   "vendor": "synthetic payroll output (Team 10 harness)",
+   "software_version": "harness",
+   "observed": {
+    "ABGABEGRUND": "01",
+    "KORR-ABGABEGRUND": "00",
+    "MM-ALLGEMEIN": "J",
+    "MM-ENTGELT": "J",
+    "MM-ZEITKG": "N",
+    "MM-VOER": "N",
+    "DATUM-AB": "20260613",
+    "DATUM-EGZBIS": "20260724",
+    "EAZ-BEGINN-1": "20260501",
+    "EAZ-ENDE-1": "20260531",
+    "BRUTTO-1": "00116814",
+    "NETTO-1": "00190000",
+    "WAEHREEL-BRUTTO": "00000000"
+   },
+   "evidence_ref": "eaz_cases.json#EAZ-029",
+   "run_at": "2026-10-27T09:12:11+00:00"
+  },
+  "RUN-EAZ-030": {
+   "id": "RUN-EAZ-030",
+   "test_case_id": "EAZ-030",
+   "vendor": "synthetic payroll output (Team 10 harness)",
+   "software_version": "harness",
+   "observed": {
+    "ABGABEGRUND": "01",
+    "KORR-ABGABEGRUND": "00",
+    "MM-ALLGEMEIN": "J",
+    "MM-ENTGELT": "J",
+    "MM-ZEITKG": "N",
+    "MM-VOER": "N",
+    "DATUM-AB": "20260111",
+    "DATUM-EGZBIS": "20260221",
+    "EAZ-BEGINN-1": "20251201",
+    "EAZ-ENDE-1": "20251231",
+    "BRUTTO-1": "00465000",
+    "NETTO-1": "00280144",
+    "WAEHREEL-BRUTTO": "00000000"
+   },
+   "evidence_ref": "eaz_cases.json#EAZ-030",
+   "run_at": "2026-10-27T09:12:11+00:00"
+  }
+ },
+ "finding": {
+  "FIND-EAZ-001": {
+   "id": "FIND-EAZ-001",
+   "status": "PASS",
+   "reason": "observed output matches expected value",
+   "links": [
+    "EAZ-001",
+    "RUN-EAZ-001"
+   ]
+  },
+  "FIND-EAZ-002": {
+   "id": "FIND-EAZ-002",
+   "status": "PASS",
+   "reason": "observed output matches expected value",
+   "links": [
+    "EAZ-002",
+    "RUN-EAZ-002"
+   ]
+  },
+  "FIND-EAZ-003": {
+   "id": "FIND-EAZ-003",
+   "status": "MISMATCH",
+   "reason": "EAZ-BEGINN-1: expected '20260501', observed '20260601'; EAZ-ENDE-1: expected '20260531', observed '20260630'",
+   "links": [
+    "EAZ-003",
+    "RUN-EAZ-003"
+   ]
+  },
+  "FIND-EAZ-004": {
+   "id": "FIND-EAZ-004",
+   "status": "MISMATCH",
+   "reason": "MM-VOER: expected 'N', observed 'J'",
+   "links": [
+    "EAZ-004",
+    "RUN-EAZ-004"
+   ]
+  },
+  "FIND-EAZ-005": {
+   "id": "FIND-EAZ-005",
+   "status": "PASS",
+   "reason": "observed output matches expected value",
+   "links": [
+    "EAZ-005",
+    "RUN-EAZ-005"
+   ]
+  },
+  "FIND-EAZ-006": {
+   "id": "FIND-EAZ-006",
+   "status": "PASS",
+   "reason": "observed output matches expected value",
+   "links": [
+    "EAZ-006",
+    "RUN-EAZ-006"
+   ]
+  },
+  "FIND-EAZ-007": {
+   "id": "FIND-EAZ-007",
+   "status": "PASS",
+   "reason": "observed output matches expected value",
+   "links": [
+    "EAZ-007",
+    "RUN-EAZ-007"
+   ]
+  },
+  "FIND-EAZ-008": {
+   "id": "FIND-EAZ-008",
+   "status": "PASS",
+   "reason": "observed output matches expected value",
+   "links": [
+    "EAZ-008",
+    "RUN-EAZ-008"
+   ]
+  },
+  "FIND-EAZ-009": {
+   "id": "FIND-EAZ-009",
+   "status": "PASS",
+   "reason": "observed output matches expected value",
+   "links": [
+    "EAZ-009",
+    "RUN-EAZ-009"
+   ]
+  },
+  "FIND-EAZ-010": {
+   "id": "FIND-EAZ-010",
+   "status": "PASS",
+   "reason": "observed output matches expected value",
+   "links": [
+    "EAZ-010",
+    "RUN-EAZ-010"
+   ]
+  },
+  "FIND-EAZ-011": {
+   "id": "FIND-EAZ-011",
+   "status": "PASS",
+   "reason": "observed output matches expected value",
+   "links": [
+    "EAZ-011",
+    "RUN-EAZ-011"
+   ]
+  },
+  "FIND-EAZ-012": {
+   "id": "FIND-EAZ-012",
+   "status": "PASS",
+   "reason": "observed output matches expected value",
+   "links": [
+    "EAZ-012",
+    "RUN-EAZ-012"
+   ]
+  },
+  "FIND-EAZ-013": {
+   "id": "FIND-EAZ-013",
+   "status": "PASS",
+   "reason": "observed output matches expected value",
+   "links": [
+    "EAZ-013",
+    "RUN-EAZ-013"
+   ]
+  },
+  "FIND-EAZ-014": {
+   "id": "FIND-EAZ-014",
+   "status": "PASS",
+   "reason": "observed output matches expected value",
+   "links": [
+    "EAZ-014",
+    "RUN-EAZ-014"
+   ]
+  },
+  "FIND-EAZ-015": {
+   "id": "FIND-EAZ-015",
+   "status": "PASS",
+   "reason": "observed output matches expected value",
+   "links": [
+    "EAZ-015",
+    "RUN-EAZ-015"
+   ]
+  },
+  "FIND-EAZ-016": {
+   "id": "FIND-EAZ-016",
+   "status": "MISMATCH",
+   "reason": "EAZ-ENDE-1: expected '20260531', observed '20260530'",
+   "links": [
+    "EAZ-016",
+    "RUN-EAZ-016"
+   ]
+  },
+  "FIND-EAZ-017": {
+   "id": "FIND-EAZ-017",
+   "status": "MISMATCH",
+   "reason": "EAZ-BEGINN-1: expected '20251101', observed '20251201'; EAZ-ENDE-1: expected '20251130', observed '20251231'",
+   "links": [
+    "EAZ-017",
+    "RUN-EAZ-017"
+   ]
+  },
+  "FIND-EAZ-018": {
+   "id": "FIND-EAZ-018",
+   "status": "PASS",
+   "reason": "observed output matches expected value",
+   "links": [
+    "EAZ-018",
+    "RUN-EAZ-018"
+   ]
+  },
+  "FIND-EAZ-019": {
+   "id": "FIND-EAZ-019",
+   "status": "MISMATCH",
+   "reason": "BRUTTO-1: expected '00640000', observed '00740000'",
+   "links": [
+    "EAZ-019",
+    "RUN-EAZ-019"
+   ]
+  },
+  "FIND-EAZ-020": {
+   "id": "FIND-EAZ-020",
+   "status": "PASS",
+   "reason": "observed output matches expected value",
+   "links": [
+    "EAZ-020",
+    "RUN-EAZ-020"
+   ]
+  },
+  "FIND-EAZ-021": {
+   "id": "FIND-EAZ-021",
+   "status": "MISMATCH",
+   "reason": "DATUM-EGZBIS: expected '20260529', observed '20260530'",
+   "links": [
+    "EAZ-021",
+    "RUN-EAZ-021"
+   ]
+  },
+  "FIND-EAZ-022": {
+   "id": "FIND-EAZ-022",
+   "status": "PASS",
+   "reason": "observed output matches expected value",
+   "links": [
+    "EAZ-022",
+    "RUN-EAZ-022"
+   ]
+  },
+  "FIND-EAZ-023": {
+   "id": "FIND-EAZ-023",
+   "status": "PASS",
+   "reason": "observed output matches expected value",
+   "links": [
+    "EAZ-023",
+    "RUN-EAZ-023"
+   ]
+  },
+  "FIND-EAZ-024": {
+   "id": "FIND-EAZ-024",
+   "status": "MISMATCH",
+   "reason": "DATUM-EGZBIS: expected '20260714', observed '20260713'",
+   "links": [
+    "EAZ-024",
+    "RUN-EAZ-024"
+   ]
+  },
+  "FIND-EAZ-025": {
+   "id": "FIND-EAZ-025",
+   "status": "PASS",
+   "reason": "observed output matches expected value",
+   "links": [
+    "EAZ-025",
+    "RUN-EAZ-025"
+   ]
+  },
+  "FIND-EAZ-026": {
+   "id": "FIND-EAZ-026",
+   "status": "MISMATCH",
+   "reason": "NETTO-1: expected '00312620', observed '00003126'",
+   "links": [
+    "EAZ-026",
+    "RUN-EAZ-026"
+   ]
+  },
+  "FIND-EAZ-027": {
+   "id": "FIND-EAZ-027",
+   "status": "PASS",
+   "reason": "observed output matches expected value",
+   "links": [
+    "EAZ-027",
+    "RUN-EAZ-027"
+   ]
+  },
+  "FIND-EAZ-028": {
+   "id": "FIND-EAZ-028",
+   "status": "MISMATCH",
+   "reason": "DATUM-AB: expected '20260301', observed '20260302'",
+   "links": [
+    "EAZ-028",
+    "RUN-EAZ-028"
+   ]
+  },
+  "FIND-EAZ-029": {
+   "id": "FIND-EAZ-029",
+   "status": "MISMATCH",
+   "reason": "BRUTTO-1: expected '00190000', observed '00116814'; NETTO-1: expected '00116814', observed '00190000'",
+   "links": [
+    "EAZ-029",
+    "RUN-EAZ-029"
+   ]
+  },
+  "FIND-EAZ-030": {
+   "id": "FIND-EAZ-030",
+   "status": "PASS",
+   "reason": "observed output matches expected value",
+   "links": [
+    "EAZ-030",
+    "RUN-EAZ-030"
+   ]
+  }
+ },
+ "report": {
+  "RPT-1": {
+   "id": "RPT-1",
+   "template_id": "TPL-SYNTH-1",
+   "renderer_version": "itsg.renderer/0.1.0",
+   "field_map_version": "itsg.fieldmap/synth-1",
+   "artifact_ref": "data\\eaz30\\report.artifact.json",
+   "conformance": [
+    {
+     "status": "pass",
+     "checks": {
+      "required_fields": {
+       "missing": [],
+       "pass": true
+      },
+      "labels_and_order": {
+       "problems": [],
+       "pass": true,
+       "blocked": false
+      },
+      "output_type": {
+       "problems": [],
+       "pass": true,
+       "blocked": false
+      },
+      "value_mapping": {
+       "problems": [],
+       "pass": true,
+       "blocked": false
+      }
+     },
+     "compliance_claim_allowed": false,
+     "reason": "synthetic template profile: conformance checks are structural only and cannot authorize a legal or template compliance claim"
+    }
+   ],
+   "compliance_claim": false
+  }
+ }
+}

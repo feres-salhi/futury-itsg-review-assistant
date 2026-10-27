@@ -1,0 +1,82 @@
+{
+  "schemaVersion": "mimosa-finding-history/v1",
+  "runId": "20261026T170154157Z-48579-d3b2e5185607",
+  "runStatus": "inconclusive",
+  "errors": [
+    "candidate-select:pipeline/index/verify.py: candidate_limit_exceeded: 11 changed reviewable file(s) were not scanned because the limit is 20",
+    "baseline-read:requirements.txt: baseline_snapshot_unreadable: file is missing from task baseline",
+    "baseline-read:pipeline/__init__.py: baseline_snapshot_unreadable: file is missing from task baseline",
+    "baseline-read:pipeline/audit.py: baseline_snapshot_unreadable: file is missing from task baseline",
+    "baseline-read:pipeline/ids.py: baseline_snapshot_unreadable: file is missing from task baseline",
+    "baseline-read:pipeline/segmenter/__init__.py: baseline_snapshot_unreadable: file is missing from task baseline",
+    "baseline-read:pipeline/segmenter/chunker.py: baseline_snapshot_unreadable: file is missing from task baseline",
+    "baseline-read:pipeline/segmenter/cli.py: baseline_snapshot_unreadable: file is missing from task baseline",
+    "baseline-read:pipeline/segmenter/docx_extractor.py: baseline_snapshot_unreadable: file is missing from task baseline",
+    "baseline-read:pipeline/segmenter/models.py: baseline_snapshot_unreadable: file is missing from task baseline",
+    "baseline-read:pipeline/segmenter/pdf_extractor.py: baseline_snapshot_unreadable: file is missing from task baseline",
+    "baseline-read:pipeline/registry/__init__.py: baseline_snapshot_unreadable: file is missing from task baseline",
+    "baseline-read:pipeline/registry/cli.py: baseline_snapshot_unreadable: file is missing from task baseline",
+    "baseline-read:pipeline/registry/fetch.py: baseline_snapshot_unreadable: file is missing from task baseline",
+    "baseline-read:pipeline/registry/g0.py: baseline_snapshot_unreadable: file is missing from task baseline",
+    "baseline-read:pipeline/registry/importer.py: baseline_snapshot_unreadable: file is missing from task baseline",
+    "baseline-read:pipeline/registry/manifest.py: baseline_snapshot_unreadable: file is missing from task baseline",
+    "baseline-read:pipeline/index/__init__.py: baseline_snapshot_unreadable: file is missing from task baseline",
+    "baseline-read:pipeline/index/cli.py: baseline_snapshot_unreadable: file is missing from task baseline",
+    "baseline-read:pipeline/index/fts.py: baseline_snapshot_unreadable: file is missing from task baseline",
+    "baseline-read:pipeline/index/query.py: baseline_snapshot_unreadable: file is missing from task baseline",
+    "scan:pipeline/__init__.py: scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+    "scan:pipeline/audit.py: scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+    "scan:pipeline/ids.py: scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+    "scan:pipeline/segmenter/__init__.py: scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+    "scan:pipeline/segmenter/chunker.py: scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+    "scan:pipeline/segmenter/cli.py: scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+    "scan:pipeline/segmenter/docx_extractor.py: scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+    "scan:pipeline/segmenter/models.py: scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+    "scan:pipeline/segmenter/pdf_extractor.py: scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+    "scan:pipeline/registry/__init__.py: scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+    "scan:pipeline/registry/cli.py: scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+    "scan:pipeline/registry/fetch.py: scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+    "scan:pipeline/registry/g0.py: scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+    "scan:pipeline/registry/importer.py: scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+    "scan:pipeline/registry/manifest.py: scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+    "scan:pipeline/index/__init__.py: scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+    "scan:pipeline/index/cli.py: scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+    "scan:pipeline/index/fts.py: scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+    "scan:pipeline/index/query.py: scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+    "supply-chain-check:.: stop_budget_exhausted: focused supply-chain check was not run before the gate budget"
+  ],
+  "target": ".",
+  "revision": "090703782aaa5e63b113e39178a30fd5c0f5b039",
+  "diffHash": "fc141eae21b18aede1d3089883b94c93f8b5489cd4c391246819a52a0e778865",
+  "rulesVersion": "unavailable",
+  "recordedAt": "2026-10-26T17:01:54.157Z",
+  "timing": {
+    "startedAt": "2026-10-26T17:01:51.014Z",
+    "completedAt": "2026-10-26T17:01:54.157Z",
+    "durationMs": 3143
+  },
+  "tokens": {
+    "input": 0,
+    "output": 0,
+    "total": 0,
+    "modelCalls": 0,
+    "measurement": "known-zero"
+  },
+  "findings": {
+    "total": 0,
+    "bySeverity": {},
+    "byStatus": {}
+  },
+  "coverage": {
+    "status": "partial",
+    "reasonCounts": {
+      "candidate_limit_exceeded": 1,
+      "baseline_snapshot_unreadable": 20,
+      "scanner_failed": 19,
+      "stop_budget_exhausted": 1,
+      "project_check_failed": 41
+    }
+  },
+  "evidenceBoundary": "static_only",
+  "immutableReport": ".mimosa/reports/task-review-session_ad7d3ed380e7bdb4ce499d06994380f4-20261026T170154157Z-48579-d3b2e5185607.json"
+}
