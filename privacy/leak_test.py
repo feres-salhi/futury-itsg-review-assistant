@@ -259,41 +259,99 @@ def false_positives(count: int = 50):
     return (len(sample), *scan(sample), len(chunks), *scan(chunks))
 
 
-def main() -> int:
-    records = make_records(50)
-    leaks, stats = run_records(records)
+def independent_set():
+    """The reviewer-written records from test_independent.py (read with ast, so no pytest is needed here)."""
+    import ast
+
+    tree = ast.parse((Path(__file__).resolve().parent / "test_independent.py").read_text(encoding="utf-8"))
+    records = next(ast.literal_eval(node.value) for node in tree.body
+                   if isinstance(node, ast.Assign) and any(getattr(t, "id", "") == "RECORDS" for t in node.targets))
+    planted = leaked = 0
+    for text, values in records:
+        clean, _summary = schleuse.pseudonymize(text, TEST_KEY)
+        for value in values:
+            planted += 1
+            leaked += value in clean
+    return {"records": len(records), "planted": planted, "leaked_after_fix": leaked,
+            "first_run_before_fix": {"caught": 18, "leaked": 1, "note": "name after 'Versicherter:' was not recognised"}}
+
+
+KNOWN_LIMITS = [
+    "Names in plain free text without a cue word (Herr, Frau, Name:, Versicherter ...) are not found.",
+    "0 leaked on the author's records is not independent evidence: the detectors were tuned on that kind of record.",
+    "DTA name-block positions (DBNA, DBAP, DSKO) come from one sample file, not from the verified record layout.",
+    "Pseudonymized data is still personal data under GDPR while it can be linked back.",
+    "Only ask(), the retrieval.ask/ui.server loggers and the Langfuse calls of run_review/harness use the airlock.",
+]
+
+
+def collect() -> dict:
+    """Run everything and return the results as plain data (printed by main, served by the UI)."""
+    from datetime import datetime, timezone
+
+    leaks, stats = run_records(make_records(50))
     distinct = {(i, slot) for i, slot, _c, _w in leaks}
     stress_leaks, stress_stats = run_records(make_uncued_names(10))
-    stress_distinct = {(i, slot) for i, slot, _c, _w in stress_leaks}
     extra_planted = extra_leaked = 0
     for seed in range(1, 9):  # same generator, other random draws
         extra_leaks, extra_stats = run_records(make_records(50, seed))
         extra_planted += extra_stats["planted"]
         extra_leaked += len({(i, slot) for i, slot, _c, _w in extra_leaks})
     total, s_strict, s_lenient, all_total, a_strict, a_lenient = false_positives(50)
+    return {
+        "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "policy_version": schleuse.POLICY_VERSION,
+        "author": {"records": stats["records"], "planted": stats["planted"], "leaked": len(distinct),
+                   "leaks": [{"record": i, "category": c, "where": w} for i, _s, c, w in leaks],
+                   "blocked": stats["blocked"], "reached_model": stats["answered_not_found"],
+                   "tokens_mapped_back": stats["restored"],
+                   "extra_seeds": {"seeds": 8, "planted": extra_planted, "leaked": extra_leaked},
+                   "stress_uncued_names": {"planted": stress_stats["planted"],
+                                           "leaked": len({(i, s) for i, s, _c, _w in stress_leaks})}},
+        "independent": independent_set(),
+        "false_positives": {"sample": {"chunks": total, "strict": len(s_strict), "specimens_allowed": len(s_lenient)},
+                            "all": {"chunks": all_total, "strict": len(a_strict), "specimens_allowed": len(a_lenient),
+                                    "examples": [{"chunk": c, "hits": h} for c, h in a_lenient][:10]}},
+        "known_limits": KNOWN_LIMITS,
+    }
+
+
+def main() -> int:
+    json_path = sys.argv[sys.argv.index("--json") + 1] if "--json" in sys.argv else None
+    r = collect()
+    a, ind, fp = r["author"], r["independent"], r["false_positives"]
 
     print("== Datenschutz-Schleuse leak test (synthetic data only) ==")
-    print(f"records sent through ask() + log path : {stats['records']}")
-    print(f"planted personal values               : {stats['planted']}")
-    print(f"LEAKED values (goal 0)                : {len(distinct)}")
-    for index, slot, category, where in leaks:
-        print(f"  leak: record {index}, {category}, found in {where}")
-    print(f"records BLOCKED (nothing sent)        : {stats['blocked']}")
-    print(f"records that reached the fake model   : {stats['answered_not_found']}")
-    print(f"answers with tokens mapped back       : {stats['restored']}")
-    print(f"extra seeds 1-8 (8 x 50 records)      : planted {extra_planted}, leaked {extra_leaked}")
+    print(f"records sent through ask() + log path : {a['records']}")
+    print(f"planted personal values               : {a['planted']}")
+    print(f"LEAKED values (goal 0)                : {a['leaked']}")
+    for leak in a["leaks"]:
+        print(f"  leak: record {leak['record']}, {leak['category']}, found in {leak['where']}")
+    print(f"records BLOCKED (nothing sent)        : {a['blocked']}")
+    print(f"records that reached the fake model   : {a['reached_model']}")
+    print(f"answers with tokens mapped back       : {a['tokens_mapped_back']}")
+    print(f"extra seeds 1-8 (8 x 50 records)      : planted {a['extra_seeds']['planted']}, leaked {a['extra_seeds']['leaked']}")
+    print()
+    print("-- independent reviewer set (test_independent.py) --")
+    print(f"{ind['records']} records, {ind['planted']} planted values: first run before the fix "
+          f"{ind['first_run_before_fix']['caught']} caught / {ind['first_run_before_fix']['leaked']} leaked; "
+          f"now leaked {ind['leaked_after_fix']}")
     print()
     print("-- stress, outside the 50: names in plain free text without any cue word --")
-    print(f"planted names {stress_stats['planted']}, leaked {len(stress_distinct)} (known limit of regex detection)")
+    print(f"planted names {a['stress_uncued_names']['planted']}, leaked {a['stress_uncued_names']['leaked']} (known limit of regex detection)")
     print()
-    print(f"-- false positives on clean ITSG rulebook chunks (real hits, not a goal) --")
-    print(f"50-chunk sample, strict               : {len(s_strict)} of {total} chunks")
-    print(f"50-chunk sample, specimens allowed    : {len(s_lenient)} of {total} chunks")
-    print(f"all chunks, strict                    : {len(a_strict)} of {all_total} chunks")
-    print(f"all chunks, specimens allowed         : {len(a_lenient)} of {all_total} chunks")
-    for chunk_id, hits in a_lenient:
-        print(f"  {chunk_id}: {hits}")
-    return 1 if distinct else 0
+    print("-- false positives on clean ITSG rulebook chunks (real hits, not a goal) --")
+    print(f"50-chunk sample, strict               : {fp['sample']['strict']} of {fp['sample']['chunks']} chunks")
+    print(f"50-chunk sample, specimens allowed    : {fp['sample']['specimens_allowed']} of {fp['sample']['chunks']} chunks")
+    print(f"all chunks, strict                    : {fp['all']['strict']} of {fp['all']['chunks']} chunks")
+    print(f"all chunks, specimens allowed         : {fp['all']['specimens_allowed']} of {fp['all']['chunks']} chunks")
+    for example in fp["all"]["examples"]:
+        print(f"  {example['chunk']}: {example['hits']}")
+    if json_path:  # for the UI: the result is saved and the exit code stays 0, the file holds the verdict
+        Path(json_path).write_text(json.dumps(r, ensure_ascii=False, indent=1), encoding="utf-8")
+        print(f"-> {json_path}")
+        return 0
+    return 1 if a["leaked"] else 0
 
 
 if __name__ == "__main__":
