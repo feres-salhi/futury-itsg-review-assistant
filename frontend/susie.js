@@ -620,16 +620,82 @@ console.info(`[SÜSIE] frontend build ${SUSIE_BUILD}`);
     return wrap;
   }
 
-  // suggestion chips under a fresh greeting — one click sends the prompt
+  // Onboarding storyline (T10-054): after the greeting SUSIE proposes her five
+  // predefined jobs. Uploads open a file picker and then propose the matching
+  // action directly (propose → human Ja → execute, no model involvement); the
+  // reference job asks for the Fundstelle in chat; the random job proposes at
+  // once. No fake user messages anywhere.
   function addChips(log) {
-    const row = el("div", "chip-row");
-    for (const text of t("chips")) {
-      const chip = el("button", "chip state", text);
-      chip.addEventListener("click", () => { if (!S.busy) sendMessage(text); });
-      row.appendChild(chip);
+    const card = el("div", "onboard-menu");
+    card.appendChild(el("div", "onboard-menu-title", t("menuTitle")));
+    const jobs = [
+      { label: t("menuUploadRegulation"), accept: ".xml,.txt,.md,.pdf,.json,.csv",
+        action: "register_regulation", params: (f) => ({ file_id: f.id, title: f.original_name }) },
+      { label: t("menuUploadReport"), accept: ".xml,.txt",
+        action: "import_software_report", params: (f) => ({ file_id: f.id }) },
+      { label: t("menuUploadCase"), accept: ".txt,.md,.json,.xml,.csv",
+        action: "add_manual_case", params: (f) => ({ file_id: f.id }) },
+      { label: t("menuCaseReference") },
+      { label: t("menuCaseRandom"), action: "create_random_case", params: () => ({}) },
+    ];
+    for (const job of jobs) {
+      const item = el("button", "chip state onboard-item", job.label);
+      item.type = "button";
+      item.addEventListener("click", () => {
+        if (S.busy) return;
+        if (!job.action) askForReference(log);
+        else if (job.accept) pickAndUpload(log, job);
+        else demoCommand(job.action, job.params(null));
+      });
+      card.appendChild(item);
     }
-    log.appendChild(row);
+    log.appendChild(card);
     log.scrollTop = log.scrollHeight;
+  }
+
+  function pickAndUpload(log, job) {
+    const picker = document.createElement("input");
+    picker.type = "file";
+    picker.accept = job.accept;
+    picker.addEventListener("change", async () => {
+      const file = picker.files && picker.files[0];
+      if (!file) return;
+      addBubble(log, "susie", LANG === "de"
+        ? `Lade „${file.name}“ hoch …` : `Uploading “${file.name}” …`);
+      try {
+        const f = await uploadFile(file);
+        addBubble(log, "susie", LANG === "de"
+          ? `Empfangen: ${f.original_name} (${f.id}).`
+          : `Received: ${f.original_name} (${f.id}).`);
+        demoCommand(job.action, job.params(f));
+      } catch (err) {
+        addBubble(log, "susie", LANG === "de"
+          ? `Upload fehlgeschlagen: ${err.message}` : `Upload failed: ${err.message}`);
+      }
+    });
+    picker.click();
+  }
+
+  async function uploadFile(file) {
+    const res = await fetch(`/api/upload?filename=${encodeURIComponent(file.name)}`, {
+      method: "POST", headers: { "Content-Type": "application/octet-stream" }, body: file,
+    });
+    const body = await res.json().catch(() => ({}));
+    if (!res.ok || body.ok === false) throw new Error(body.error || `HTTP ${res.status}`);
+    return body.file;
+  }
+
+  function askForReference(jobLog) {
+    S.referenceAsk = true;
+    addBubble(jobLog, "susie", t("referenceAsk"));
+    const input = activeLog().querySelector(".composer input");
+    input?.focus();
+  }
+
+  function proposeReference(reference) {
+    const log = activeLog().querySelector(".chat-log");
+    if (log) addBubble(log, "user", reference);
+    demoCommand("create_case_from_reference", { reference });
   }
 
   // =========================================================================
@@ -1509,7 +1575,9 @@ console.info(`[SÜSIE] frontend build ${SUSIE_BUILD}`);
     for (const grp of changeGroups.values()) {
       rows.push({
         at: grp.at,
-        label: t("evChangesGrouped").replace("{n}", String(grp.n)),
+        label: grp.n === 1
+          ? (LANG === "de" ? "1 Store-Änderung" : "1 store change")
+          : t("evChangesGrouped").replace("{n}", String(grp.n)),
         detail: `${grp.kind}${grp.ids.length ? ` · ${grp.ids.join(", ")}` : ""}`,
         ref: "",
         kind: "other",
