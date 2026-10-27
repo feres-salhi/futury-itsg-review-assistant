@@ -49,8 +49,32 @@ If anything personal is still left, the request is **BLOCKED** and nothing is se
 | `seal` | Hash only (HMAC-SHA256 with the privacy key). No text goes to the seal. |
 | `logs` | No personal data at all. Every hit becomes `[CATEGORY]`; if something is still found the whole line is replaced by `[withheld ...]`. |
 
-Use `apply_policy("<destination>", payload)`. `run_review.py` and the seal client are **not** changed by this task
-(they are outside `privacy/` and `retrieval/`); wiring `langfuse` and `seal` to `apply_policy` is still open.
+Use `apply_policy("<destination>", payload)`. Langfuse is guarded (see below). The seal client already sends only report hashes.
+
+## Langfuse guard (`langfuse_guard.py`, needs review by Sohee)
+
+`run_review.py` and `harness/run_harness.py` belong to Sohee; the changes there are small and commented `T10-007`.
+Every payload for Langfuse (span input/output, trace output/metadata, dataset items, scores) goes through
+`LangfuseGuard`: minimize (only listed top-level keys, strings cut at 200 characters), pseudonymize, `check_clean`.
+A payload that still looks personal is replaced by `[withheld: personal data suspected]`.
+`--public` is no longer set when the trace starts: the trace stays private and is made public at the end only if every
+payload was clean; otherwise a message says it was refused. Without Langfuse keys nothing changes.
+Tests (`test_langfuse_guard.py`) use a fake Langfuse that records everything: the TEEL0 VSNR, names, emails and phone
+numbers never appear, and the review findings and counts are the same with and without Langfuse.
+Limit: the allowed-key list is hand-made; a new field must be added to it to show up in Langfuse.
+
+## UI tab and retention
+
+- Tab "Datenschutz" (`ui/js/privacy.js`): live preview of what leaves the system, data-flow map with traffic lights built
+  from the policy and the server settings, leak-test scorecard (author set and independent set shown separately), a short "why" box.
+  Endpoints: `POST /api/privacy/preview` (max 5000 characters, 20 per minute, never returns the original), `GET /api/privacy/flows`,
+  `GET /api/privacy/leaktest` (result in `reports/leaktest-latest.json`, made on demand, copy made at Docker build time).
+  `BLOCKED` answers from `/api/ask` get their own red card. Needs review by Oussama.
+- Retention: `ui/server.py` deletes `RPT-*.json` and `harness-*.json` older than `RETENTION_DAYS` (default 7) at start and daily.
+  The seal ledger is not touched. Why this fits the "right to erasure": the ledger holds only hashes and run IDs, no report content, so
+  the report (the personal data) can be erased while the ledger stays append-only and verifiable. Whether a keyed hash itself is
+  personal data is an open question (see `DPIA.md`). The decision log `review-events.jsonl` (typed reviewer names) is not purged yet.
+- `DPIA.md`: one-page draft for ITSG's data-protection officer, not legal advice.
 
 ## How tokens work
 

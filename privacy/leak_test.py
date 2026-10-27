@@ -196,6 +196,7 @@ def _leaked(category: str, value: str, payload: str) -> bool:
 def run_records(records: List[Record], key: str = TEST_KEY):
     """Send records through ask() and the log path. Returns (leaks, stats)."""
     import os
+    old_key = os.environ.get(schleuse.KEY_ENV)
     os.environ[schleuse.KEY_ENV] = key  # the same key path the real service uses
     capture = LogCapture()
     root = logging.getLogger()
@@ -229,6 +230,10 @@ def run_records(records: List[Record], key: str = TEST_KEY):
                         leaks.append((index, slot, category, where))
             capture.lines.clear()
     finally:
+        if old_key is None:
+            os.environ.pop(schleuse.KEY_ENV, None)
+        else:
+            os.environ[schleuse.KEY_ENV] = old_key
         root.removeHandler(capture)
         root.setLevel(old_level)
         careless.setLevel(careless_level)
