@@ -689,7 +689,7 @@ h2 { font-size: 1.1rem; letter-spacing: -.01em; margin: 0 0 .5rem; }
 .side-link, .side-ext { flex-wrap: nowrap; }
 .side-sub { display: none; }
 
-/* ---- Prüfakte tree in the sidebar + embedded view ---- */
+/* ---- Governance group in the sidebar ---- */
 .side-group { margin-top: 8px; padding: 2px 6px 2px; border-top: 1px solid var(--line); }
 .side-group-toggle {
   display: flex; align-items: center; justify-content: space-between; gap: 6px;
@@ -706,26 +706,6 @@ h2 { font-size: 1.1rem; letter-spacing: -.01em; margin: 0 0 .5rem; }
   display: block; padding: 2px 10px 6px;
   font-size: .6875rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
   color: var(--ink-2, #626260);
-}
-.side-adv {
-  display: block; width: 100%; text-align: left;
-  padding: 6px 10px 6px 24px; margin: 1px 0;
-  border: none; border-left: 2px solid var(--line); border-radius: 8px;
-  background: transparent; color: var(--ink-2, #626260);
-  font-size: .78125rem; cursor: pointer;
-  transition: background .15s var(--ease-out), color .15s var(--ease-out);
-}
-.side-adv:hover { background: var(--surface, #fff); color: var(--ink, #242424); }
-.side-adv.active {
-  border-left-color: var(--accent, var(--accent));
-  background: var(--accent-soft, #fbeef1);
-  color: var(--accent-ink, #a30f33); font-weight: 600;
-}
-#view-advanced { height: calc(100vh - 150px); }
-#advanced-frame {
-  width: 100%; height: 100%;
-  border: 1px solid var(--line, #e6e4e1); border-radius: var(--radius-card, 14px);
-  background: var(--surface, #fff);
 }
 
 /* ---------- Datenschutz-Schleuse badge + panel (T10-043) ---------- */
@@ -1036,3 +1016,6 @@ body:not([data-view="cases"]) .summary-chips { display: none; }
   height: auto;
   min-height: calc(100vh - var(--bottom-h) - 232px);
 }
+
+/* Governance sub-links (T10-049): indented under the group title */
+.side-sub-link { padding-left: 26px; font-size: .78125rem; }
