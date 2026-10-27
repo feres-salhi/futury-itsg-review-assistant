@@ -101,6 +101,21 @@ the AU dates and the Abgabegrund field stay (`pytest privacy`).
 
 Commands: `python -m pytest privacy retrieval -q` -> 91 passed. `python privacy/leak_test.py` as above.
 
+### Independent review set (`test_independent.py`)
+
+An independent reviewer (not the author) wrote 10 new records with 19 planted values (`privacy/test_independent.py`,
+kept separate from the author's tests).
+
+| Run | Result |
+|---|---|
+| First run, before any fix | **18 of 19 caught, 1 leaked**: the name "Jonas Bergmann" in `Versicherter: Jonas Bergmann, geb. ...` |
+| Cause | Role cue words (Versicherter, Arbeitnehmer, Mitarbeiter ...) followed by a colon were not recognised |
+| After the fix (new `_ROLE_COLON` pattern) | 19 of 19 removed |
+
+The 19 of 19 is again a result after a fix made because of these very records, so it is also not independent evidence.
+The honest independent number is the first one: 18 of 19 (94.7 %) on a small set. Another reviewer with new records
+is still needed.
+
 **Read these numbers carefully.** The first run of the leak test found leaks and blocked 25 of 50 records. I then
 fixed the detectors (DTA headers inside logged text, "A=x B=y" name fields, particles like "von", false alarms such as
 "eine Frau Mutterschaftsgeld"). So "0 leaked" is **not** an independent result: the detectors were tuned on the same

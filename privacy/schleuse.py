@@ -162,6 +162,9 @@ _SALUTATION = re.compile(r"\b(?:Herrn?|Frau|Fr\.|Hr\.|Dr\.|Prof\.)[ \t]+(?:Dr\.[
 _ROLE_CUE = re.compile(
     r"\b(?:Versicherte[rn]?|Arbeitnehmer(?:in)?|Mitarbeiter(?:in)?|Patient(?:in)?|Antragsteller(?:in)?|Kunde|Kundin|"
     r"Beschäftigte[rn]?|Leistungsempfänger(?:in)?)[ \t]+(" + _NAME_2_3 + ")")
+_ROLE_COLON = re.compile(  # "Versicherter: Jonas Bergmann" - with a colon one name word is enough
+    r"\b(?:Versicherte[rn]?|Arbeitnehmer(?:in)?|Mitarbeiter(?:in)?|Patient(?:in)?|Antragsteller(?:in)?|Kunde|Kundin|"
+    r"Beschäftigte[rn]?|Leistungsempfänger(?:in)?)[ \t]*:[ \t]*(" + _NAME_1_3 + ")")
 _SELF_CUE = re.compile(r"(?i:mein name ist|ich heiße|ich heisse|name lautet|namens)[ \t]+(" + _NAME_1_3 + ")")
 
 # Capitalised German nouns that follow a cue word but are not names ("Versicherte Person", "Frau Dr.").
@@ -293,7 +296,7 @@ def _cue_names(pattern, text: str):
 
 
 def _person_spans(text: str):
-    for pattern in (_NAME_FIELD, _SALUTATION, _ROLE_CUE, _SELF_CUE):
+    for pattern in (_NAME_FIELD, _SALUTATION, _ROLE_CUE, _ROLE_COLON, _SELF_CUE):
         yield from _cue_names(pattern, text)
     # fixed-width DTA records: names sit in known blocks, separated by two or more spaces
     for m in _DTA_HEADER_ANY.finditer(text):
