@@ -62,7 +62,9 @@ def pending_cards(records: dict) -> list[dict]:
                     "id": record["id"],
                     "label_key": "pendingDraft",
                     "detail": record.get("title", "") or record.get("name", ""),
-                    "proposed_action": "record_review_state",
+                    # Draft sign-off needs a G1/G3 gate action that arrives with
+                    # T10-050; until then the UI renders the card read-only.
+                    "proposed_action": "record_draft_gate",
                     "created_at": record.get("created_at", ""),
                 })
     pending.sort(key=lambda item: (item["created_at"], item["kind"], item["id"]))
