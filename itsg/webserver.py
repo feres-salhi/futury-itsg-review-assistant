@@ -932,7 +932,7 @@ class SUSIEHandler(BaseHTTPRequestHandler):
     def do_POST(self) -> None:  # noqa: N802 (http.server API)
         path = self.path.split("?", 1)[0]
         if path not in ("/api/run", "/api/review/run", "/api/chat", "/api/action",
-                        "/api/report/pdf", "/api/report/seal"):
+                        "/api/action/propose", "/api/report/pdf", "/api/report/seal"):
             self._send_json({"ok": False, "error": "not found"}, status=404)
             return
         length = int(self.headers.get("Content-Length") or 0)
@@ -989,6 +989,17 @@ class SUSIEHandler(BaseHTTPRequestHandler):
             self._send_json({"ok": False,
                              "error": "action requires an action_id and a params object"},
                             status=400)
+            return
+        if path == "/api/action/propose":
+            # Propose-only: issues a single-use confirmation token without
+            # executing. The human confirms client-side; execution still goes
+            # through /api/action with the token (four-eyes preserved).
+            try:
+                proposal = actions.propose(action_id, params, str(body.get("session_id", "")))
+            except ValueError as exc:
+                self._send_json({"ok": False, "error": str(exc)}, status=400)
+                return
+            self._send_json({"ok": True, **proposal})
             return
         try:
             result = actions.execute(action_id, params, body.get("confirm_token"),

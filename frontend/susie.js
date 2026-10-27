@@ -44,6 +44,33 @@
       advSources: "Quellen & Kriterien", advSourcesSub: "Quellen und Kriterien, aus denen die Prüflogik abgeleitet ist",
       advReport: "Prüfakte-Bericht", advReportSub: "Prüfakte-Bericht mit Notizen und Freigabe-Status je Fall",
       advAudit: "Verlauf", advAuditSub: "Jede Gate-Entscheidung mit Name, Zeitstempel und Begründung — die 4-Augen-Akte",
+      governance: "Governance",
+      freigaben: "Freigaben", freigabenSub: "Offene menschliche Entscheidungen: Quellen, Entwürfe und Berichtsschritte, die auf Ihre Freigabe warten",
+      verlauf: "Verlauf", verlaufSub: "Jede Entscheidung und jeder KI-Lauf mit Name, Zeitstempel und Begründung — die Vier-Augen-Akte",
+      stories: "Story-Suiten", storiesSub: "Szenario-Fälle mit erwarteter Abweichung — zum Durchklicken und Nachvollziehen",
+      govOffline: "Verbindung zum Bridge-Server fehlt — Governance-Daten sind nur mit Backend verfügbar.",
+      freigabenNone: "Nichts offen — alle Entscheidungen sind getroffen.",
+      govRationalePh: "Begründung (Pflicht) …",
+      govDecideBtn: "Entscheiden",
+      govActionPending: "Freigabe folgt in Kürze",
+      govActionPendingTitle: "Diese Freigabe-Aktion wird in Kürze aktiviert — der Beschluss wird dann hier mit Name und Begründung protokolliert.",
+      govConfirmPrefix: "Freigabe bestätigen:",
+      evGate: "Gate-Entscheidung",
+      evAgentRun: "KI-Lauf",
+      evChange: "Änderung",
+      verlaufFilter: "Verlauf filtern",
+      verlaufAll: "Alles",
+      verlaufEmpty: "Noch keine Ereignisse protokolliert.",
+      verlaufMore: "Weitere laden",
+      storiesError: "Story-Suiten konnten nicht geladen werden",
+      storiesEmpty: "Keine Story-Suiten im Store.",
+      storiesSearchPh: "Story-Suiten durchsuchen …",
+      storiesSort: "Sortierung",
+      storiesSortId: "Nach ID",
+      storiesSortDev: "Nach erwarteter Abweichung",
+      storiesDev: "Erwartete Abweichung",
+      storiesNoDev: "Keine Abweichung erwartet",
+      storiesNoMatch: "Kein Treffer — Suchbegriff anpassen.",
       advanced: "Erweiterter Modus",
       topTitle: "Prüffälle",
       topSub: "Systemüberprüfung sozialversicherungsrechtlicher IT-Ergebnisse",
@@ -166,6 +193,33 @@
       advSources: "Sources & criteria", advSourcesSub: "Sources and criteria the review logic was derived from",
       advReport: "Dossier report", advReportSub: "Dossier report with notes and release status per case",
       advAudit: "History", advAuditSub: "Every gate decision with name, timestamp and rationale — the four-eyes record",
+      governance: "Governance",
+      freigaben: "Approvals", freigabenSub: "Open human decisions: sources, drafts and report steps waiting for your approval",
+      verlauf: "History", verlaufSub: "Every decision and AI run with name, timestamp and rationale — the four-eyes record",
+      stories: "Story suites", storiesSub: "Scenario cases with an expected deviation — browse and verify",
+      govOffline: "Connection to the bridge server is down — governance data is only available with the backend.",
+      freigabenNone: "Nothing open — all decisions have been made.",
+      govRationalePh: "Rationale (required) …",
+      govDecideBtn: "Decide",
+      govActionPending: "Approval coming soon",
+      govActionPendingTitle: "This approval action is activated shortly — the decision will then be recorded here with name and rationale.",
+      govConfirmPrefix: "Confirm approval:",
+      evGate: "Gate decision",
+      evAgentRun: "AI run",
+      evChange: "Change",
+      verlaufFilter: "Filter history",
+      verlaufAll: "Everything",
+      verlaufEmpty: "No events recorded yet.",
+      verlaufMore: "Load more",
+      storiesError: "Story suites could not be loaded",
+      storiesEmpty: "No story suites in the store.",
+      storiesSearchPh: "Search the story suites …",
+      storiesSort: "Sort order",
+      storiesSortId: "By ID",
+      storiesSortDev: "By expected deviation",
+      storiesDev: "Expected deviation",
+      storiesNoDev: "No deviation expected",
+      storiesNoMatch: "No match — adjust the search term.",
       advanced: "Advanced mode",
       topTitle: "Cases",
       topSub: "Systematic review of social-insurance IT results",
@@ -728,10 +782,11 @@
   function showView(v) {
     if (v !== S.view) { S.viewStack = S.viewStack || []; S.viewStack.push(S.view); }
     S.view = v;
-    for (const id of ["cases", "report", "sources", "advanced", "regulations"]) $(`view-${id}`).hidden = id !== v;
+    for (const id of ["cases", "report", "sources", "advanced", "regulations", "freigaben", "verlauf", "stories"]) $(`view-${id}`).hidden = id !== v;
     $("case-summary").hidden = v !== "cases";  // the case counts mean nothing elsewhere
     document.body.dataset.view = v;
     if (v === "regulations" && !S.regLoaded) loadRegulations();
+    if (v === "freigaben" || v === "verlauf") loadGovernance();
     document.querySelectorAll(".side-link").forEach((b) =>
       b.classList.toggle("active", b.dataset.view === v));
     // the page heading follows the view — never a stale title anywhere
@@ -1219,6 +1274,232 @@
       chip.title = it.title;
       strip.appendChild(chip);
     }
+  }
+
+  // =========================================================================
+  // Governance views (T10-049 Wave R): Freigaben (pending human decisions),
+  // Verlauf (timeline), Story-Suiten. Labels are human acts — gate IDs are
+  // storage metadata only (spec §5.6). Data: /api/governance + /api/state.
+  // =========================================================================
+  const GATE_ACT = {
+    G0: "actSource", G1: "actRequirements", G2: "actTranslation", G3: "actCriteria",
+    G4: "actReviewStep", G5: "actConformance", G6: "actRelease",
+  };
+  // Pending-card actions the UI can carry end to end today. "record_g0"
+  // joins when T10-047 lands the gate action, "record_draft_gate" with
+  // T10-050 — until then those cards render read-only with an honest hint.
+  const GOV_ACTIONS = new Set([]);
+
+  async function loadGovernance() {
+    try {
+      const r = await fetch("/api/governance");
+      const body = await r.json();
+      S.gov = body.ok ? body : { ok: false, error: body.error || "governance unavailable", pending: [], gates: [], events: [] };
+    } catch {
+      S.gov = { ok: false, error: "offline", pending: [], gates: [], events: [] };
+    }
+    withViewGuard("freigaben", renderFreigaben);
+    withViewGuard("verlauf", renderVerlauf);
+  }
+
+  function renderFreigaben() {
+    const body = $("freigaben-body"); body.textContent = "";
+    const gov = S.gov;
+    if (!gov || (!gov.ok && gov.error === "offline")) {
+      body.appendChild(el("div", "empty", t("govOffline")));
+      return;
+    }
+    const pending = (gov && gov.pending) || [];
+    if (!pending.length) {
+      body.appendChild(el("div", "empty", t("freigabenNone")));
+      return;
+    }
+    for (const item of pending) {
+      const card = el("div", "card freigaben-card");
+      const head = el("div", "card-head");
+      head.appendChild(el("span", "card-title", t(item.label_key)));
+      head.appendChild(el("span", "card-ref", item.id));
+      card.appendChild(head);
+      if (item.detail) card.appendChild(el("p", "card-meta", item.detail));
+      // A named human decides — typed name + rationale, consistent with the
+      // no-login decision (self-approval stays allowed, the audit says so).
+      const nameIn = el("input", "gov-input");
+      nameIn.type = "text"; nameIn.placeholder = t("yourName"); nameIn.setAttribute("aria-label", t("yourName"));
+      const whyIn = el("input", "gov-input");
+      whyIn.type = "text"; whyIn.placeholder = t("govRationalePh"); whyIn.setAttribute("aria-label", t("govRationalePh"));
+      const row = el("div", "gov-row");
+      row.appendChild(nameIn); row.appendChild(whyIn);
+      card.appendChild(row);
+      const wired = GOV_ACTIONS.has(item.proposed_action);
+      const act = el("button", "btn case-act gov-act");
+      act.type = "button";
+      act.disabled = !wired;
+      act.textContent = wired ? t("govDecideBtn") : t("govActionPending");
+      if (!wired) {
+        act.title = t("govActionPendingTitle");
+      } else {
+        act.addEventListener("click", async () => {
+          const reviewer = nameIn.value.trim();
+          const rationale = whyIn.value.trim();
+          if (!reviewer || !rationale) { flash(card); nameIn.classList.toggle("needs-input", !reviewer); whyIn.classList.toggle("needs-input", !rationale); return; }
+          act.disabled = true;
+          try {
+            // propose → explicit human confirm → single-use token execute
+            const pr = await fetch("/api/action/propose", {
+              method: "POST", headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ session_id: S.sessionId, action_id: item.proposed_action,
+                                     params: { id: item.id, reviewer, rationale, decision: "approve" } }),
+            });
+            const pbody = await pr.json();
+            if (!pr.ok || pbody.ok === false || !pbody.confirm_token) {
+              throw new Error(pbody.error || "proposal refused");
+            }
+            if (!window.confirm(`${t("govConfirmPrefix")} "${item.detail || item.id}" — ${reviewer}`)) {
+              act.disabled = false; return;
+            }
+            await invoke(item.proposed_action,
+              { id: item.id, reviewer, rationale, decision: "approve", gate: pbody.action?.params?.gate },
+              pbody.confirm_token);
+            await loadGovernance();
+          } catch (err) {
+            act.textContent = LANG === "de" ? "Fehler — erneut versuchen" : "Failed — retry";
+            setTimeout(() => { act.textContent = t("govDecideBtn"); act.disabled = false; }, 2500);
+          }
+        });
+      }
+      card.appendChild(act);
+      body.appendChild(card);
+    }
+  }
+
+  function govEventLabel(event) {
+    const kind = String(event.kind || "");
+    if (kind === "gate") return t("evGate");
+    if (kind === "agent_run") return t("evAgentRun");
+    return t("evChange");
+  }
+
+  function renderVerlauf() {
+    const body = $("verlauf-body"); body.textContent = "";
+    const gov = S.gov;
+    if (!gov || (!gov.ok && gov.error === "offline")) {
+      body.appendChild(el("div", "empty", t("govOffline")));
+      return;
+    }
+    const filterSel = el("select", "gov-filter");
+    filterSel.setAttribute("aria-label", t("verlaufFilter"));
+    for (const [val, key] of [["all", "verlaufAll"], ["gate", "evGate"], ["agent_run", "evAgentRun"], ["other", "evChange"]]) {
+      const opt = el("option", "", t(key));
+      opt.value = val;
+      filterSel.appendChild(opt);
+    }
+    filterSel.value = S.verlaufFilter || "all";
+    filterSel.addEventListener("change", () => { S.verlaufFilter = filterSel.value; renderVerlauf(); });
+    const bar = el("div", "gov-bar");
+    bar.appendChild(filterSel);
+    body.appendChild(bar);
+
+    const gates = (gov.gates || []).slice();
+    const events = (gov.events || []).slice().reverse();
+    const rows = [];
+    for (const gate of gates) {
+      rows.push({
+        at: gate.decided_at || "",
+        label: `${t(gate.label_key || GATE_ACT[gate.gate] || "evGate")} — ${gate.reviewer || ""}`,
+        detail: gate.rationale || "",
+        ref: gate.id || "",
+        kind: "gate",
+      });
+    }
+    for (const ev of events) {
+      const kind = ev.kind === "gate" ? "gate" : ev.kind === "agent_run" ? "agent_run" : "other";
+      rows.push({ at: ev.at || "", label: govEventLabel(ev), detail: `${ev.kind} · ${ev.action}`, ref: ev.id || "", kind });
+    }
+    rows.sort((a, b) => String(b.at).localeCompare(String(a.at)));
+    const shown = rows.filter((r) => S.verlaufFilter === "all" || !S.verlaufFilter ? true : r.kind === S.verlaufFilter);
+    if (!shown.length) {
+      body.appendChild(el("div", "empty", t("verlaufEmpty")));
+      return;
+    }
+    const cap = S.verlaufShown || 200;
+    const list = el("div", "gov-timeline");
+    for (const row of shown.slice(0, cap)) {
+      const item = el("div", "gov-event");
+      item.appendChild(el("span", "gov-time", fmtDateTime(row.at) || row.at || "—"));
+      item.appendChild(el("span", "gov-label", row.label));
+      if (row.ref) item.appendChild(el("span", "card-ref", row.ref));
+      if (row.detail) {
+        item.appendChild(el("p", "gov-detail", row.detail));
+      }
+      list.appendChild(item);
+    }
+    body.appendChild(list);
+    if (shown.length > cap) {
+      const more = el("button", "btn ghost-btn gov-more", t("verlaufMore"));
+      more.type = "button";
+      more.addEventListener("click", () => { S.verlaufShown = cap + 200; renderVerlauf(); });
+      body.appendChild(more);
+    }
+  }
+
+  function renderStories() {
+    const body = $("stories-body"); body.textContent = "";
+    const st = S.appState || {};
+    const stories = st.stories;
+    if (!stories || stories.ok === false) {
+      const empty = el("div", "empty", stories && stories.error ? `${t("storiesError")} (${stories.error})` : t("storiesEmpty"));
+      body.appendChild(empty);
+      return;
+    }
+    const cases = Array.isArray(stories.cases) ? stories.cases : [];
+    if (!cases.length) { body.appendChild(el("div", "empty", t("storiesEmpty"))); return; }
+
+    // Controls built once; typing keeps focus (only the list node re-renders).
+    const bar = el("div", "gov-bar stories-bar");
+    const search = el("input", "gov-input stories-search");
+    search.type = "search"; search.placeholder = t("storiesSearchPh"); search.setAttribute("aria-label", t("storiesSearchPh"));
+    search.value = S.storiesFilter || "";
+    const sortSel = el("select", "gov-filter");
+    sortSel.setAttribute("aria-label", t("storiesSort"));
+    for (const [val, key] of [["id", "storiesSortId"], ["dev", "storiesSortDev"]]) {
+      const opt = el("option", "", t(key));
+      opt.value = val; sortSel.appendChild(opt);
+    }
+    sortSel.value = S.storiesSort || "id";
+    const counter = el("span", "gov-count", "");
+    const list = el("div", "stories-list");
+    bar.appendChild(search); bar.appendChild(sortSel); bar.appendChild(counter);
+    body.appendChild(bar); body.appendChild(list);
+
+    const draw = () => {
+      const q = (S.storiesFilter || "").toLowerCase();
+      let rows = cases.filter((c) => !q || JSON.stringify(c).toLowerCase().includes(q));
+      if (S.storiesSort === "dev") rows = rows.slice().sort((a, b) => String(b.expected_deviation ?? "").localeCompare(String(a.expected_deviation ?? ""), undefined, { numeric: true }));
+      counter.textContent = `${rows.length} / ${cases.length}`;
+      list.textContent = "";
+      if (!rows.length) { list.appendChild(el("div", "empty", t("storiesNoMatch"))); return; }
+      for (const story of rows) {
+        const row = el("button", "card story-row");
+        row.type = "button";
+        row.appendChild(el("span", "card-title", story.id || story.story_id || "—"));
+        const dev = story.expected_deviation ?? story.expected?.deviation ?? "";
+        if (dev !== "" && dev != null) {
+          const db = el("span", `badge ${String(dev).toUpperCase() === "NONE" || dev === false ? "badge-pass" : "badge-mismatch"}`,
+            String(dev).toUpperCase() === "NONE" || dev === false ? t("storiesNoDev") : `${t("storiesDev")}: ${dev}`);
+          row.appendChild(db);
+        }
+        const desc = story.description || story.scenario || story.summary || "";
+        if (desc) row.appendChild(el("p", "card-meta", String(desc)));
+        row.addEventListener("click", () => {
+          const open = row.classList.toggle("open");
+          row.setAttribute("aria-expanded", open ? "true" : "false");
+        });
+        list.appendChild(row);
+      }
+    };
+    search.addEventListener("input", () => { S.storiesFilter = search.value; draw(); });
+    sortSel.addEventListener("change", () => { S.storiesSort = sortSel.value; draw(); });
+    draw();
   }
 
   // =========================================================================
@@ -1943,7 +2224,7 @@
     LANG = LANG === "de" ? "en" : "de";
     store.set("susie-ui-lang", LANG);
     applyI18n();
-    withViewGuard("cases", renderCases); withViewGuard("report", renderReport); withViewGuard("sources", renderSources); withViewGuard("trust", renderTrust);
+    withViewGuard("cases", renderCases); withViewGuard("report", renderReport); withViewGuard("sources", renderSources); withViewGuard("stories", renderStories); withViewGuard("trust", renderTrust);
     // empty chat surfaces re-greet in the new language; an ongoing thread stays
     for (const root of [$("chat-overlay"), $("chat-full")]) {
       const logEl = root.querySelector(".chat-log");
@@ -1961,6 +2242,20 @@
     const next = document.body.dataset.theme === "dark" ? "light" : "dark";
     applyTheme(next); store.set("susie-ui-theme", next);
   });
+
+  // Dynamic font size (T10-049): steps the --font-scale hook (CSS-side by the
+  // density pass); persisted, applied before first paint content re-renders.
+  const FONT_STEPS = [0.9, 1, 1.15, 1.3];
+  const storedFont = parseFloat(store.get("susie-font-scale", "1"));
+  let fontStep = FONT_STEPS.indexOf(storedFont);
+  if (fontStep === -1) fontStep = 1;
+  const applyFontScale = () => {
+    document.documentElement.style.setProperty("--font-scale", String(FONT_STEPS[fontStep]));
+    store.set("susie-font-scale", String(FONT_STEPS[fontStep]));
+  };
+  applyFontScale();
+  $("font-smaller").addEventListener("click", () => { fontStep = Math.max(0, fontStep - 1); applyFontScale(); });
+  $("font-larger").addEventListener("click", () => { fontStep = Math.min(FONT_STEPS.length - 1, fontStep + 1); applyFontScale(); });
 
   async function pollHealth() {
     const dot = $("bridge-dot"), label = $("bridge-label");
@@ -2313,7 +2608,7 @@
         S.appState = body;
         if (sig !== lastStateSig) {
           lastStateSig = sig;
-          withViewGuard("cases", renderCases); withViewGuard("report", renderReport); withViewGuard("sources", renderSources); withViewGuard("trust", renderTrust);
+          withViewGuard("cases", renderCases); withViewGuard("report", renderReport); withViewGuard("sources", renderSources); withViewGuard("stories", renderStories); withViewGuard("trust", renderTrust);
         }
       }
     } catch {

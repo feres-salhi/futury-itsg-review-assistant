@@ -45,6 +45,7 @@ class GovernanceTest(unittest.TestCase):
         self.assertEqual(by_id["SRC-BP"]["label_key"], "pendingSource")
         self.assertEqual(by_id["CRIT-1"]["label_key"], "pendingDraft")
         self.assertEqual(by_id["SRC-BP"]["proposed_action"], "record_g0")
+        self.assertEqual(by_id["CRIT-1"]["proposed_action"], "record_draft_gate")
 
     def test_gates_carry_label_keys(self) -> None:
         self.put("gate", {"id": "GATE-G0-x", "gate": "G0", "reviewer": "Amr",
