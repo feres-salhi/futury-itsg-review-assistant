@@ -2128,6 +2128,11 @@ console.info(`[SÜSIE] frontend build ${SUSIE_BUILD}`);
     if (reply.degraded) {
       const banner = activeLog().querySelector("[data-degraded]");
       if (banner) banner.hidden = false;
+    } else {
+      // a healthy reply proves the connection recovered — a once-shown banner
+      // must not outlive it (it used to persist until a page reload)
+      const banner = activeLog().querySelector("[data-degraded]");
+      if (banner) banner.hidden = true;
     }
 
     if (reply.action && reply.action.id) {
@@ -2157,7 +2162,9 @@ console.info(`[SÜSIE] frontend build ${SUSIE_BUILD}`);
     const res = await fetch(`/api/report/pdf?lang=${LANG}`);  // report in the UI language
     if (!res.ok) {
       const body = await res.json().catch(() => ({}));
-      throw new Error(body.error || `${LANG === "de" ? "PDF-Endpunkt" : "PDF endpoint"} ${res.status}`);
+      const msg = body.error || `${LANG === "de" ? "PDF-Endpunkt" : "PDF endpoint"} ${res.status}`;
+      window.alert(msg);  // silent failure would read as "nothing is wired"
+      throw new Error(msg);
     }
     const blob = await res.blob();
     const url = URL.createObjectURL(blob);
@@ -2174,7 +2181,9 @@ console.info(`[SÜSIE] frontend build ${SUSIE_BUILD}`);
     const res = await fetch(`/api/report/pdf?case_id=${encodeURIComponent(caseId)}&lang=${LANG}`);
     if (!res.ok) {
       const body = await res.json().catch(() => ({}));
-      throw new Error(body.error || `${LANG === "de" ? "PDF-Endpunkt" : "PDF endpoint"} ${res.status}`);
+      const msg = body.error || `${LANG === "de" ? "PDF-Endpunkt" : "PDF endpoint"} ${res.status}`;
+      window.alert(msg);  // silent failure would read as "nothing is wired"
+      throw new Error(msg);
     }
     const blob = await res.blob();
     const url = URL.createObjectURL(blob);

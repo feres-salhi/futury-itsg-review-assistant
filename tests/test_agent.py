@@ -1,14 +1,16 @@
 """T10-046 — the Claude Sonnet agent loop (itsg/agent.py) and the dispatcher chain.
 
 Contract under test (no network — the Anthropic transport is always mocked):
-- available(): ANTHROPIC_API_KEY env + airlock module; run_turn raises
-  AgentUnavailable without a key (fail closed);
+- available(): ANTHROPIC_API_KEY (env or encrypted secrets store) + airlock
+  module; run_turn raises AgentUnavailable without a key (fail closed);
 - the loop executes server-side tools (search/fetch/propose), collects state
   and corpus citations, and proposes actions ONLY through the whitelist;
 - hallucinated tools/actions are stripped or error'd honestly;
 - the step cap and wall clock are bounded;
-- chat.turn dispatches: agent first, hessian fallback (recorded on the
-  envelope), deterministic commands and injected gateways unchanged.
+- chat.turn dispatches: agent first; when configured, a failure falls to the
+  canned layer WITHOUT calling the hessian gateway (owner directive
+  2026-10-27); without a key the hessian chain still runs; deterministic
+  commands and injected gateways unchanged.
 """
 from __future__ import annotations
 
@@ -44,10 +46,28 @@ def _tool_use(name, input_args, call_id="call-1"):
 
 class AvailabilityTests(unittest.TestCase):
     def test_no_key_means_unavailable(self):
-        with mock.patch.dict("os.environ", {"ANTHROPIC_API_KEY": ""}):
+        # no key anywhere: env unset AND a secrets store without the key
+        with mock.patch.dict("os.environ", {"ANTHROPIC_API_KEY": "",
+                                            "SUSIE_SECRETS_DIR": self._empty_store()}):
             self.assertFalse(agent.available())
             with self.assertRaises(agent.AgentUnavailable):
                 agent.run_turn("m", STATE, [], [], "sys", "T", "s1")
+
+    def test_key_from_secrets_store(self):
+        # owner directive 2026-10-27: the key lives in the encrypted store;
+        # env unset must still resolve it (fail closed on an unreadable store)
+        with mock.patch.dict("os.environ", {"ANTHROPIC_API_KEY": ""}):
+            if agent.api_key():
+                self.assertTrue(agent.available())
+            else:
+                self.assertFalse(agent.available())
+
+    @staticmethod
+    def _empty_store() -> str:
+        import tempfile
+        from pathlib import Path
+        tmp = Path(tempfile.mkdtemp())
+        return str(tmp)  # no susie-secrets.json inside → resolve fails closed
 
     def test_model_from_env(self):
         with mock.patch.dict("os.environ", {"SUSIE_MODEL": "claude-sonnet-x"}):
@@ -145,23 +165,40 @@ class AgentLoopTests(unittest.TestCase):
 
 
 class DispatcherTests(unittest.TestCase):
-    """chat.turn: agent first, hessian fallback recorded, injected gateway skips."""
+    """chat.turn: agent first, canned fallback when configured (hessian scratched
+    off per owner directive 2026-10-27), hessian only without an agent key,
+    injected gateway skips the agent."""
 
-    def test_agent_failure_falls_back_to_hessian_with_note(self):
-        def fake_completion(endpoint, model, system_prompt, messages, token, timeout=25):
-            return json.dumps({"utterance": "hessian antwortet", "confidence": "general",
-                               "citations": [], "action": None})
+    def test_agent_failure_falls_back_to_canned_without_hessian(self):
+        # owner directive 2026-10-27: when the Claude agent is configured but
+        # fails, the chain goes straight to the canned layer — the hessian
+        # gateway must NOT be called anymore.
+        def exploding_completion(*a, **k):
+            raise AssertionError("hessian gateway must not be called when the agent is configured")
 
         with mock.patch.object(chat.agent, "available", return_value=True), \
                 mock.patch.object(chat.agent, "run_turn",
                                   side_effect=agent.AgentUnavailable("no key")), \
                 mock.patch.object(chat, "resolve_token", return_value="t"), \
+                mock.patch.object(chat, "chat_completion", side_effect=exploding_completion):
+            r = chat.turn("…", {}, [], [], store_path=":memory:")
+        self.assertNotEqual(r.utterance, "")
+        self.assertEqual(r.agent_run["result"]["model"], llm.MODEL_ASSISTANT)
+        self.assertTrue(any("claude agent unavailable" in e
+                            for e in r.agent_run["validation_errors"]))
+
+    def test_agent_failure_without_key_still_uses_hessian(self):
+        # no Anthropic key configured → the hessian chain remains the brain
+        def fake_completion(endpoint, model, system_prompt, messages, token, timeout=25):
+            return json.dumps({"utterance": "hessian antwortet", "confidence": "general",
+                               "citations": [], "action": None})
+
+        with mock.patch.object(chat.agent, "available", return_value=False), \
+                mock.patch.object(chat, "resolve_token", return_value="t"), \
                 mock.patch.object(chat, "chat_completion", side_effect=fake_completion):
             r = chat.turn("…", {}, [], [], store_path=":memory:")
         self.assertEqual(r.utterance, "hessian antwortet")
         self.assertEqual(r.agent_run["result"]["model"], llm.MODEL_ASSISTANT)
-        self.assertTrue(any("claude agent unavailable" in e
-                            for e in r.agent_run["validation_errors"]))
 
     def test_injected_gateway_skips_the_agent(self):
         with mock.patch.object(chat.agent, "available", return_value=True) as avail:
