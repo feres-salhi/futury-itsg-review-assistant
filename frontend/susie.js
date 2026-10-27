@@ -612,7 +612,7 @@
     go_back() {
       const prev = (S.viewStack || []).pop();
       showView(prev && prev !== S.view ? prev : "cases");
-      renderCases(); renderReport(); renderSources();
+      withViewGuard("cases", renderCases); withViewGuard("report", renderReport); withViewGuard("sources", renderSources);
       return { executed: true, detail: LANG === "de" ? `Zurück zu ${t(S.view)}` : `Back to ${t(S.view)}` };
     },
     next_case() { return stepCase(+1); },
@@ -695,6 +695,32 @@
     if (reducedMotion.matches) return;
     node.classList.remove("flash"); void node.offsetWidth; node.classList.add("flash");
   }
+
+  // Render guard (T10-049): one failing view must never take down the shell.
+  // The error card is honest text (no fake recovery), built with textContent.
+  function withViewGuard(viewName, renderFn) {
+    try {
+      renderFn();
+    } catch (err) {
+      console.error(`view ${viewName} failed to render`, err);
+      const host = $(`view-${viewName}`);
+      if (!host) return;
+      host.textContent = "";
+      const card = el("div", "card guard-error");
+      card.appendChild(el("strong", "", LANG === "de" ? "Diese Ansicht konnte nicht geladen werden." : "This view could not be loaded."));
+      card.appendChild(el("p", "guard-detail", String(err && err.message ? err.message : err)));
+      const retry = el("button", "btn ghost-btn", LANG === "de" ? "Erneut versuchen" : "Retry");
+      retry.type = "button";
+      retry.addEventListener("click", () => withViewGuard(viewName, renderFn));
+      card.appendChild(retry);
+      host.appendChild(card);
+    }
+  }
+
+  // Last resort: an uncaught error must never leave a blank shell behind.
+  window.addEventListener("error", (event) => {
+    console.error("uncaught", event.error || event.message);
+  });
 
   // =========================================================================
   // Views
@@ -1831,7 +1857,7 @@
             if (r.ok) {
               const st = await r.json();
               if ((st?.backend?.agent_runs ?? 0) - baselineRuns >= 3) {
-                S.appState = st; renderCases(); renderReport();
+                S.appState = st; withViewGuard("cases", renderCases); withViewGuard("report", renderReport);
                 finish("ok", t("runDoneLate"));
                 recovered = true;
               }
@@ -1917,7 +1943,7 @@
     LANG = LANG === "de" ? "en" : "de";
     store.set("susie-ui-lang", LANG);
     applyI18n();
-    renderCases(); renderReport(); renderSources(); renderTrust();
+    withViewGuard("cases", renderCases); withViewGuard("report", renderReport); withViewGuard("sources", renderSources); withViewGuard("trust", renderTrust);
     // empty chat surfaces re-greet in the new language; an ongoing thread stays
     for (const root of [$("chat-overlay"), $("chat-full")]) {
       const logEl = root.querySelector(".chat-log");
@@ -2287,7 +2313,7 @@
         S.appState = body;
         if (sig !== lastStateSig) {
           lastStateSig = sig;
-          renderCases(); renderReport(); renderSources(); renderTrust();
+          withViewGuard("cases", renderCases); withViewGuard("report", renderReport); withViewGuard("sources", renderSources); withViewGuard("trust", renderTrust);
         }
       }
     } catch {
