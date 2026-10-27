@@ -39,6 +39,9 @@ class ChatAirlockTests(unittest.TestCase):
         self._patches = [
             mock.patch.object(chat, "resolve_token", return_value="test-token"),
             mock.patch.object(chat, "chat_completion", side_effect=fake_completion),
+            # the hessian transport is under test here — the Claude agent loop
+            # must stay out of the way even on machines with an API key set
+            mock.patch.object(chat.agent, "available", return_value=False),
         ]
         for p in self._patches:
             p.start()

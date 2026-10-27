@@ -829,7 +829,8 @@ def run_chat_turn(store_root: Path, index_path: Path, message: str,
             for r in chat_history(store_root, session_id)
         ]
         reply = chat.turn(message, state_context, corpus_hits, history,
-                          gateway=CHAT_GATEWAY, session_id=session_id, lang=lang)
+                          gateway=CHAT_GATEWAY, session_id=session_id, lang=lang,
+                          store_root=store_root, index_path=Path(index_path))
         store = Store(store_root)
         next_id = 1 + max((_chat_number(r) for r in store.all("chat_turn")),
                           default=0)
