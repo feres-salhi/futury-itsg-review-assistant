@@ -71,6 +71,11 @@
       storiesDev: "Erwartete Abweichung",
       storiesNoDev: "Keine Abweichung erwartet",
       storiesNoMatch: "Kein Treffer — Suchbegriff anpassen.",
+      regExpand: "Les Ansicht vergrößern",
+      regCollapse: "Les Ansicht verkleinern",
+      openCaseAria: "im Prüfbericht öffnen",
+      basisSearch: "im Regelwerk öffnen",
+      sourcesOpenReg: "Im Regelwerk öffnen",
       advanced: "Erweiterter Modus",
       topTitle: "Prüffälle",
       topSub: "Systemüberprüfung sozialversicherungsrechtlicher IT-Ergebnisse",
@@ -220,6 +225,11 @@
       storiesDev: "Expected deviation",
       storiesNoDev: "No deviation expected",
       storiesNoMatch: "No match — adjust the search term.",
+      regExpand: "Enlarge reader",
+      regCollapse: "Shrink reader",
+      openCaseAria: "open in the report",
+      basisSearch: "open in the regulations",
+      sourcesOpenReg: "Open in the regulations",
       advanced: "Advanced mode",
       topTitle: "Cases",
       topSub: "Systematic review of social-insurance IT results",
@@ -350,9 +360,13 @@
   // One map everywhere (badges, chips, report) — no raw machine enums in the UI.
   const STATUS_LABELS = {
     de: { PASS: "Bestanden", MISMATCH: "Abweichung", NOT_EVALUATED: "Nicht bewertet",
-          pass: "Bestanden", compliant: "Konform", blocked: "Blockiert" },
+          pass: "Bestanden", compliant: "Konform", blocked: "Blockiert",
+          needs_review: "Wartet auf Freigabe", candidate: "Kandidat",
+          rejected: "Abgelehnt", superseded: "Ersetzt" },
     en: { PASS: "Pass", MISMATCH: "Deviation", NOT_EVALUATED: "Not evaluated",
-          pass: "Pass", compliant: "Compliant", blocked: "Blocked" },
+          pass: "Pass", compliant: "Compliant", blocked: "Blocked",
+          needs_review: "Awaiting approval", candidate: "Candidate",
+          rejected: "Rejected", superseded: "Superseded" },
   };
   const STATUS_TOOLTIPS = {
     de: {
@@ -643,7 +657,7 @@
   const listeners = new Map();
   const emit = (ev, detail) => (listeners.get(ev) || []).forEach((f) => { try { f(detail); } catch {} });
 
-  const READ_ONLY = new Set(["select_case", "open_evidence", "filter_cases", "jump_to_source", "show_comparison", "switch_mode", "start_over", "go_back", "next_case", "prev_case"]);
+  const READ_ONLY = new Set(["select_case", "open_evidence", "filter_cases", "jump_to_source", "show_comparison", "switch_mode", "start_over", "go_back", "next_case", "prev_case", "open_report_section", "open_regulation"]);
 
   // step to the neighbouring case in the rendered list order (go back and forth)
   function stepCase(dir) {
@@ -702,6 +716,25 @@
       const card = document.querySelector(`[data-case="${CSS.escape(case_id)}"]`);
       if (card) { card.scrollIntoView({ block: "center" }); flash(card); }
       return { executed: true, detail: LANG === "de" ? `Vergleich für ${case_id} angezeigt` : `Comparison for ${case_id} shown` };
+    },
+    open_report_section({ case_id }) {
+      S.view = "report"; showView("report");
+      withViewGuard("report", renderReport);
+      const target = Array.from(document.querySelectorAll("#report-body .report-row"))
+        .find((r) => r.querySelector(".card-title")?.textContent === case_id);
+      if (target) { target.scrollIntoView({ block: "center" }); flash(target); }
+      return { executed: true, detail: LANG === "de" ? `Berichtsabschnitt zu ${case_id} geöffnet` : `Report section for ${case_id} opened` };
+    },
+    open_regulation({ query }) {
+      S.regQ = String(query ?? "");
+      S.view = "regulations";
+      showView("regulations");
+      const fill = () => {
+        const search = document.querySelector(".reg-search");
+        if (search) { search.value = S.regQ; regRunSearch(); }
+      };
+      if (!S.regLoaded) loadRegulations().then(fill); else fill();
+      return { executed: true, detail: LANG === "de" ? `Regelwerke durchsucht: „${S.regQ}“` : `Regulations searched: "${S.regQ}"` };
     },
     switch_mode({ mode }) {
       setMode(mode === "fullscreen" ? "fullscreen" : "overlay");
@@ -976,7 +1009,18 @@
           row(LANG === "de" ? "Sachverhalt (Eingaben)" : "Scenario (inputs)",
             Object.entries(c.inputs).map(([k, v]) => `${fieldLabel(k)}: ${fmtInputValue(v)}`).join(" · "));
         }
-        row(t("basis"), c.expected_basis);
+        // Cross-link (T10-049): the expectation basis opens the regulation
+        // browser pre-searched for it — the finding points at its law text.
+        if (c.expected_basis) {
+          kv.appendChild(el("dt", "", t("basis")));
+          const basisBtn = el("dd", "link-like", `${c.expected_basis} — ${t("basisSearch")}`);
+          basisBtn.tabIndex = 0;
+          basisBtn.setAttribute("role", "button");
+          const go = () => clientExec.open_regulation({ query: c.expected_basis });
+          basisBtn.addEventListener("click", (e) => { e.stopPropagation(); go(); });
+          basisBtn.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.stopPropagation(); go(); } });
+          kv.appendChild(basisBtn);
+        }
         if (c.run_at) row(t("runAt"), fmtDateTime(c.run_at));
         card.appendChild(kv);
         card.appendChild(evidenceChain(c, crit));
@@ -1121,9 +1165,14 @@
     const outcomes = el("div", "card");
     outcomes.appendChild(el("h2", "", LANG === "de" ? "Ergebnisse im Überblick" : "Results at a glance"));
     for (const c of cases) {
-      const row = el("div", "card-head");
+      // Cross-link (T10-049): a report row opens its case — the report is no
+      // longer a dead end. Button semantics for keyboard reachability.
+      const row = el("button", "card-head report-row");
+      row.type = "button";
+      row.setAttribute("aria-label", `${c.id} ${t("openCaseAria")}`);
       row.appendChild(el("span", "card-title", c.id || "—"));
       row.appendChild(badge(c.status || "NOT_EVALUATED"));
+      row.addEventListener("click", () => clientExec.select_case({ case_id: c.id }));
       outcomes.appendChild(row);
       const hr = humanReason(c);
       const line = [hr.intro, hr.body].filter(Boolean).join(" ");
@@ -1168,10 +1217,10 @@
       const head = el("div", "card-head");
       head.appendChild(el("span", "card-title", src.id || "Quelle"));
       const sb = el("span", `badge ${src.status === "approved" ? "badge-pass" : "badge-not-evaluated"}`,
-        src.status === "approved" ? (LANG === "de" ? "Freigegeben (G0)" : "Approved (G0)") : (src.status || ""));
+        src.status === "approved" ? (LANG === "de" ? "Freigegeben" : "Approved") : statusLabel(src.status));
       sb.title = LANG === "de"
-        ? "Gate G0: Ein Mensch hat Herkunft, Herausgeber, Version und Prüfsumme dieser Quelle verifiziert — erst dann darf sie in die Prüfung einfließen."
-        : "Gate G0: a human verified origin, issuer, version and checksum before this source may enter the review.";
+        ? "Ein Mensch hat Herkunft, Herausgeber, Version und Prüfsumme dieser Quelle verifiziert und die Freigabe mit Name und Begründung protokolliert — erst dann darf sie in die Prüfung einfließen."
+        : "A human verified origin, issuer, version and checksum and recorded the approval with name and rationale before this source may enter the review.";
       sb.classList.add("has-tip");
       head.appendChild(sb);
       card.appendChild(head);
@@ -1194,6 +1243,12 @@
       }
       kv.appendChild(dd);
       card.appendChild(kv);
+      // Cross-link (T10-049): the source opens its law text in the Regelwerke
+      // browser — sources and regulations stop being separate worlds.
+      const regBtn = el("button", "btn ghost-btn src-reg-btn", t("sourcesOpenReg"));
+      regBtn.type = "button";
+      regBtn.addEventListener("click", () => clientExec.open_regulation({ query: src.title || src.id || "" }));
+      card.appendChild(regBtn);
       body.appendChild(card);
     }
     if (tpl) {
@@ -1224,12 +1279,12 @@
       "Extraktor (GLM-Flash): schlägt Anforderungen vor — ohne zitierbare Fundstelle unterlässt er die Aussage (Cite-or-Abstain).",
       "Designer (Kolibri-1, anderes Modell): entwirft Testfall-Kandidaten.",
       "Challenger (unabhängig): sucht Lücken und unbelegte Annahmen — nur Empfehlung, nie Freigabe.",
-      `Autor ≠ Prüfer erzwungen · ${b.gates ?? "—"} menschliche Gate-Entscheidungen (G0–G6) protokolliert · ${b.agent_runs ?? "—"} KI-Läufe im Audit-Trail.`,
+      `Autor ≠ Prüfer erzwungen · ${b.gates ?? "—"} menschliche Freigaben protokolliert · ${b.agent_runs ?? "—"} KI-Läufe im Audit-Trail.`,
     ] : [
       "Extractor (GLM-Flash): proposes requirements — must cite the passage or abstain.",
       "Designer (Kolibri-1, a different model): drafts test-case candidates.",
       "Challenger (independent): probes for gaps and unsupported assumptions — recommendation only.",
-      `Author ≠ reviewer enforced · ${b.gates ?? "—"} human gate decisions (G0–G6) recorded · ${b.agent_runs ?? "—"} AI runs in the audit trail.`,
+      `Author ≠ reviewer enforced · ${b.gates ?? "—"} human approvals recorded · ${b.agent_runs ?? "—"} AI runs in the audit trail.`,
     ];
     for (const it of items) govList.appendChild(el("li", "", it));
     gov.appendChild(govList);
@@ -1289,6 +1344,9 @@
   // joins when T10-047 lands the gate action, "record_draft_gate" with
   // T10-050 — until then those cards render read-only with an honest hint.
   const GOV_ACTIONS = new Set([]);
+  // Source status vocabulary → human label (copy rule: raw statuses are
+  // storage identifiers, never UI copy) — merged into STATUS_LABELS above;
+  // statusLabel (line ~393) covers it.
 
   async function loadGovernance() {
     try {
@@ -1610,6 +1668,19 @@
       regRunSearch();
     });
     bar.appendChild(select);
+    // Expand reader (T10-049): the reader pane takes the full width, the hit
+    // list collapses to a slim index rail (CSS hook from the density pass).
+    const expandBtn = el("button", "btn ghost-btn reg-expand");
+    expandBtn.type = "button";
+    expandBtn.textContent = t("regExpand");
+    expandBtn.setAttribute("aria-pressed", "false");
+    expandBtn.addEventListener("click", () => {
+      const on = !root.classList.contains("reader-expanded");
+      root.classList.toggle("reader-expanded", on);
+      expandBtn.setAttribute("aria-pressed", on ? "true" : "false");
+      expandBtn.textContent = on ? t("regCollapse") : t("regExpand");
+    });
+    bar.appendChild(expandBtn);
     root.appendChild(bar);
     const cols = el("div", "reg-cols");
     cols.appendChild(el("div", "reg-results", ""));
@@ -2445,8 +2516,8 @@
       ask: { de: "Was ist der Prüfbericht?", en: "What is the report?" } },
     "sources-body": {
       title: { de: "Quellen & Kriterien", en: "Sources & criteria" },
-      text: { de: "Quellen mit Versions-/Checksummen-Nachweis und die Kriterien mit ihrer Erwartungs-Grundlage. Jede Quelle ist per G0-Gate menschlich freigegeben.",
-              en: "Sources with version/checksum proof and the criteria with their expectation basis. Every source is human-approved through a G0 gate." },
+      text: { de: "Quellen mit Versions-/Checksummen-Nachweis und die Kriterien mit ihrer Erwartungs-Grundlage. Jede Quelle wird von einem Menschen mit Name und Begründung freigegeben, bevor sie in die Prüfung einfließt.",
+              en: "Sources with version/checksum proof and the criteria with their expectation basis. Every source is approved by a human with name and rationale before it enters the review." },
       ask: { de: "Was sind die Quellen?", en: "What are the sources?" } },
     "privacy-badge": {
       title: { de: "Datenschutz-Schleuse", en: "Privacy airlock" },

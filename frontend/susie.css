@@ -29,6 +29,11 @@
   --ease-out: cubic-bezier(.16, 1, .3, 1);
   --sidebar-w: 224px;
   --bottom-h: 42px;
+
+  /* Font scale (UI density wave): JS drives this via
+     document.documentElement.style.setProperty("--font-scale", value).
+     1 = default; e.g. 0.9 / 1 / 1.15 / 1.3. Consumed by the html rule below. */
+  --font-scale: 1;
 }
 
 [data-theme="dark"] {
@@ -56,9 +61,11 @@
 /* ---------- base ---------- */
 * { box-sizing: border-box; }
 html, body { height: 100%; }
+/* Root font size consumes --font-scale; every rem-based size below scales. */
+html { font-size: calc(16px * var(--font-scale, 1)); }
 body {
   margin: 0;
-  font: 16px/1.55 system-ui, "Helvetica Neue", Arial, sans-serif;
+  font: 1rem/1.55 system-ui, "Helvetica Neue", Arial, sans-serif;
   color: var(--ink);
   background: var(--bg);
   overflow: hidden;
@@ -87,7 +94,7 @@ h2 { font-size: 1.1rem; letter-spacing: -.01em; margin: 0 0 .5rem; }
 /* ---------- sidebar ---------- */
 .sidebar {
   display: flex; flex-direction: column; align-items: stretch;
-  padding: 18px 14px;
+  padding: 12px 10px;
   border-right: 1px solid var(--line);
   background: color-mix(in srgb, var(--surface) 72%, transparent);
   backdrop-filter: blur(6px);
@@ -95,7 +102,7 @@ h2 { font-size: 1.1rem; letter-spacing: -.01em; margin: 0 0 .5rem; }
 .susie-entry {
   position: relative;
   display: grid; place-items: center;
-  padding: 14px 10px;
+  padding: 10px 8px;
   border: 1px solid var(--line);
   border-radius: var(--radius-card);
   background: var(--surface);
@@ -122,7 +129,7 @@ h2 { font-size: 1.1rem; letter-spacing: -.01em; margin: 0 0 .5rem; }
   50% { opacity: .8; transform: scale(1.015); }
 }
 
-.side-nav { display: flex; flex-direction: column; gap: 4px; margin-top: 22px; }
+.side-nav { display: flex; flex-direction: column; gap: 4px; margin-top: 14px; }
 .side-link, .side-ext {
   display: flex; align-items: center; gap: 10px;
   padding: 9px 12px;
@@ -138,7 +145,7 @@ h2 { font-size: 1.1rem; letter-spacing: -.01em; margin: 0 0 .5rem; }
 
 .ghost-icon {
   display: grid; place-items: center;
-  width: 34px; height: 34px;
+  width: 36px; height: 36px;
   border: 1px solid var(--line); border-radius: var(--radius-ctl);
   background: transparent; color: var(--ink-2);
   transition: background .15s var(--ease-out), color .15s var(--ease-out);
@@ -146,7 +153,7 @@ h2 { font-size: 1.1rem; letter-spacing: -.01em; margin: 0 0 .5rem; }
 .ghost-icon:hover { background: var(--surface); color: var(--ink); }
 .ghost-icon svg { width: 17px; height: 17px; }
 .ghost-lang {
-  min-width: 34px; height: 34px; padding: 0 8px;
+  min-width: 36px; height: 36px; padding: 0 8px;
   border: 1px solid var(--line); border-radius: var(--radius-ctl);
   background: transparent; color: var(--ink-2);
   font-size: .76rem; font-weight: 700; letter-spacing: .04em;
@@ -194,7 +201,7 @@ h2 { font-size: 1.1rem; letter-spacing: -.01em; margin: 0 0 .5rem; }
 }
 .ghost-btn {
   display: inline-flex; align-items: center; gap: 7px;
-  padding: 7px 13px;
+  min-height: 36px; padding: 0 14px;
   border: 1px solid var(--line); border-radius: 999px;
   background: transparent; color: var(--ink-2); font-size: .86rem; font-weight: 500;
   transition: background .15s var(--ease-out), color .15s var(--ease-out);
@@ -204,10 +211,10 @@ h2 { font-size: 1.1rem; letter-spacing: -.01em; margin: 0 0 .5rem; }
 
 /* ---------- main / views ---------- */
 .main { position: relative; overflow: hidden; }
-#app-views { height: 100%; overflow-y: auto; padding: 26px clamp(20px, 4vw, 48px) 40px; }
+#app-views { height: 100%; overflow-y: auto; padding: 14px clamp(14px, 2.5vw, 28px) 20px; }
 .topbar {
-  display: flex; align-items: flex-end; justify-content: space-between; gap: 18px;
-  max-width: 62rem; margin: 0 auto 22px;
+  display: flex; align-items: flex-end; justify-content: space-between; gap: 14px;
+  max-width: 62rem; margin: 0 auto 12px;
 }
 .topbar-sub { margin: .2rem 0 0; color: var(--ink-2); font-size: .9rem; }
 .summary-chips { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
@@ -220,12 +227,12 @@ h2 { font-size: 1.1rem; letter-spacing: -.01em; margin: 0 0 .5rem; }
 
 /* ---------- demo action row (owner concerns 1 + 2: one visible path each) --- */
 .case-actions {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
-  margin: 0 0 16px;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+  margin: 0 0 10px;
 }
 .case-act {
   display: flex; flex-direction: column; align-items: flex-start; gap: 3px;
-  padding: 12px 16px; text-align: left;
+  padding: 9px 14px; text-align: left;
   border: 1px solid var(--accent-line); border-radius: var(--radius-card);
   background: var(--accent-soft); color: var(--accent-ink);
   font: inherit; cursor: pointer;
@@ -277,7 +284,7 @@ h2 { font-size: 1.1rem; letter-spacing: -.01em; margin: 0 0 .5rem; }
 .card {
   border: 1px solid var(--line); border-radius: var(--radius-card);
   background: var(--surface); box-shadow: var(--shadow-card);
-  padding: 16px 18px; margin-bottom: 14px;
+  padding: 12px 14px; margin-bottom: 10px;
 }
 .card.clickable { cursor: pointer; transition: transform .16s var(--ease-out), border-color .16s var(--ease-out); }
 .card.clickable:hover { transform: translateY(-1px); border-color: var(--line-strong); }
@@ -290,9 +297,9 @@ h2 { font-size: 1.1rem; letter-spacing: -.01em; margin: 0 0 .5rem; }
 .card-head { display: flex; align-items: center; gap: 10px; }
 .card-title { font-weight: 600; }
 .card-meta { color: var(--ink-2); font-size: .85rem; margin-top: 3px; }
-.card-reason { margin: 10px 0 0; font-size: .92rem; color: var(--ink); }
+.card-reason { margin: 8px 0 0; font-size: .92rem; color: var(--ink); }
 
-.kv { display: grid; grid-template-columns: auto 1fr; gap: 4px 16px; margin: 12px 0 0; font-size: .92rem; }
+.kv { display: grid; grid-template-columns: auto 1fr; gap: 3px 12px; margin: 8px 0 0; font-size: .92rem; }
 .kv dt { color: var(--ink-2); }
 .kv dd { margin: 0; font-variant-numeric: tabular-nums; }
 
@@ -300,12 +307,12 @@ h2 { font-size: 1.1rem; letter-spacing: -.01em; margin: 0 0 .5rem; }
 .warning {
   background: var(--warn-bg); border: 1px solid var(--warn-line);
   color: var(--warn-ink);
-  border-radius: var(--radius-ctl); padding: .6rem .9rem; margin: 0 0 14px; font-size: .92rem;
+  border-radius: var(--radius-ctl); padding: .55rem .8rem; margin: 0 0 10px; font-size: .92rem;
 }
-.empty { color: var(--ink-2); padding: 30px 0; text-align: center; }
+.empty { color: var(--ink-2); padding: 24px 0; text-align: center; }
 
 /* report generation row */
-.report-gen { display: flex; align-items: center; gap: 12px; margin: 0 0 14px; flex-wrap: wrap; }
+.report-gen { display: flex; align-items: center; gap: 10px; margin: 0 0 10px; flex-wrap: wrap; }
 .btn-gen {
   background: var(--surface); color: var(--accent-ink);
   border: 1px solid var(--accent-line);
@@ -327,7 +334,7 @@ h2 { font-size: 1.1rem; letter-spacing: -.01em; margin: 0 0 .5rem; }
 }
 .susie-full-head {
   display: flex; align-items: center; gap: 14px;
-  padding: 16px clamp(20px, 4vw, 48px);
+  padding: 10px clamp(14px, 2.5vw, 28px);
   border-bottom: 1px solid var(--line);
 }
 .susie-full-head .susie-logo-img { width: 120px; }
@@ -357,7 +364,7 @@ h2 { font-size: 1.1rem; letter-spacing: -.01em; margin: 0 0 .5rem; }
 }
 .overlay-head {
   display: flex; align-items: center; gap: 6px;
-  padding: 12px 12px 12px 16px;
+  padding: 8px 8px 8px 12px;
   border-bottom: 1px solid var(--line);
   background: var(--surface-2);
 }
@@ -365,11 +372,11 @@ h2 { font-size: 1.1rem; letter-spacing: -.01em; margin: 0 0 .5rem; }
 
 /* ---------- chat (shared by overlay + fullscreen) ---------- */
 .chat { flex: 1; display: flex; flex-direction: column; min-height: 0; }
-.chat-full { max-width: 52rem; width: 100%; margin: 0 auto; padding: 0 clamp(16px, 3vw, 32px) 18px; }
-.chat-log { flex: 1; overflow-y: auto; padding: 18px 16px 8px; scroll-behavior: smooth; }
-.chat-panel .chat-log { padding: 16px 14px 8px; }
+.chat-full { max-width: 52rem; width: 100%; margin: 0 auto; padding: 0 clamp(16px, 3vw, 32px) 12px; }
+.chat-log { flex: 1; overflow-y: auto; padding: 14px 12px 6px; scroll-behavior: smooth; }
+.chat-panel .chat-log { padding: 12px 10px 6px; }
 
-.msg { display: flex; margin-bottom: 14px; animation: msg-in .3s var(--ease-out); }
+.msg { display: flex; margin-bottom: 10px; animation: msg-in .3s var(--ease-out); }
 @keyframes msg-in {
   from { opacity: 0; transform: translateY(6px); }
   to { opacity: 1; transform: translateY(0); }
@@ -378,7 +385,7 @@ h2 { font-size: 1.1rem; letter-spacing: -.01em; margin: 0 0 .5rem; }
 .msg-user { justify-content: flex-end; }
 .bubble {
   max-width: 86%;
-  padding: 10px 14px;
+  padding: 9px 12px;
   border-radius: 16px;
   font-size: .93rem;
   overflow-wrap: break-word;
@@ -492,7 +499,7 @@ h2 { font-size: 1.1rem; letter-spacing: -.01em; margin: 0 0 .5rem; }
 .action-result.err { color: var(--fail-ink); }
 
 /* composer */
-.composer { display: flex; gap: 8px; padding: 12px 14px 14px; border-top: 1px solid var(--line); }
+.composer { display: flex; gap: 8px; padding: 10px 12px 12px; border-top: 1px solid var(--line); }
 .composer input {
   flex: 1; min-width: 0;
   padding: .6rem .9rem;
@@ -513,7 +520,7 @@ h2 { font-size: 1.1rem; letter-spacing: -.01em; margin: 0 0 .5rem; }
 .send-btn svg { width: 18px; height: 18px; }
 
 /* onboarding card */
-.onboard { padding: 18px 16px; }
+.onboard { padding: 14px 12px; }
 .onboard p { margin: 0 0 10px; font-size: .92rem; }
 .onboard .composer { border-top: none; padding: 0; }
 
@@ -522,7 +529,7 @@ h2 { font-size: 1.1rem; letter-spacing: -.01em; margin: 0 0 .5rem; }
   position: fixed; z-index: 50;
   left: 0; right: 0; bottom: 0; height: var(--bottom-h);
   display: flex; align-items: center; gap: 10px;
-  padding: 0 16px;
+  padding: 0 12px;
   background: var(--surface);
   border-top: 2px solid var(--accent);
   font-size: .8rem; color: var(--ink-2);
@@ -579,19 +586,19 @@ h2 { font-size: 1.1rem; letter-spacing: -.01em; margin: 0 0 .5rem; }
 
 /* ---- T10-042: comparison table, evidence chain, suggestion chips ---- */
 .card-subhead {
-  margin: 10px 0 4px;
-  font-size: 11px;
+  margin: 8px 0 4px;
+  font-size: .6875rem;
   font-weight: 700;
   letter-spacing: .06em;
   text-transform: uppercase;
   color: var(--ink-2);
 }
-.card-detail { margin: 2px 0 6px; font-size: 13.5px; color: var(--ink); }
+.card-detail { margin: 2px 0 6px; font-size: .84375rem; color: var(--ink); }
 .cmp-table {
   width: 100%;
   border-collapse: collapse;
   margin: 4px 0 8px;
-  font-size: 12.5px;
+  font-size: .78125rem;
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: 10px;
@@ -599,7 +606,7 @@ h2 { font-size: 1.1rem; letter-spacing: -.01em; margin: 0 0 .5rem; }
 }
 .cmp-table th {
   text-align: left;
-  font-size: 10.5px;
+  font-size: .65625rem;
   letter-spacing: .05em;
   text-transform: uppercase;
   color: var(--ink-2);
@@ -614,12 +621,12 @@ h2 { font-size: 1.1rem; letter-spacing: -.01em; margin: 0 0 .5rem; }
 .cmp-bad { color: var(--accent); font-weight: 700; }
 .chain { margin-top: 8px; }
 .chain-row { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
-.chain-arrow { color: var(--ink-2); font-size: 11px; }
+.chain-arrow { color: var(--ink-2); font-size: .6875rem; }
 .chain-chip { cursor: pointer; }
 .chain-detail {
   margin-top: 6px;
   padding: 7px 10px;
-  font-size: 12.5px;
+  font-size: .78125rem;
   line-height: 1.45;
   border-left: 3px solid var(--accent);
   background: var(--surface-2);
@@ -634,19 +641,19 @@ h2 { font-size: 1.1rem; letter-spacing: -.01em; margin: 0 0 .5rem; }
 .trust-chip {
   display: inline-flex; align-items: center;
   padding: 4px 11px; border-radius: 999px;
-  font-size: 11.5px; font-weight: 600;
+  font-size: .71875rem; font-weight: 600;
   background: var(--surface-2);
   border: 1px solid var(--line);
   color: var(--ink);
   cursor: help;
 }
 .has-tip { cursor: help; }
-.chevron { margin-left: auto; color: var(--ink-2); font-size: 12px; }
+.chevron { margin-left: auto; color: var(--ink-2); font-size: .75rem; }
 .card:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .cmp-mini { margin: 6px 0 2px; }
 .cmp-mini td { padding: 4px 9px; }
-.gov-list { margin: 6px 0 0; padding-left: 18px; display: grid; gap: 5px; font-size: 13px; }
-.report-recs { margin: 6px 0 0; padding-left: 20px; display: grid; gap: 6px; font-size: 13.5px; }
+.gov-list { margin: 6px 0 0; padding-left: 18px; display: grid; gap: 5px; font-size: .8125rem; }
+.report-recs { margin: 6px 0 0; padding-left: 20px; display: grid; gap: 6px; font-size: .84375rem; }
 
 /* ---- T10-042 wave 4: the chat DOCKS instead of covering the content ---- */
 /* Above 900 px the open chat becomes a third grid column of .app: the case
@@ -668,14 +675,14 @@ h2 { font-size: 1.1rem; letter-spacing: -.01em; margin: 0 0 .5rem; }
     box-shadow: none;
     animation: none;
   }
-  #app.susie-docked .overlay-head { padding-top: 22px; }
+  #app.susie-docked .overlay-head { padding-top: 14px; }
 }
 
 /* ---- T10-042 wave 4: seal demo ---- */
 .seal-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 4px; }
 .seal-out { margin-top: 6px; display: grid; gap: 6px; }
-.seal-pending { font-size: 13px; color: var(--ink-2); }
-.seal-line { font-size: 13.5px; }
+.seal-pending { font-size: .8125rem; color: var(--ink-2); }
+.seal-line { font-size: .84375rem; }
 .seal-bad { color: var(--accent); font-weight: 700; }
 
 /* sidebar subtitles: flyover on hover/focus (title attribute), not fixed text */
@@ -683,21 +690,21 @@ h2 { font-size: 1.1rem; letter-spacing: -.01em; margin: 0 0 .5rem; }
 .side-sub { display: none; }
 
 /* ---- Prüfakte tree in the sidebar + embedded view ---- */
-.side-group { margin-top: 12px; padding: 4px 8px 4px; border-top: 1px solid var(--line); }
+.side-group { margin-top: 8px; padding: 2px 6px 2px; border-top: 1px solid var(--line); }
 .side-group-toggle {
   display: flex; align-items: center; justify-content: space-between; gap: 6px;
   width: 100%; padding: 6px 10px 4px;
   border: none; background: transparent; cursor: pointer;
   font: inherit; text-align: left;
 }
-.side-group-toggle .chevron { font-size: 11px; color: var(--ink-2, #626260); transition: transform .16s var(--ease-out); }
+.side-group-toggle .chevron { font-size: .6875rem; color: var(--ink-2, #626260); transition: transform .16s var(--ease-out); }
 .side-group-toggle[aria-expanded="false"] .chevron { transform: rotate(-90deg); }
 .side-group-items { display: block; }
 .side-group-items.collapsed { display: none; }
 .side-group-items.settling { animation: msg-in .22s var(--ease-out) 1; }
 .side-group-title {
   display: block; padding: 2px 10px 6px;
-  font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+  font-size: .6875rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
   color: var(--ink-2, #626260);
 }
 .side-adv {
@@ -705,7 +712,7 @@ h2 { font-size: 1.1rem; letter-spacing: -.01em; margin: 0 0 .5rem; }
   padding: 6px 10px 6px 24px; margin: 1px 0;
   border: none; border-left: 2px solid var(--line); border-radius: 8px;
   background: transparent; color: var(--ink-2, #626260);
-  font-size: 12.5px; cursor: pointer;
+  font-size: .78125rem; cursor: pointer;
   transition: background .15s var(--ease-out), color .15s var(--ease-out);
 }
 .side-adv:hover { background: var(--surface, #fff); color: var(--ink, #242424); }
@@ -714,7 +721,7 @@ h2 { font-size: 1.1rem; letter-spacing: -.01em; margin: 0 0 .5rem; }
   background: var(--accent-soft, #fbeef1);
   color: var(--accent-ink, #a30f33); font-weight: 600;
 }
-#view-advanced { height: calc(100vh - 200px); }
+#view-advanced { height: calc(100vh - 150px); }
 #advanced-frame {
   width: 100%; height: 100%;
   border: 1px solid var(--line, #e6e4e1); border-radius: var(--radius-card, 14px);
@@ -741,10 +748,10 @@ h2 { font-size: 1.1rem; letter-spacing: -.01em; margin: 0 0 .5rem; }
   width: min(420px, calc(100vw - 32px));
   background: var(--surface); border: 1px solid var(--line-strong);
   border-radius: var(--radius-card); box-shadow: var(--shadow-panel);
-  padding: 16px 18px;
+  padding: 12px 14px;
   font-size: .82rem; color: var(--ink);
 }
-.privacy-head { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 12px; }
+.privacy-head { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 10px; }
 .privacy-head .shield-ico { width: 26px; height: 26px; color: #2e9e4f; flex: none; margin-top: 2px; }
 .privacy-head-text strong { display: block; font-size: .92rem; margin-bottom: 2px; }
 .privacy-head-text p { margin: 0; color: var(--ink-2); line-height: 1.45; }
@@ -774,7 +781,7 @@ h2 { font-size: 1.1rem; letter-spacing: -.01em; margin: 0 0 .5rem; }
   max-height: min(70vh, 560px); overflow: auto;
   background: var(--surface); border: 1px solid var(--line-strong);
   border-radius: var(--radius-card); box-shadow: var(--shadow-panel);
-  padding: 16px 18px; font-size: .82rem; color: var(--ink);
+  padding: 12px 14px; font-size: .82rem; color: var(--ink);
 }
 .help-panel .help-title { display: block; font-size: .95rem; margin-bottom: 6px; }
 .help-panel h3 { font-size: .84rem; margin: 14px 0 4px; }
@@ -810,7 +817,7 @@ body.whats-this, body.whats-this * { cursor: help !important; }
 /* ---------- T10-045: case list toolbar (search / status filter / sort) ---------- */
 .case-toolbar {
   display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
-  margin: 0 0 14px;
+  margin: 0 0 10px;
 }
 .case-search {
   flex: 1 1 240px; min-width: 200px; max-width: 26rem;
@@ -840,9 +847,9 @@ body.whats-this, body.whats-this * { cursor: help !important; }
 .card:not([aria-expanded="true"]) .card-head { align-items: center; }
 
 /* ---------- T10-045: regulations browser ---------- */
-.reg-body { display: flex; flex-direction: column; gap: 14px; height: 100%; min-height: 0; }
+.reg-body { display: flex; flex-direction: column; gap: 10px; height: 100%; min-height: 0; }
 .reg-toolbar {
-  display: grid; grid-template-columns: minmax(280px, 380px) 1fr; gap: 14px;
+  display: grid; grid-template-columns: minmax(280px, 380px) 1fr; gap: 10px;
 }
 .reg-search {
   width: 100%;
@@ -857,20 +864,20 @@ body.whats-this, body.whats-this * { cursor: help !important; }
   border-radius: var(--radius-ctl); box-sizing: border-box;
 }
 .reg-cols {
-  display: grid; grid-template-columns: minmax(280px, 380px) 1fr; gap: 14px;
+  display: grid; grid-template-columns: minmax(280px, 380px) 1fr; gap: 10px;
   align-items: stretch; flex: 1 1 auto; min-height: 0;
 }
 @media (max-width: 900px) { .reg-cols { grid-template-columns: 1fr; } }
 .reg-results {
   background: var(--surface); border: 1px solid var(--line);
-  border-radius: var(--radius-card); padding: 8px;
-  height: min(600px, calc(100vh - var(--bottom-h) - 220px));
+  border-radius: var(--radius-card); padding: 6px;
+  height: min(720px, calc(100vh - var(--bottom-h) - 150px));
   min-height: 320px; overflow: auto;
 }
 .reg-hit {
   display: flex; flex-direction: column; gap: 3px; width: 100%; text-align: left;
   border: none; background: transparent; color: var(--ink);
-  font: inherit; padding: 9px 10px; border-radius: var(--radius-ctl); cursor: pointer;
+  font: inherit; padding: 6px 8px; border-radius: var(--radius-ctl); cursor: pointer;
 }
 .reg-hit:hover { background: var(--surface-2); }
 .reg-hit.active { background: var(--accent-soft); }
@@ -880,22 +887,22 @@ body.whats-this, body.whats-this * { cursor: help !important; }
 .reg-hit-snippet { font-size: .75rem; color: var(--ink-2); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .reg-reader {
   background: var(--surface); border: 1px solid var(--line);
-  border-radius: var(--radius-card); padding: 16px 18px;
-  max-height: calc(100vh - var(--bottom-h) - 190px); overflow: auto;
-  display: flex; flex-direction: column; gap: 12px; min-height: 320px;
+  border-radius: var(--radius-card); padding: 12px 16px;
+  max-height: calc(100vh - var(--bottom-h) - 150px); overflow: auto;
+  display: flex; flex-direction: column; gap: 10px; min-height: 320px;
 }
 .reg-reader-head {
   display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
-  padding-bottom: 10px; border-bottom: 1px solid var(--line);
+  padding-bottom: 8px; border-bottom: 1px solid var(--line);
 }
 .reg-reader-title { display: flex; flex-direction: column; gap: 2px; }
 .reg-reader-title strong { font-size: .95rem; }
 .reg-reader-where { font-size: .74rem; color: var(--ink-2); }
-.reg-pdf-frame { width: 100%; flex: 1 1 auto; min-height: 60vh; border: 1px solid var(--line); border-radius: var(--radius-ctl); background: var(--surface-2); }
-.reg-md { font-size: .86rem; line-height: 1.55; color: var(--ink); }
-.reg-md h1, .reg-md h2, .reg-md h3, .reg-md h4, .reg-md h5, .reg-md h6 { margin: 1em 0 .4em; line-height: 1.3; }
+.reg-pdf-frame { width: 100%; flex: 1 1 auto; min-height: 320px; border: 1px solid var(--line); border-radius: var(--radius-ctl); background: var(--surface-2); }
+.reg-md { font-size: .88rem; line-height: 1.5; color: var(--ink); }
+.reg-md h1, .reg-md h2, .reg-md h3, .reg-md h4, .reg-md h5, .reg-md h6 { margin: .65em 0 .35em; line-height: 1.3; }
 .reg-md h1 { font-size: 1.15rem; } .reg-md h2 { font-size: 1.05rem; } .reg-md h3 { font-size: .95rem; }
-.reg-md p, .reg-md ul { margin: .5em 0; }
+.reg-md p, .reg-md ul { margin: .4em 0; }
 .reg-md ul { padding-left: 1.3em; }
 .reg-md li { margin: .15em 0; }
 .reg-md .md-line { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .78rem; white-space: pre; overflow-x: auto; padding: 2px 0; }
@@ -916,7 +923,7 @@ body.whats-this, body.whats-this * { cursor: help !important; }
 .reg-doc {
   display: flex; align-items: flex-start; gap: 10px; width: 100%; text-align: left;
   border: none; background: transparent; color: var(--ink);
-  font: inherit; padding: 10px; border-radius: var(--radius-ctl); cursor: pointer;
+  font: inherit; padding: 7px 8px; border-radius: var(--radius-ctl); cursor: pointer;
 }
 .reg-doc:hover { background: var(--surface-2); }
 .reg-doc:focus-visible, .reg-hit:focus-visible, .seg-item:focus-visible {
@@ -940,17 +947,16 @@ body.whats-this, body.whats-this * { cursor: help !important; }
   padding: 2px 6px; border-radius: 5px; letter-spacing: .04em;
 }
 /* reading measure: the verse of a law text should not run the full pane */
-.reg-md { max-width: 72ch; }
-/* result/reader panes: equal rhythm, reader breathes */
-.reg-reader { padding: 18px 22px; }
-.reg-reader-head { align-items: flex-start; padding-bottom: 12px; }
+.reg-md { max-width: 75ch; }
+/* result/reader panes: equal rhythm, reader aligned to the top */
+.reg-reader-head { align-items: flex-start; }
 /* the case summary chips belong to the cases view — enforced at CSS level too */
 body:not([data-view="cases"]) .summary-chips { display: none; }
 .reg-md pre.md-fence {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: .74rem; line-height: 1.5; white-space: pre; overflow-x: auto;
   background: var(--surface-2); border: 1px solid var(--line);
-  border-radius: var(--radius-ctl); padding: 10px 12px; margin: .6em 0;
+  border-radius: var(--radius-ctl); padding: 8px 10px; margin: .6em 0;
 }
 
 /* ---------- T10-045 alignment pass ---------- */
@@ -961,3 +967,72 @@ body:not([data-view="cases"]) .summary-chips { display: none; }
 
 /* centered empty state inside the reader pane */
 .reg-reader .empty { margin: auto; text-align: center; }
+
+/* ==========================================================================
+   Regulations reader EXPAND hook (CSS contract for susie.js — no JS in CSS)
+   --------------------------------------------------------------------------
+   1) `reader-expanded` on #reg-body (.reg-body):
+      JS: document.getElementById("reg-body").classList.toggle("reader-expanded", on)
+      Effect: the view goes full width (the 62rem cap is lifted via :has() on
+      #app-views), the hit/doc list collapses to a slim 200px index rail
+      (titles kept, meta dropped), and the md/PDF reader pane + .reg-pdf-frame
+      iframe fill the remaining height down to the bottom bar.
+   2) `list-hidden` additionally on .reg-body (with reader-expanded):
+      hides the rail entirely; the reader takes the whole row.
+   3) `reader-full-height` on the .reg-pdf-frame iframe:
+      a guaranteed near-viewport-height PDF even OUTSIDE reader-expanded
+      (offset is approximate by design; inside reader-expanded the iframe
+      already reaches maximum height and this class is not needed).
+      JS: document.querySelector(".reg-pdf-frame").classList.toggle("reader-full-height", on)
+   ========================================================================== */
+
+/* widen the shell around the expanded regulations view */
+#app-views:has(.reg-body.reader-expanded) { padding-inline: 12px; }
+#app-views:has(.reg-body.reader-expanded) .view,
+#app-views:has(.reg-body.reader-expanded) .topbar { max-width: none; }
+#app-views:has(.reg-body.reader-expanded) .topbar { margin-bottom: 8px; }
+
+/* hit list -> slim index rail (titles kept, meta dropped), reader -> full
+   remaining height. 200px keeps the rail usable in BOTH modes (document
+   browse and section hits of one doc); the reader keeps its 75ch measure. */
+.reg-body.reader-expanded .reg-cols {
+  grid-template-columns: 200px minmax(0, 1fr);
+  height: calc(100vh - var(--bottom-h) - 145px);
+  flex: none;
+}
+.reg-body.reader-expanded .reg-results,
+.reg-body.reader-expanded .reg-reader {
+  height: 100%;
+  max-height: none;
+  min-height: 0;
+}
+.reg-body.reader-expanded .reg-results { padding: 6px 4px; }
+
+/* slim rail drops the meta lines, keeps clickable titles / doc IDs */
+.reg-body.reader-expanded .reg-doc { padding: 6px 8px; }
+.reg-body.reader-expanded .reg-doc-where,
+.reg-body.reader-expanded .reg-doc-pdf,
+.reg-body.reader-expanded .reg-hit-where,
+.reg-body.reader-expanded .reg-hit-snippet { display: none; }
+.reg-body.reader-expanded .reg-hit { padding: 6px 8px; }
+.reg-body.reader-expanded .reg-hit-title,
+.reg-body.reader-expanded .reg-doc-title { font-size: .78rem; }
+
+/* optional: hide the rail completely */
+.reg-body.reader-expanded.list-hidden .reg-cols { grid-template-columns: minmax(0, 1fr); }
+.reg-body.reader-expanded.list-hidden .reg-results { display: none; }
+
+/* the freed width goes to breathing room, not to squeezed text:
+   the reading measure stays capped, centered in the wide pane */
+.reg-body.reader-expanded .reg-md { margin-inline: auto; }
+
+/* PDF iframe fills the expanded reader to the bottom */
+.reg-body.reader-expanded .reg-pdf-frame { flex: 1 1 auto; min-height: 240px; }
+
+/* distinct taller PDF state outside reader-expanded (approximate offset:
+   topbar + toolbar + reader head + shell paddings) */
+.reg-pdf-frame.reader-full-height {
+  flex: none;
+  height: auto;
+  min-height: calc(100vh - var(--bottom-h) - 232px);
+}
