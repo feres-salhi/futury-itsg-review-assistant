@@ -1,9 +1,9 @@
 """Tests for the SÜSIE chat brain (itsg.chat, task 4, susie-assistant track).
 
 Contract under test (fail closed, model never has the final word):
-- grounded claims without a citation are deterministically forced to abstain
-  ("Das kann ich nicht belegen.") with confidence="unknown" and a recorded
-  validation error in the AgentRun envelope;
+- grounded claims without a citation are kept but downgraded (T10-051 soft
+  enforcement): unverified prefix, confidence="unknown", disclaimer flag,
+  recorded validation error in the AgentRun envelope — never grounded;
 - "general" confidence always forces the disclaimer flag;
 - unregistered (hallucinated) action ids are stripped with a validation error;
 - registered actions pass through actions.propose: read-only ones need no
@@ -68,7 +68,7 @@ class BuildUserContentTests(unittest.TestCase):
         # propose a valid action id (yes/no takeover would be inert).
         from itsg import actions
 
-        content = chat.build_user_content("Frage?", {}, [], [])
+        content = chat.build_user_content("Frage?", {}, [])
         for action_id in (*actions.READ_ONLY_ACTIONS, *actions.MUTATING_ACTIONS,
                           *actions.DECISION_GATE_ACTIONS):
             self.assertIn(action_id, content, f"registry id missing from context: {action_id}")
@@ -78,19 +78,35 @@ class BuildUserContentTests(unittest.TestCase):
         self.assertIn('"rationale"', content)
         self.assertIn('"target_id"', content)
 
-    def test_renders_state_hits_and_history(self):
+    def test_renders_state_and_hits(self):
         content = chat.build_user_content(
             "Warum weicht TC-002 ab?",
             {"cases": [{"id": "TC-002", "status": "abweichung"}]},
             [{"source_version_id": "SRCV-1", "text": "§ 2 Abs. 1 …", "heading_path": "Leistung"}],
-            [{"role": "user", "content": "hallo"}, {"role": "assistant", "content": "guten Tag"}],
         )
         self.assertIn("Warum weicht TC-002 ab?", content)
         self.assertIn("TC-002", content)
         self.assertIn("SRCV-1", content)
         self.assertIn("§ 2 Abs. 1 …", content)
-        self.assertIn("hallo", content)
-        self.assertIn("guten Tag", content)
+
+    def test_history_travels_as_real_messages(self):
+        # T10-051: prior turns go as user/assistant messages (not flattened
+        # text inside the user content), bounded to the last HISTORY_TURNS_MAX.
+        history = [{"role": "user", "content": "hallo"},
+                   {"role": "susie", "content": "guten Tag"},
+                   {"role": "susie", "content": "Wie kann ich helfen?"}]
+        msgs = chat.build_messages("Warum weicht TC-002 ab?", {"cases": []}, [], history)
+        self.assertEqual([m["role"] for m in msgs], ["user", "assistant", "user"])
+        self.assertEqual(msgs[0]["content"], "hallo")
+        self.assertIn("guten Tag", msgs[1]["content"])  # consecutive susie turns merged
+        self.assertIn("Warum weicht TC-002 ab?", msgs[-1]["content"])
+        self.assertIn("APP-STATE", msgs[-1]["content"])
+        self.assertEqual(len(msgs), 3)
+        # long histories are bounded (consecutive same-role turns merge)
+        long = [{"role": "user" if i % 2 == 0 else "susie", "content": f"m{i}"}
+                for i in range(chat.HISTORY_TURNS_MAX + 5)]
+        self.assertLessEqual(len(chat.build_messages("x", {}, [], long)),
+                             chat.HISTORY_TURNS_MAX + 1)
 
 
 class ChatTurnTests(unittest.TestCase):
@@ -101,11 +117,17 @@ class ChatTurnTests(unittest.TestCase):
         self.assertFalse(r.degraded)
         self.assertEqual(r.confidence, "grounded")
 
-    def test_grounded_without_citation_is_forced_to_abstain(self):
+    def test_grounded_without_citation_is_kept_but_marked_unverified(self):
+        # T10-051 soft enforcement: the answer survives, but is downgraded —
+        # unverified prefix, confidence "unknown", disclaimer flag, recorded
+        # violation. Never presented as grounded.
         r = chat.turn("…", {}, [], [], gateway=_gw(GROUNDED_NO_CITE))
-        self.assertIn("Das kann ich nicht belegen", r.utterance)
+        self.assertIn("Sicher gilt …", r.utterance)
+        self.assertIn("nicht belegt", r.utterance)
         self.assertEqual(r.confidence, "unknown")
+        self.assertTrue(r.disclaimer)
         self.assertTrue(r.agent_run["validation_errors"])
+        self.assertEqual(r.agent_run["result"]["confidence"], "unknown")
 
     def test_general_knowledge_forces_disclaimer_flag(self):
         r = chat.turn("…", {}, [], [], gateway=_gw(GENERAL))
@@ -130,16 +152,18 @@ class ChatTurnTests(unittest.TestCase):
         self.assertFalse(r.needs_confirmation)
         self.assertTrue(r.agent_run["validation_errors"])
 
-    def test_forced_abstain_neutralizes_proposed_action(self):
-        # A retracted justification must yield nothing actionable: no proposal,
-        # no confirmation token, and a recorded validation error.
+    def test_unverified_utterance_keeps_gated_action(self):
+        # T10-051: an unverified claim no longer strips the action — action
+        # safety is guaranteed independently by the whitelist + human gates;
+        # the envelope still records the citation violation.
         reply = json.dumps({"utterance": "Sicher gilt …", "confidence": "grounded",
             "citations": [],
             "action": {"id": "save_note", "params": {"text": "Notiz", "case_id": "TC-002"}}})
         r = chat.turn("…", {}, [], [], gateway=_gw(reply))
-        self.assertIn("Das kann ich nicht belegen", r.utterance)
-        self.assertIsNone(r.action)
-        self.assertFalse(r.needs_confirmation)
+        self.assertIn("nicht belegt", r.utterance)
+        self.assertEqual(r.action["id"], "save_note")
+        self.assertTrue(r.action["confirm_token"])
+        self.assertTrue(r.needs_confirmation)
         self.assertTrue(r.agent_run["validation_errors"])
 
     def test_non_dict_action_is_treated_as_no_action(self):
