@@ -32,6 +32,11 @@ from .llm import (
     resolve_token,
 )
 
+try:   # T10-043: Datenschutz-Schleuse (Fares, privacy/schleuse.py) — stdlib only
+    from privacy.schleuse import Schleuse
+except ImportError:   # pragma: no cover — repo-layout regression, fail closed below
+    Schleuse = None
+
 ABSTAIN_LINE = "Das kann ich nicht belegen."
 DISCLAIMER_FLAG_LINE = "Das steht nicht in meinem Datensatz"
 GATE_HANDBACK_LINE = (
@@ -159,6 +164,90 @@ _EN_WORDS = re.compile(
     r"\b(where|show|open|select|start|run|generate|status|overview|back|"
     r"reset|again|report|export|stand|summary|hello|hi)\b", re.IGNORECASE)
 _CASE_ID_RE = re.compile(r"\b(?:tc|fall|case)[\s\-#]*(\d{1,3})\b", re.IGNORECASE)
+
+# T10-044: deterministic help topics — what the UI's "What's this?" flyovers and
+# the chat's explanation questions resolve to. Facts only, no legal interpretation;
+# anything the model answers still goes through cite-or-abstain.
+HELP_TOPICS: list[dict] = [
+    {"id": "schleuse", "match": r"datenschutz|schleuse|airlock|privacy|personenbezogen|pseudonym",
+     "de": ("Die Datenschutz-Schleuse (das grüne Schild unten rechts) schützt personenbezogene "
+            "Daten: Bevor irgendetwas einen externen Kanal verlässt, werden Versicherungsnummern, "
+            "Namen, IBANs u. ä. erkannt und durch Platzhalter ersetzt. Findet die Nachprüfung "
+            "danach noch etwas Persönliches, wird der Versand komplett blockiert — nie still "
+            "durchgewink. Das Protokoll hält nur Kategorien und Zahlen fest, nie Werte."),
+     "en": ("The privacy airlock (the green shield bottom-right) protects personal data: before "
+            "anything leaves for an external channel, insurance numbers, names, IBANs and similar "
+            "are detected and replaced with placeholders. If the re-check still finds personal "
+            "data, the send is blocked entirely — never silently waved through. The audit log "
+            "keeps categories and counts only, never values.")},
+    {"id": "siegel", "match": r"siegel|seal|manipulation|tamper|fingerabdruck|receipt",
+     "de": ("Das Manipulationssiegel macht den Prüfbericht fälschungssicher nachweisbar: Beim "
+            "Sigeln erhält der Bericht einen kryptografischen Beleg (HMAC-Empfangsbestätigung) "
+            "über seinen SHA-256-Fingerabdruck; nur der Fingerabdruck verlässt dafür den Rechner. "
+            "Jeder spätere Texteingriff würde die Verifikation fehlschlagen lassen."),
+     "en": ("The tamper-evidence seal makes the report's integrity provable: sealing obtains a "
+            "cryptographic receipt (HMAC) over the report's SHA-256 fingerprint; only the "
+            "fingerprint ever leaves this machine. Any later text change would fail verification.")},
+    {"id": "abgleich", "match": r"abgleich|feldvergleich|vergleich|comparison|soll.?ist",
+     "de": ("Der Abgleich ist der deterministische Feldvergleich: die offizielle Erwartung je "
+            "Feld wird Feld für Feld gegen die übermittelte Softwareausgabe gestellt — in Code, "
+            "ohne KI, in Sekunden. Abweichungen erscheinen sofort in der Fallkarte; fehlt eine "
+            "Grundlage, bleibt das Feld „nicht bewertet“ (Fail-closed, nie still bestanden)."),
+     "en": ("The comparison is a deterministic field-by-field check: the official expectation per "
+            "field is compared against the transmitted software output — in code, no AI, seconds. "
+            "Deviations appear immediately in the case card; a missing basis keeps the field "
+            "“not evaluated” (fail closed, never silently passed).")},
+    {"id": "belegkette", "match": r"belegkette|evidence|nachvollzieh|rückverfolg|traceab|audit",
+     "de": ("Die Belegkette zeigt, worauf ein Befund beruht: Prüffall → Ausführung → Kriterium → "
+            "Anforderung → Quelle, jeden Link mit echtem Store-Eintrag und Zeitstempel. So lässt "
+            "sich jeder Befund bis zur amtlichen Grundlage zurückverfolgen."),
+     "en": ("The evidence chain shows what a finding rests on: test case → execution → criterion → "
+            "requirement → source, each link backed by a real store record and timestamp. Every "
+            "finding can be traced back to its official basis.")},
+    {"id": "vier_augen", "match": r"vier.?augen|four.?eyes|freigabe|gate|entscheidung|4.?augen",
+     "de": ("Das Vier-Augen-Prinzip: KI darf vorschlagen, entscheiden darf nur ein Mensch. Jede "
+            "Gate-Entscheidung (Freigabe, Zurückweisung, Konformität) wird mit Name, Zeitstempel "
+            "und Begründung protokolliert — die Autorin einer KI-Ausgabe darf sie nicht selbst "
+            "freigeben."),
+     "en": ("The four-eyes principle: AI may propose, only a human decides. Every gate decision "
+            "(approval, rejection, conformance) is recorded with name, timestamp and rationale — "
+            "the author of an AI output may not approve it themselves.")},
+    {"id": "bericht", "match": r"prüfbericht|prüfakte.?bericht|bericht als|report\b|pdf",
+     "de": ("Der Prüfbericht fasst die Prüfung zusammen: Vorspann, Zusammenfassung mit "
+            "Empfehlungen, alle Befunde im Detail und die Belegkette — als PDF exportierbar. "
+            "Hinweis: Die Vorlage ist synthetisch, es gibt keine amtliche Vorlage; der Bericht "
+            "enthält deshalb keine Konformitätsaussage."),
+     "en": ("The report summarizes the review: preface, executive summary with recommended "
+            "actions, all findings in detail and the evidence chain — exportable as PDF. Note: "
+            "the template is synthetic; no official form exists, so the report makes no "
+            "conformance claim.")},
+    {"id": "prueffaelle", "match": r"prüffälle|prueffaelle|testfall|fälle|cases\b",
+     "de": ("Die Prüffälle sind die Testdaten dieser Systemprüfung: jeder Fall enthält einen "
+            "Soll/Ist-Vergleich zwischen offizieller Erwartung und übermittelter Softwareausgabe. "
+            "Sie stammen aus dem offiziellen Beispielpapier und generierten Szenarien — "
+            "ausschließlich synthetische Daten."),
+     "en": ("The cases are this review's test data: each holds an expected/transmitted comparison "
+            "between the official expectation and the software output. They come from the official "
+            "sample document and generated scenarios — synthetic data only.")},
+    {"id": "quellen", "match": r"quellen|sources\b|rechtsgrundlage|grundlagen",
+     "de": ("Die Quellen sind die Rechts- und Regelgrundlagen der Prüfung (Beispielpapier, "
+            "Verfahrensbeschreibung, GG EEL), jeweils mit Versionsangabe, Gültigkeitsdatum und "
+            "SHA-256-Prüfsumme. Jede Version wird registriert und vor der Nutzung per G0-Gate "
+            "von einem Menschen freigegeben."),
+     "en": ("The sources are the review's legal and rule bases (sample document, procedure "
+            "description, GG EEL), each with version, validity date and SHA-256 checksum. Every "
+            "version is registered and human-approved through a G0 gate before use.")},
+]
+
+
+def _help_topic(low: str) -> "dict | None":
+    """Best deterministic topic for an explanation question, else None."""
+    for topic in HELP_TOPICS:
+        if re.search(topic["match"], low):
+            return topic
+    return None
+
+
 _MISMATCH_RE = re.compile(
     r"([A-Z0-9\-]+):\s*expected\s+'([^']*)',\s*observed\s+'([^']*)'")
 _FIELD_HUMAN_DE = {
@@ -327,6 +416,75 @@ def deterministic_turn(message: str, state_context: dict, task_id: str,
         citations = [{"kind": "state", "ref": src["id"]}] if src.get("id") else []
         return _reply(ut, citations=citations, command="sources")
 
+    # -- help & support (T10-044): onboarding, capabilities, troubleshooting -----
+    # Matched BEFORE the action commands: an explanation question ("was ist der
+    # Abgleich?") must be answered, never executed as a command.
+    if re.search(r"\b(hilfe|hilf\s+mir|help|anleitung|onboarding|was\s+kannst\s+du|"
+                 r"was\s+kann\s+ich\s+(machen|fragen)|funktionen|support)\b", low):
+        if english:
+            ut = ("I am SÜSIE, your assistant for this system review (ITSG system test, "
+                  "synthetic data only). What I can do:\n"
+                  "- Guide the review: „Where do I stand?“ gives the current status with every deviation.\n"
+                  "- Explain everything: ask me about cases, sources, the field comparison, the "
+                  "evidence chain, the tamper-evidence seal or the privacy airlock.\n"
+                  "- Run steps on your word: field comparison, test-case generation, report export — "
+                  "nothing runs without your explicit confirmation.\n"
+                  "- Or use the ? icon (bottom left): „What's this?“ explains any element on click; "
+                  "the lifebuoy opens this help.\n"
+                  "Troubleshooting: if something seems stuck, the dot in the bottom-right shows the "
+                  "bridge status; ask me „Something is not working“ for a checklist.")
+        else:
+            ut = ("Ich bin SÜSIE, Ihre Assistentin für diese Systemprüfung (ITSG-Systemtest, "
+                  "nur synthetische Daten). Das kann ich für Sie tun:\n"
+                  "- Durch die Prüfung führen: „Wo stehe ich?“ liefert den Prüfstand mit jeder Abweichung.\n"
+                  "- Alles erklären: fragen Sie mich nach Prüffällen, Quellen, dem Abgleich, der "
+                  "Belegkette, dem Manipulationssiegel oder der Datenschutz-Schleuse.\n"
+                  "- Schritte auf Ihr Wort ausführen: Feldvergleich, Testfall-Generierung, "
+                  "Berichts-Export — nichts läuft ohne Ihre ausdrückliche Bestätigung.\n"
+                  "- Oder das ? unten links nutzen: „Was ist das?“ erklärt jedes Element per Klick; "
+                  "der Rettungsring öffnet diese Hilfe.\n"
+                  "Fehlerbehebung: Wenn etwas klemmt, zeigt der Punkt unten rechts den Bridge-Status; "
+                  "fragen Sie mich „Etwas funktioniert nicht“ für eine Checkliste.")
+        return _reply(ut, command="help")
+
+    # explanation intent → topic answer, never an action; unknown topics go to the model
+    if re.search(r"\b(was\s+(ist|sind|bedeutet)|erklär(e| mir|en)?|wie\s+funktioniert|"
+                 r"what\s+(is|are)|explain|how\s+does|what's\s+this)\b", low):
+        topic = _help_topic(low)
+        if topic is not None:
+            ut = topic["en"] if english else topic["de"]
+            return _reply(ut, citations=topic.get("citations") or [], command=f"help_topic:{topic['id']}")
+        return None   # open explanation question → the model answers (cite-or-abstain applies)
+
+    # -- troubleshooting checklist ------------------------------------------------
+    if re.search(r"\b(funktioniert\s+nicht|geht\s+nicht|klemmt|hängt|haengt|stürzt\s+ab|"
+                 r"läuft\s+nicht|keine\s+reaktion|reagiert\s+nicht|problem|fehlerbehebung|"
+                 r"troubleshoot\w*|not\s+working|something\s+is\s+(broken|stuck)|does\s?n'?t\s+work)\b", low):
+        if english:
+            ut = ("Small checklist, in this order:\n"
+                  "- Bridge: the dot bottom-right must be green („Bridge connected“). Red means the "
+                  "local service is down — restart it and reload the page.\n"
+                  "- Comparison: „Run comparison“ takes a few seconds; the progress card shows step 1–4. "
+                  "If it aborts, run it again — it never leaves the review in a half state.\n"
+                  "- Chat: if I do not reply, the knowledge service is unreachable; navigation "
+                  "(„Where do I stand?“, „Next case“) still works — it runs locally.\n"
+                  "- Report: the PDF export needs a completed comparison first.\n"
+                  "- Still stuck: describe to me what you clicked and what happened — I log every step "
+                  "and can look at the last actions with you.")
+        else:
+            ut = ("Kurze Checkliste, in dieser Reihenfolge:\n"
+                  "- Bridge: der Punkt unten rechts muss grün sein („Bridge verbunden“). Rot heißt, "
+                  "der lokale Dienst läuft nicht — neu starten und die Seite neu laden.\n"
+                  "- Abgleich: „Abgleich starten“ dauert einige Sekunden; die Fortschrittskarte zeigt "
+                  "Schritt 1–4. Bricht er ab, einfach erneut starten — die Prüfung bleibt immer in einem "
+                  "sauberen Zustand.\n"
+                  "- Chat: antworte ich nicht, ist der Wissensdienst nicht erreichbar; die Navigation "
+                  "(„Wo stehe ich?“, „Nächster Fall“) läuft lokal und funktioniert weiter.\n"
+                  "- Bericht: der PDF-Export braucht zuerst einen abgeschlossenen Abgleich.\n"
+                  "- Immer noch klemmend: beschreiben Sie mir, was Sie geklickt haben und was passierte — "
+                  "ich protokolliere jeden Schritt und gehe die letzten Aktionen mit Ihnen durch.")
+        return _reply(ut, command="troubleshoot")
+
     # -- select / open a case ---------------------------------------------------
     case_match = _CASE_ID_RE.search(text.upper())
     if case_match or re.search(r"\b(fall|case|abweichung|mismatch|fehler|deviation|abweichend\w*)\b", low):
@@ -458,6 +616,26 @@ def turn(message: str, state_context: dict, corpus_hits: list[dict], history: li
 
     try:
         user_content = build_user_content(message, state_context, corpus_hits, history)
+        privacy_summary = None
+        if not gateway_injected:
+            # T10-043: the gateway call is the only path where app data leaves the
+            # system. Fares's airlock (policy "hessian_ai" in privacy/schleuse.py)
+            # pseudonymizes the outbound payload, then a final check_clean gate
+            # blocks the call entirely if anything personal survived. Fail closed:
+            # no airlock module -> no external call.
+            if Schleuse is None:
+                return _degraded_turn(task_id, "privacy airlock unavailable — external call refused (fail closed)")
+            airlock = Schleuse()
+            user_content, privacy_summary = airlock.pseudonymize(user_content)
+            hits = airlock.check_clean(user_content)
+            if hits:
+                cats = sorted({h.category for h in hits})
+                return _degraded_turn(
+                    task_id,
+                    "privacy airlock blocked the outbound call — personal data still present "
+                    f"after pseudonymization (categories: {', '.join(cats)})",
+                    privacy={"airlock": "blocked", "categories": cats})
+            privacy_summary = {**privacy_summary, "airlock": "passed"}
         messages = [{"role": "user", "content": user_content}]
         model_used = MODEL_ASSISTANT
         try:
@@ -512,16 +690,15 @@ def turn(message: str, state_context: dict, corpus_hits: list[dict], history: li
             validation_errors.append(f"unregistered action stripped: {exc}")
 
     run = _envelope(task_id, utterance, confidence, False, citations,
-                    validation_errors, model_used=model_used)
+                    validation_errors, model_used=model_used, privacy=privacy_summary)
     return ChatReply(utterance=utterance, citations=citations, action=action,
                      needs_confirmation=needs_confirmation, disclaimer=disclaimer,
                      confidence=confidence, degraded=False, agent_run=run.to_dict())
 
 
-def _degraded_turn(task_id: str, reason: str) -> ChatReply:
+def _degraded_turn(task_id: str, reason: str, privacy: dict | None = None) -> ChatReply:
     """Rehearsed degraded reply — a gateway failure is recorded, never fatal."""
-    run = _envelope(task_id, DEGRADED_UTTERANCE, "unknown", True, [],
-                    [reason])
+    run = _envelope(task_id, DEGRADED_UTTERANCE, "unknown", True, [], [reason], privacy=privacy)
     return ChatReply(utterance=DEGRADED_UTTERANCE, citations=[], action=None,
                      needs_confirmation=False, disclaimer=False, confidence="unknown",
                      degraded=True, agent_run=run.to_dict())
@@ -529,17 +706,21 @@ def _degraded_turn(task_id: str, reason: str) -> ChatReply:
 
 def _envelope(task_id: str, utterance: str, confidence: str, degraded: bool,
               citations: list[dict], validation_errors: list[str],
-              model_used: str = MODEL_ASSISTANT):
+              model_used: str = MODEL_ASSISTANT, privacy: dict | None = None):
     """Wrap the turn in an AgentRun audit envelope; status reflects degradation."""
     envelope_citations = [
         {"source_version_id": c.get("ref", ""), "locator": c.get("locator", "")}
         for c in citations if c.get("kind") == "corpus"
     ]
+    result = {"utterance": utterance, "confidence": confidence,
+              "degraded": degraded, "model": model_used}
+    if privacy is not None:
+        # categories/counts only — the airlock summary never holds values (privacy/schleuse.py)
+        result["privacy"] = privacy
     run = new_run(
         ROLE_SUSIE_ASSISTANT, task_id, PROVIDER, model_used,
         input_ids=[c.get("ref", "") for c in citations if c.get("ref")],
-        result={"utterance": utterance, "confidence": confidence,
-                "degraded": degraded, "model": model_used},
+        result=result,
         citations=envelope_citations,
         author=AUTHOR,
     )

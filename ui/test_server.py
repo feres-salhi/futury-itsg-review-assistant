@@ -191,7 +191,9 @@ def test_health_seal_down_is_unavailable(reports):
 def test_review_run_returns_a_real_report(sample_report):
     findings = sample_report["data"]["findings"]
     assert sample_report["file"].startswith("RPT-")
-    assert {f["id"] for f in findings} >= {"F1", "C1", "C8"}
+    # T10-043 merge: run_review.py no longer runs the C1-C8 message-flow checks
+    # (lisa-update removed them); the DBVO checks F1-F7 + C9-C13 remain.
+    assert {f["id"] for f in findings} >= {"F1", "C9", "C12"}
     assert all(f["status"] in ("PASS", "MISMATCH", "NOT EVALUATED", "NEEDS_REVIEW", "BLOCKED") for f in findings)
     assert sample_report["data"]["robustness"]["result"].endswith("stopped")
 
