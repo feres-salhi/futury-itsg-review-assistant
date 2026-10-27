@@ -8,11 +8,19 @@ python-docx>=1.1
 # frontmatter and needs PyMuPDF; both are exercised only on the PDF path.
 PyYAML>=6.0
 
-# Adopted teammate tooling that stays OPTIONAL and is not wired into the
-# deterministic SÜSIE core (see src/PROVENANCE.md): run_review.py imports
-# langfuse only when env keys are set; Merge_graph_neo.py needs neo4j.
-# langfuse>=3,<4
-# neo4j>=5
+# Adopted teammate tooling wired into the stack (T10-043 merge):
+# run_review.py / orchestrator import langfuse only when env keys are set;
+# Merge_graph_neo.py needs neo4j; retrieval/comparator modules need the rest.
+langfuse>=3,<4
+neo4j>=5
+requests
+python-frontmatter
+pydantic>=2
+python-dotenv
+
+# T10-043: Lisa's orchestrator (orchestrator/llm.py) speaks the Anthropic
+# SDK natively; provider/model selection is env-driven (see orchestrator/llm.py).
+anthropic>=0.40
 
 # Development (optional): the test suite also runs without it via
 #   python3 -m unittest discover -s tests
