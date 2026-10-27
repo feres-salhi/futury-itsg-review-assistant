@@ -84,7 +84,8 @@ GATEWAY_TIMEOUT_S = 60
 ACTION_DESCRIPTIONS = {
     "select_case": "Fall auswählen und öffnen. params: {\"case_id\"}",
     "open_evidence": "Belege/Quellen zu einem Fall anzeigen. params: {\"case_id\"}",
-    "filter_cases": "Fallliste filtern. params: {\"filter\"}",
+    "filter_cases": "Fallliste filtern. params: {\"filter\"} — \"PASS\", \"MISMATCH\" oder "
+                    "\"NOT_EVALUATED\" für einen Statusfilter, sonst Freitext-Suche.",
     "jump_to_source": "Zu einer Fundstelle im Quelltext springen. params: {\"source_version_id\", \"locator\"}",
     "show_comparison": "Vergleichsansicht anzeigen. params: {\"case_id\"}",
     "switch_mode": "Ansichtsmodus wechseln. params: {\"mode\"}",
