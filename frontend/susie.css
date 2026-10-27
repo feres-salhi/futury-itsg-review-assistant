@@ -141,7 +141,7 @@ h2 { font-size: 1.1rem; letter-spacing: -.01em; margin: 0 0 .5rem; }
 .side-link svg, .side-ext svg { width: 19px; height: 19px; flex: none; }
 .side-link:hover, .side-ext:hover { background: var(--surface); color: var(--ink); }
 .side-link.active { background: var(--accent-soft); color: var(--accent-ink); }
-.side-foot { margin-top: auto; display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-start; }
+.side-foot { margin-top: auto; display: flex; flex-wrap: wrap; gap: 4px; justify-content: flex-start; }
 
 .ghost-icon {
   display: grid; place-items: center;
@@ -160,7 +160,7 @@ h2 { font-size: 1.1rem; letter-spacing: -.01em; margin: 0 0 .5rem; }
   transition: background .15s var(--ease-out), color .15s var(--ease-out);
 }
 .ghost-lang:hover { background: var(--surface); color: var(--ink); }
-.side-foot { display: flex; flex-wrap: wrap; gap: 6px; }
+.side-foot { display: flex; flex-wrap: wrap; gap: 4px; }
 
 /* ---------- chat agent FAB ---------- */
 .susie-fab {
