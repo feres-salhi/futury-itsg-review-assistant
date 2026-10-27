@@ -2197,19 +2197,20 @@
     applyTheme(next); store.set("susie-ui-theme", next);
   });
 
-  // Dynamic font size (T10-049): steps the --font-scale hook (CSS-side by the
-  // density pass); persisted, applied before first paint content re-renders.
-  const FONT_STEPS = [0.9, 1, 1.15, 1.3];
+  // Dynamic font size (T10-049): one toggle cycling the --font-scale hook
+  // (CSS-side by the density pass); persisted, honest label in the tooltip.
+  const FONT_STEPS = [1, 1.15, 1.3, 0.9];
   const storedFont = parseFloat(store.get("susie-font-scale", "1"));
   let fontStep = FONT_STEPS.indexOf(storedFont);
-  if (fontStep === -1) fontStep = 1;
+  if (fontStep === -1) fontStep = 0;
   const applyFontScale = () => {
     document.documentElement.style.setProperty("--font-scale", String(FONT_STEPS[fontStep]));
     store.set("susie-font-scale", String(FONT_STEPS[fontStep]));
+    const pct = Math.round(FONT_STEPS[fontStep] * 100);
+    $("font-toggle").title = LANG === "de" ? `Schriftgröße: ${pct} % — klicken zum Umschalten` : `Text size: ${pct} % — click to cycle`;
   };
   applyFontScale();
-  $("font-smaller").addEventListener("click", () => { fontStep = Math.max(0, fontStep - 1); applyFontScale(); });
-  $("font-larger").addEventListener("click", () => { fontStep = Math.min(FONT_STEPS.length - 1, fontStep + 1); applyFontScale(); });
+  $("font-toggle").addEventListener("click", () => { fontStep = (fontStep + 1) % FONT_STEPS.length; applyFontScale(); });
 
   async function pollHealth() {
     const dot = $("bridge-dot"), label = $("bridge-label");
