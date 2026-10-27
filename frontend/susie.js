@@ -4,10 +4,14 @@
    names the human. All model output is rendered as literal text. */
 "use strict";
 
+// Build marker (T10-049): makes a stale cached tab self-identifying — the
+// console banner always names the loaded build; the footer carries data-build.
+const SUSIE_BUILD = "2026-10-27.r2";
+console.info(`[SÜSIE] frontend build ${SUSIE_BUILD}`);
+
 (() => {
   // ---------- tiny DOM helpers (literal text only — no innerHTML for data) ----------
   const $ = (id) => document.getElementById(id);
-  window.SUSIE = window.SUSIE || {}; window.SUSIE.build = BUILD;
   const el = (tag, cls, text) => {
     const n = document.createElement(tag);
     if (cls) n.className = cls;
