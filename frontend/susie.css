@@ -974,10 +974,10 @@ body:not([data-view="cases"]) .summary-chips { display: none; }
    ========================================================================== */
 
 /* widen the shell around the expanded regulations view */
-#app-views:has(.reg-body.reader-expanded) { padding-inline: 12px; }
-#app-views:has(.reg-body.reader-expanded) .view,
-#app-views:has(.reg-body.reader-expanded) .topbar { max-width: none; }
-#app-views:has(.reg-body.reader-expanded) .topbar { margin-bottom: 8px; }
+#app-views { padding-inline: 12px; }
+#app-views .view,
+#app-views .topbar { max-width: none; }
+#app-views .topbar { margin-bottom: 8px; }
 
 /* hit list -> slim index rail (titles kept, meta dropped), reader -> full
    remaining height. 200px keeps the rail usable in BOTH modes (document
