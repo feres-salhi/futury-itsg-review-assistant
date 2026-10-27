@@ -23,3 +23,12 @@ md/
 # Python packaging
 *.egg-info/
 build/
+
+# T10-043 merge: entries from member2-privacy
+.env
+~$*
+*.jsonl
+*.receipt.json
+.seal_current_run
+seal-data/
+.pytest_cache/

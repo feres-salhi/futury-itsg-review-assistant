@@ -16,10 +16,10 @@ The core slice must work before any optional AI features. Use the provided prese
 
 | Person | Primary ownership | Concrete deliverables |
 |---|---|---|
-| Member 1 | Workflow, data model, source provenance, orchestration | Source/requirement/test/execution records; stable IDs and citations; workflow state and event log; integration lead |
-| Member 2 | Deterministic comparator and quality | Input/output schema; comparator; reproducible finding format; test design and independent review of the comparator |
-| Member 3 | Source intake and evidence display | Upload/import one text or JSON fixture; page/section locators; requirement and source view |
-| Member 4 | Test-case workflow and user interface | Test-case list/detail; expected-vs-actual display; clear statuses and report screen |
+| Member 1 (Devansh) | Data Ingestion | Text chunking, indexing service, Vector Embeddings|
+| Member 2 (Fares) | Retreival | Input/output schema, request to externalAPI to AI  and response |
+| Member 3 (Lisa) | Data Ingestion | Text chunking, indexing service, Vector Embeddings|
+| Member 4 (Oussama and Houssem) | Test-case workflow and user interface | Test-case list/detail; expected-vs-actual display; clear statuses and report screen |
 | Member 5 | Vendor output and report integration | Synthetic CSV/JSON output importer; report renderer; required-field/structure conformance checks; evidence-backed report |
 | Member 6 | Scope, source checks, human gates, acceptance, demo narrative | Choose the bounded example; help identify the applicable official report form and its version; confirm form assumptions with a qualified reviewer; keep claims honest; track decisions/blockers; rehearse and present |
 
