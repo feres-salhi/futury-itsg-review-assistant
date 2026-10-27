@@ -628,9 +628,8 @@ h2 { font-size: 1.1rem; letter-spacing: -.01em; margin: 0 0 .5rem; }
   padding: 7px 10px;
   font-size: .78125rem;
   line-height: 1.45;
-  border-left: 3px solid var(--accent);
   background: var(--surface-2);
-  border-radius: 0 8px 8px 0;
+  border-radius: 8px;
   overflow-wrap: anywhere;
 }
 .chip-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 4px; }
