@@ -245,3 +245,17 @@ Team10-LetzGo! DONE (filter fix verified; name ask = by-design persistence, owne
 - Verified live in real browser (in-app browser, :8799): SUSIE_APP.invoke("filter_cases",{filter:"MISMATCH"}) → chip "Deviation 11" active, search cleared, 11 cards rendered (was 0 before fix); filter "EAZ-019" → 1 card, no chip stacking. Suite 315 passed / 7 skipped (pre-existing), node --check PASS. Bridge :8799 restarted (old PID 75235 killed, same command) — static files are no-store, owner just reloads the tab.
 - Owner report (2): "susie chat doesn't ask for name anymore." NOT a regression: the T10-054 onboarding asks only when localStorage key `susie-reviewer` is empty; after the first entry the name persists deliberately (welcome-back greeting "Schön, dass Sie wieder da sind, <name>"). Browser-verified: with the key removed, the ask reappears ("Who am I working with?" + name input + Start). Owner decision needed if per-session asking (sessionStorage) or a "Not <name>? change" affordance is wanted — one-line change either way; not changed without directive.
 - Nothing committed/pushed (no human authorization). Working tree: frontend/susie.js, itsg/chat.py + runtime data (data/demo, .DS_Store) modified.
+## 2026-10-27 — Owner-directed local commit ("commit local") — ZCode / GLM-Flash
+Team10-LetzGo! DONE
+- Commit `75ec3a5` on amourification/susie-assistant, NO push: the T10-052 chat-driven filter fix (frontend/susie.js + itsg/chat.py ACTION_DESCRIPTIONS) plus .leapfrog board/log notes. Gate: suite 315 passed / 7 skipped, node --check PASS, live-browser verification recorded in the previous entry.
+- Shared-file handling per the standing rule: the parallel session's in-flight T10-055 "Unter der Haube" frontend (susie.html nav/view skeleton + susie.js i18n/view-registry lines) rode along in the shared files, attributed in the commit message. EXCLUDED from the commit: runtime data (data/demo/*), data/secrets (never), .DS_Store, __pycache__.
+- Note: the parallel session kept writing the T10-055 renderTechnik implementation into frontend/susie.js AFTER the commit — those are new uncommitted hunks, left untouched for that session to land.
+
+Team10-LetzGo! T10-055 IN_REVIEW
+Done: Sidebar item "Unter der Haube / Under the hood" under Verlauf (Governance group) + architecture view: the approved "From spec to signed report" illustration rebuilt as an authored, bilingual, token-themed SVG (3 lanes, 18 nodes, dashed rework loops, legend) with staggered entrance and hover lane-focus animation; reduced-motion path; explain-mode entries.
+In progress: nothing — awaiting human visual acceptance.
+Next: owner review in the browser (bridge-served susie.html); commit only on authorization.
+Blocker: none
+Files owned: frontend/susie.html, frontend/susie.js, frontend/susie.css, .leapfrog/**
+Evidence/verification: node --check PASS; browser evidence on standalone server :8866 — DE/light full render, EN/dark full render, hover focus (dim + crimson tint + loop march + node lift), view round-trip with zero window errors, animation finished/opacity 1; one defect found+fixed during verification (broken-file note clipped at the viewBox edge). Parallel-session coordination: susie.js was edited concurrently (filter_cases fix) — disjoint regions, both sets coexist; no overwrites.
+Handoff/reviewer: Amr (self-review, solo mode) — human acceptance pending.
