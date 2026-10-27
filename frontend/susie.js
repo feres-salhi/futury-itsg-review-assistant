@@ -45,7 +45,7 @@ console.info(`[SÜSIE] frontend build ${SUSIE_BUILD}`);
       sourcesSub: "Worauf die Prüfung beruht: Rechtsgrundlagen, Vorlage — und wer welche KI-Ausgabe freigegeben hat",
       governance: "Governance",
       freigaben: "Freigaben", freigabenSub: "Offene menschliche Entscheidungen: Quellen, Entwürfe und Berichtsschritte, die auf Ihre Freigabe warten",
-      verlauf: "Verlauf", verlaufSub: "Jede Entscheidung und jeder KI-Lauf mit Name, Zeitstempel und Begründung — die Vier-Augen-Akte",
+      verlauf: "Verlauf", verlaufSub: "Das Prüfungsprotokoll: wer was wann entschieden hat — Freigaben mit Name und Begründung, KI-Läufe, Änderungen",
       govOffline: "Verbindung zum Bridge-Server fehlt — Governance-Daten sind nur mit Backend verfügbar.",
       freigabenNone: "Nichts offen — alle Entscheidungen sind getroffen.",
       govRationalePh: "Begründung (Pflicht) …",
@@ -60,6 +60,14 @@ console.info(`[SÜSIE] frontend build ${SUSIE_BUILD}`);
       verlaufAll: "Alles",
       verlaufEmpty: "Noch keine Ereignisse protokolliert.",
       verlaufMore: "Weitere laden",
+      verlaufDecisions: "Entscheidungen & KI-Läufe",
+      evChangesGrouped: "{n} Store-Änderungen",
+      caseViewReport: "Im Bericht zeigen",
+      caseReportPdf: "Einzelfallbericht (PDF)",
+      caseReportPrint: "Drucken",
+      reportRegen: "Bericht neu erzeugen",
+      reportRegenBusy: "Erzeuge Bericht …",
+      reportRegenDone: "Bericht erzeugt",
       regExpand: "Les Ansicht vergrößern",
       regCollapse: "Les Ansicht verkleinern",
       openCaseAria: "im Prüfbericht öffnen",
@@ -182,7 +190,7 @@ console.info(`[SÜSIE] frontend build ${SUSIE_BUILD}`);
       sourcesSub: "What the review rests on: legal basis, template — and who approved which AI output",
       governance: "Governance",
       freigaben: "Approvals", freigabenSub: "Open human decisions: sources, drafts and report steps waiting for your approval",
-      verlauf: "History", verlaufSub: "Every decision and AI run with name, timestamp and rationale — the four-eyes record",
+      verlauf: "History", verlaufSub: "The review protocol: who decided what and when — approvals with name and rationale, AI runs, changes",
       govOffline: "Connection to the bridge server is down — governance data is only available with the backend.",
       freigabenNone: "Nothing open — all decisions have been made.",
       govRationalePh: "Rationale (required) …",
@@ -197,6 +205,14 @@ console.info(`[SÜSIE] frontend build ${SUSIE_BUILD}`);
       verlaufAll: "Everything",
       verlaufEmpty: "No events recorded yet.",
       verlaufMore: "Load more",
+      verlaufDecisions: "Decisions & AI runs",
+      evChangesGrouped: "{n} store changes",
+      caseViewReport: "Show in report",
+      caseReportPdf: "Single-case report (PDF)",
+      caseReportPrint: "Print",
+      reportRegen: "Regenerate report",
+      reportRegenBusy: "Generating report …",
+      reportRegenDone: "Report generated",
       regExpand: "Enlarge reader",
       regCollapse: "Shrink reader",
       openCaseAria: "open in the report",
@@ -985,6 +1001,20 @@ console.info(`[SÜSIE] frontend build ${SUSIE_BUILD}`);
         }
         if (c.run_at) row(t("runAt"), fmtDateTime(c.run_at));
         card.appendChild(kv);
+        // Report actions for THIS case (owner request 2026-10-27): view in the
+        // report, single-case PDF, print. Buttons stop the card's toggle.
+        const acts = el("div", "case-report-actions");
+        const mk = (label, fn) => {
+          const b = el("button", "btn ghost-btn case-report-btn", label);
+          b.type = "button";
+          b.addEventListener("click", (e) => { e.stopPropagation(); fn(); });
+          b.addEventListener("keydown", (e) => e.stopPropagation());
+          return b;
+        };
+        acts.appendChild(mk(t("caseViewReport"), () => clientExec.open_report_section({ case_id: c.id })));
+        acts.appendChild(mk(t("caseReportPdf"), () => downloadCaseReport(c.id)));
+        acts.appendChild(mk(t("caseReportPrint"), () => window.open(`/api/report/pdf?case_id=${encodeURIComponent(c.id)}&lang=${LANG}`, "_blank")));
+        card.appendChild(acts);
         card.appendChild(evidenceChain(c, crit));
       }
       const toggle = () => {
@@ -1051,6 +1081,27 @@ console.info(`[SÜSIE] frontend build ${SUSIE_BUILD}`);
       }
     });
     genRow.appendChild(genBtn);
+    // Regenerate (owner request 2026-10-27): rerun the deterministic review
+    // pipeline (POST /api/review/run), then refresh every view from the store.
+    const regenBtn = el("button", "btn ghost-btn", t("reportRegen"));
+    regenBtn.type = "button";
+    regenBtn.addEventListener("click", async () => {
+      regenBtn.disabled = true;
+      regenBtn.textContent = t("reportRegenBusy");
+      try {
+        const res = await fetch("/api/review/run", {
+          method: "POST", headers: { "Content-Type": "application/json" }, body: "{}",
+        });
+        const body = await res.json().catch(() => ({}));
+        if (!res.ok || body.ok === false) throw new Error(body.error || `HTTP ${res.status}`);
+        await loadState();
+        regenBtn.textContent = `${t("reportRegenDone")} ✓`;
+      } catch (err) {
+        regenBtn.textContent = LANG === "de" ? "Fehler — erneut versuchen" : "Failed — retry";
+      }
+      setTimeout(() => { regenBtn.textContent = t("reportRegen"); regenBtn.disabled = false; }, 2500);
+    });
+    genRow.appendChild(regenBtn);
     genRow.appendChild(el("span", "report-gen-note", t("exportNote")));
     body.appendChild(genRow);
 
@@ -1406,23 +1457,26 @@ console.info(`[SÜSIE] frontend build ${SUSIE_BUILD}`);
       body.appendChild(el("div", "empty", t("govOffline")));
       return;
     }
+    // Human protocol (owner review 2026-10-27): decisions and AI runs first;
+    // raw store writes are grouped per kind and minute — never a flat event dump.
     const filterSel = el("select", "gov-filter");
     filterSel.setAttribute("aria-label", t("verlaufFilter"));
-    for (const [val, key] of [["all", "verlaufAll"], ["gate", "evGate"], ["agent_run", "evAgentRun"], ["other", "evChange"]]) {
+    for (const [val, key] of [["decisions", "verlaufDecisions"], ["changes", "evChange"], ["all", "verlaufAll"]]) {
       const opt = el("option", "", t(key));
       opt.value = val;
       filterSel.appendChild(opt);
     }
-    filterSel.value = S.verlaufFilter || "all";
-    filterSel.addEventListener("change", () => { S.verlaufFilter = filterSel.value; renderVerlauf(); });
+    // honest default: decisions when any exist, otherwise the change summary
+    const hasDecisions = (gov.gates || []).length > 0 ||
+      (gov.events || []).some((ev) => ev.kind === "gate" || ev.kind === "agent_run");
+    filterSel.value = S.verlaufFilter || (hasDecisions ? "decisions" : "changes");
+    filterSel.addEventListener("change", () => { S.verlaufFilter = filterSel.value; S.verlaufShown = 200; renderVerlauf(); });
     const bar = el("div", "gov-bar");
     bar.appendChild(filterSel);
     body.appendChild(bar);
 
-    const gates = (gov.gates || []).slice();
-    const events = (gov.events || []).slice().reverse();
     const rows = [];
-    for (const gate of gates) {
+    for (const gate of (gov.gates || []).slice()) {
       rows.push({
         at: gate.decided_at || "",
         label: `${t(gate.label_key || GATE_ACT[gate.gate] || "evGate")} — ${gate.reviewer || ""}`,
@@ -1431,12 +1485,39 @@ console.info(`[SÜSIE] frontend build ${SUSIE_BUILD}`);
         kind: "gate",
       });
     }
-    for (const ev of events) {
-      const kind = ev.kind === "gate" ? "gate" : ev.kind === "agent_run" ? "agent_run" : "other";
-      rows.push({ at: ev.at || "", label: govEventLabel(ev), detail: `${ev.kind} · ${ev.action}`, ref: ev.id || "", kind });
+    // group raw store writes: same kind + same minute → one count line
+    const changeGroups = new Map();
+    for (const ev of (gov.events || []).slice()) {
+      if (ev.kind === "gate" || ev.kind === "agent_run") {
+        rows.push({
+          at: ev.at || "",
+          label: govEventLabel(ev),
+          detail: `${ev.kind} · ${ev.action}`,
+          ref: ev.id || "",
+          kind: ev.kind,
+        });
+        continue;
+      }
+      const minute = String(ev.at || "").slice(0, 16);
+      const key = `${ev.kind}·${minute}`;
+      const grp = changeGroups.get(key) || { at: ev.at || "", kind: ev.kind, n: 0, ids: [] };
+      grp.n += 1;
+      if (grp.ids.length < 3) grp.ids.push(ev.id || "");
+      changeGroups.set(key, grp);
+    }
+    for (const grp of changeGroups.values()) {
+      rows.push({
+        at: grp.at,
+        label: t("evChangesGrouped").replace("{n}", String(grp.n)),
+        detail: `${grp.kind}${grp.ids.length ? ` · ${grp.ids.join(", ")}` : ""}`,
+        ref: "",
+        kind: "other",
+      });
     }
     rows.sort((a, b) => String(b.at).localeCompare(String(a.at)));
-    const shown = rows.filter((r) => S.verlaufFilter === "all" || !S.verlaufFilter ? true : r.kind === S.verlaufFilter);
+    const filter = S.verlaufFilter || "decisions";
+    const shown = rows.filter((r) => filter === "all" ? true
+      : filter === "decisions" ? (r.kind === "gate" || r.kind === "agent_run") : r.kind === "other");
     if (!shown.length) {
       body.appendChild(el("div", "empty", t("verlaufEmpty")));
       return;
@@ -1817,6 +1898,7 @@ console.info(`[SÜSIE] frontend build ${SUSIE_BUILD}`);
           if (s) s.disabled = false;
         }
         if (S.pendingMessage) { const m = S.pendingMessage; S.pendingMessage = null; sendMessage(m); }
+        if (S.pendingAction) { const a = S.pendingAction; S.pendingAction = null; demoCommand(a.actionId, a.params); }
       });
       input.addEventListener("keydown", (e) => { if (e.key === "Enter") go.click(); });
       comp.appendChild(input); comp.appendChild(go); ob.appendChild(comp);
@@ -2005,6 +2087,23 @@ console.info(`[SÜSIE] frontend build ${SUSIE_BUILD}`);
     setTimeout(() => URL.revokeObjectURL(url), 4000);
   }
 
+  // Single-case report (owner request 2026-10-27): the formal PDF filtered to
+  // one case, with the explicit Einzelfall note — same deterministic pipeline.
+  async function downloadCaseReport(caseId) {
+    const res = await fetch(`/api/report/pdf?case_id=${encodeURIComponent(caseId)}&lang=${LANG}`);
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      throw new Error(body.error || `${LANG === "de" ? "PDF-Endpunkt" : "PDF endpoint"} ${res.status}`);
+    }
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = el("a");
+    a.href = url;
+    a.download = `SUSIE-report-${caseId}.pdf`;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 4000);
+  }
+
   function actionCard(action, needsConfirmation) {
     const wrap = el("div", "msg msg-susie");
     const card = el("div", "action-card");
@@ -2165,18 +2264,37 @@ console.info(`[SÜSIE] frontend build ${SUSIE_BUILD}`);
       setGroupOpen(groupToggle.getAttribute("aria-expanded") !== "true"));
   }
 
-  // Demo paths for the owner's concerns 1 + 2: a visible button per job. Both
-  // route through SÜSIE's proposal → Ja flow so the gate narrative stays intact.
-  const demoCommand = (text) => {
+  // Demo paths for the owner's concerns 1 + 2 (T10-052): a visible button per
+  // job. The button proposes the action DIRECTLY via /api/action/propose and
+  // renders the Ja/Nein card — no fake user message, no model involvement,
+  // nothing runs before the human confirms (four-eyes preserved).
+  const demoCommand = async (actionId, params) => {
     if (S.busy) return;
     setMode("overlay");
-    if (!S.reviewer) { S.pendingMessage = text; return; }
-    sendMessage(text);
+    if (!S.reviewer) { S.pendingAction = { actionId, params }; return; }
+    const log = activeLog().querySelector(".chat-log");
+    if (!log) return;
+    try {
+      const res = await fetch("/api/action/propose", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ session_id: S.sessionId, action_id: actionId, params }),
+      });
+      const body = await res.json();
+      if (!res.ok || body.ok === false || !body.confirm_token) {
+        throw new Error(body.error || (LANG === "de" ? "Vorschlag abgelehnt" : "proposal refused"));
+      }
+      log.appendChild(actionCard({ ...body.action, confirm_token: body.confirm_token }, true));
+      log.scrollTop = log.scrollHeight;
+    } catch (err) {
+      addBubble(log, "susie", LANG === "de"
+        ? `Vorschlag fehlgeschlagen: ${err.message}`
+        : `Proposal failed: ${err.message}`);
+    }
   };
   $("btn-gen-cases").addEventListener("click", () =>
-    demoCommand(LANG === "de" ? "Generiere Testfälle aus dem Gesetz" : "Generate test cases from the law"));
+    demoCommand("run_comparison", { live: true }));
   $("btn-run-compare").addEventListener("click", () =>
-    demoCommand(LANG === "de" ? "Starte den Abgleich mit der Softwareausgabe" : "Run the field comparison against the software output"));
+    demoCommand("run_comparison", { live: false }));
 
   $("lang-toggle").addEventListener("click", () => {
     LANG = LANG === "de" ? "en" : "de";
