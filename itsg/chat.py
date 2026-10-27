@@ -20,13 +20,13 @@ verbatim abstention line — the answer is kept but downgraded (unverified
 prefix, confidence "unknown", disclaimer flag, envelope validation error);
 nothing unverifiable is ever presented as grounded.
 
-Layering (T10-051): ``deterministic_turn`` matches ONLY true navigation
-commands (start over, go back, next/prev case) before the gateway call —
-demo-critical and model-independent (T10-042 directive). Every other canned
-answer (status, sources, help topics, troubleshooting, case selection,
-comparison/export proposals) lives in ``canned_turn`` and is used ONLY as
-the gateway-down fallback; with a live gateway those questions reach the
-model, which has the state context to answer conversationally.
+Layering (T10-051/052): ``deterministic_turn`` matches navigation commands
+AND action jobs (fetch a named case, run the comparison, generate the
+report) before the gateway call — the owner gets exactly what she asked
+for, model-independent, with the human Ja/Nein gate intact. Explanations
+(status, sources, help topics, troubleshooting) live in ``canned_turn``:
+with a live gateway those questions reach the model, which has the state
+context; the canned text is the fallback when the gateway is down.
 """
 from __future__ import annotations
 
@@ -96,6 +96,12 @@ ACTION_DESCRIPTIONS = {
     "record_review_state": "Review-Zustand an einem menschlichen Gate erfassen (menschliche Entscheidung). params: {\"gate\", \"decision\", \"rationale\", \"target_id\"}",
     "record_conformance": "Konformitätsentscheidung an einem menschlichen Gate erfassen (menschliche Entscheidung). params: {\"gate\", \"decision\", \"rationale\", \"target_id\"}",
     "request_release": "Freigabe an einem menschlichen Gate anfordern (menschliche Entscheidung). params: {\"gate\", \"decision\", \"rationale\", \"target_id\"}",
+    # T10-054 onboarding jobs — proposal only, the human confirms the card.
+    "register_regulation": "Hochgeladene Regeländerung als G0-Kandidat registrieren (Datei liegt im Posteingang). params: {\"file_id\", \"title\"}",
+    "import_software_report": "Hochgeladenen Softwarebericht (TEEL0) importieren und Felder parsen. params: {\"file_id\"}",
+    "add_manual_case": "Manuellen Prüffall aus hochgeladener Datei oder Text anlegen (Entwurf, pending review). params: {\"file_id\", \"text\"}",
+    "create_case_from_reference": "Aus einer vom Menschen zitierten Fundstelle der Regelwerke Testfall-Entwürfe erstellen (Entwürfe, pending review). params: {\"reference\"}",
+    "create_random_case": "Aus einem zufälligen Kriterium mit zitierter Grundlage Testfall-Entwürfe erstellen (Entwürfe, pending review). params: {}",
 }
 
 
@@ -127,6 +133,23 @@ OUTPUT: ausschließlich EIN JSON-Objekt, kein weiterer Text:
 {{"utterance": "<Antworttext in der Sprache des Nutzers>", "citations": [{{"kind": "state"|"corpus", "ref": "<ID>", "locator": "<Fundstelle, nur corpus>"}}], "action": {{"id": "<action_id>", "params": {{...}}}} | null, "confidence": "grounded"|"general"|"unknown"}}
 {_DATA_LINE}
 AUDIT: Jede Antwort wird mit Modell- und Prompt-Metadaten in ein AgentRun-Protokoll eingeschlossen."""
+
+
+def _system_prompt(lang: str) -> str:
+    """System prompt with the LANGUAGE rule rewritten per turn (T10-053).
+
+    The UI's DE/EN selection is explicit and wins over the message language;
+    only an empty/unknown lang falls back to mirroring the last message."""
+    if lang == "de":
+        rule = ('LANGUAGE: Antworte immer auf Deutsch (formelle Anrede "Sie"), '
+                'unabhängig davon, in welcher Sprache die Nachricht verfasst ist.')
+    elif lang == "en":
+        rule = "LANGUAGE: Always answer in English, regardless of the language of the user's message."
+    else:
+        rule = ('LANGUAGE: Always answer in the language of the user\'s last message; '
+                'in German use the formal "Sie". / Antworte immer in der Sprache der '
+                'letzten Nutzernachricht; im Deutschen verwenden Sie die formelle Anrede "Sie".')
+    return re.sub(r"LANGUAGE: [^\n]*", rule, SUSIE_SYSTEM_PROMPT, count=1)
 
 
 @dataclass
@@ -205,6 +228,12 @@ def _parse_reply(raw: str) -> dict:
 # ---------------------------------------------------------------------------
 
 NAV_COMMANDS = {"start_over", "go_back", "next_case", "prev_case"}
+# T10-052 (owner directive): action JOBS are also pre-gateway deterministic —
+# "fetch case TC-2", "run the comparison", "generate the report" must work
+# reliably and never depend on the model's phrasing. They only PROPOSE; the
+# human Ja/Nein gate (single-use token on mutating ones) stays fully intact.
+COMMAND_IDS = NAV_COMMANDS | {"select_case", "run_comparison_offline",
+                              "run_comparison_live", "export_report"}
 
 _EN_WORDS = re.compile(
     r"\b(where|show|open|select|start|run|generate|status|overview|back|"
@@ -400,24 +429,44 @@ def _langfuse_utterance(text: str, english: bool) -> str:
     return "\n".join(lines)
 
 
+def _named_case_id(message: str, state_context: dict) -> "str | None":
+    """The case id actually named in the message (TC-3, DEC-002, GOLD-13.1 …),
+    or None. Drives the pre-gateway select_case filter (T10-052): SÜSIE fetches
+    a case she was GIVEN, she does not guess one from topic words."""
+    named = {str(c.get("id", "")).upper(): c.get("id")
+             for c in state_context.get("cases") or []}
+    for token in re.findall(r"[A-Za-z0-9][A-Za-z0-9.\-]*[A-Za-z0-9]", message):
+        if token.upper() in named:
+            return named[token.upper()]
+    m = _CASE_ID_RE.search(message.upper())
+    return f"TC-{m.group(1)}" if m else None
+
+
 def deterministic_turn(message: str, state_context: dict, task_id: str,
                        session_id: str, lang: str = "") -> "ChatReply | None":
-    """Pre-gateway layer: ONLY true navigation commands (start over, go back,
-    next/prev case) — everything else falls through to the model (T10-051)."""
+    """Pre-gateway layer (T10-042 + T10-052): navigation commands and ACTION
+    JOBS — fetch a named case, run the comparison, generate the report.
+    select_case requires an explicitly named case id; topic-word phrasings
+    ("die Abweichung", "der Fehler") fall through to the model. Everything
+    else (status, sources, help, explanations) reaches the model."""
     reply = canned_turn(message, state_context, task_id=task_id,
                         session_id=session_id, lang=lang)
     if reply is None:
         return None
     command = reply.agent_run["result"].get("deterministic_command")
-    return reply if command in NAV_COMMANDS else None
+    if command not in COMMAND_IDS:
+        return None
+    if command == "select_case" and _named_case_id(message, state_context) is None:
+        return None
+    return reply
 
 
 def canned_turn(message: str, state_context: dict, task_id: str,
                 session_id: str, lang: str = "") -> "ChatReply | None":
-    """Full canned layer (T10-042/044): navigation, status, sources, help,
-    troubleshooting, case selection and comparison/export proposals, matched
-    by regex — used as the gateway-down fallback and filtered by
-    ``deterministic_turn`` down to the navigation commands."""
+    """Full canned layer (T10-042/044): navigation, action jobs, status,
+    sources, help, troubleshooting — matched by regex. ``deterministic_turn``
+    filters it down to the pre-gateway set (navigation + action jobs); the
+    rest is the gateway-down fallback."""
     text = (message or "").strip()
     low = text.lower()
     english = lang == "en" or (lang != "de" and _wants_english(text))   # UI language wins
@@ -571,19 +620,10 @@ def canned_turn(message: str, state_context: dict, task_id: str,
         return _reply(ut, command="troubleshoot")
 
     # -- select / open a case ---------------------------------------------------
-    case_match = _CASE_ID_RE.search(text.upper())
-    known_ids = {str(c.get("id", "")).upper() for c in state_context.get("cases") or []}
-    names_case = any(tok.upper() in known_ids
-                     for tok in re.findall(r"[A-Za-z0-9][A-Za-z0-9.\-]*[A-Za-z0-9]", text))
-    if case_match or names_case or re.search(r"\b(fall|case|abweichung|mismatch|fehler|deviation|abweichend\w*)\b", low):
-        case_id = f"TC-{case_match.group(1)}" if case_match else None
+    named_id = _named_case_id(text, state_context)
+    if named_id or re.search(r"\b(fall|case|abweichung|mismatch|fehler|deviation|abweichend\w*)\b", low):
+        case_id = named_id
         cases = state_context.get("cases") or []
-        # any case id of the store named in the message (DEC-002, OUT-041, S1-001, MOUT-012, GOLD-13.1 …)
-        named = {c.get("id", "").upper(): c.get("id") for c in cases}
-        for token in re.findall(r"[A-Za-z0-9][A-Za-z0-9.\-]*[A-Za-z0-9]", text):
-            if token.upper() in named:
-                case_id = named[token.upper()]
-                break
         if case_id is None and re.search(r"(abweichung|mismatch|fehler|deviation)", low):
             for c in cases:
                 if c.get("status") == "MISMATCH":
@@ -626,14 +666,12 @@ def canned_turn(message: str, state_context: dict, task_id: str,
                  r"field\s+comparison\s+(against|with)|compare\s+(against|with)\s+the\s+software",
                  low) and not re.search(r"\b(bericht|report|export)\b", low):
         action = actions.propose("run_comparison", {"live": False}, session_id)
-        ut = ("Ich führe den deterministischen Feldvergleich aus: die übermittelten "
-              "Software-Datensätze werden Feld für Feld mit der offiziellen Erwartung "
-              "(Beispielpapier V13.3) verglichen — ohne KI-Beteiligung, in Sekunden. "
+        ut = ("Ich führe den deterministischen Feldvergleich gegen die übermittelte "
+              "Softwareausgabe aus — Feld für Feld, ohne KI, in Sekunden. "
               "Soll ich das ausführen?"
               if not english else
-              "I will run the deterministic field comparison: the transmitted software "
-              "records are compared field by field against the official expectation "
-              "(example paper V13.3) — no AI involvement, done in seconds. "
+              "I will run the deterministic field comparison against the transmitted "
+              "software output — field by field, no AI, done in seconds. "
               "Shall I execute?")
         return _reply(ut, action={**action["action"], "confirm_token": action["confirm_token"]},
                       needs_confirmation=True, command="run_comparison_offline")
@@ -647,18 +685,12 @@ def canned_turn(message: str, state_context: dict, task_id: str,
         live = True  # owner directive: the demo shows the AI roles generating live
         params = {"live": live}
         action = actions.propose("run_comparison", params, session_id)
-        ut = ("Ich starte einen vollständigen Prüflauf: SÜSIE extrahiert die Anforderung "
-              "aus dem Gesetzestext (GLM-Flash), entwirft Testfall-Kandidaten (Kolibri-1), "
-              "der unabhängige Challenger prüft sie auf Lücken, dann läuft der "
-              "deterministische Vergleich gegen die übermittelten Datensätze. "
-              "Das dauert etwa 2–4 Minuten — ich zeige Ihnen jeden Schritt. "
+        ut = ("Ich starte den vollständigen Prüflauf: Gesetz → Anforderung → "
+              "Testfälle → Feldvergleich. Das dauert etwa 2–4 Minuten — "
               "Soll ich das ausführen?"
               if not english else
-              "I will run a full review pass: SÜSIE extracts the requirement from the "
-              "legal text (GLM-Flash), drafts test-case candidates (Kolibri-1), the "
-              "independent challenger probes them for gaps, then the deterministic "
-              "comparison runs against the transmitted records. "
-              "This takes about 2–4 minutes — I will show you every step. "
+              "I will run the full review pass: law → requirement → test cases "
+              "→ field comparison. This takes about 2–4 minutes — "
               "Shall I execute?")
         return _reply(ut, action={**action["action"], "confirm_token": action["confirm_token"]},
                       needs_confirmation=True, command="run_comparison_live")
@@ -735,15 +767,16 @@ def turn(message: str, state_context: dict, corpus_hits: list[dict], history: li
                     privacy={"airlock": "blocked", "categories": cats})
             privacy_summary = {**airlock_summary, "airlock": "passed"}
         model_used = MODEL_ASSISTANT
+        system_prompt = _system_prompt(lang)  # T10-053: the UI language wins
         try:
-            raw = gateway(DEFAULT_ENDPOINT, MODEL_ASSISTANT, SUSIE_SYSTEM_PROMPT, messages, "")
+            raw = gateway(DEFAULT_ENDPOINT, MODEL_ASSISTANT, system_prompt, messages, "")
         except LLMError:
             # Human directive 2026-10-27: primary model down → one fallback
             # attempt with Kolibri-1 before degrading; the envelope records
             # which model actually answered.
             model_used = MODEL_ASSISTANT_FALLBACK
             raw = gateway(DEFAULT_ENDPOINT, MODEL_ASSISTANT_FALLBACK,
-                          SUSIE_SYSTEM_PROMPT, messages, "")
+                          system_prompt, messages, "")
         reply = _parse_reply(raw)
     except (LLMError, ValueError, KeyError, TypeError) as exc:
         return _fallback(message, state_context, task_id, session_id, lang,

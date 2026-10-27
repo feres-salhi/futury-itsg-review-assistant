@@ -1,16 +1,14 @@
-"""T10-042 + T10-051 — deterministic chat layers.
+"""T10-042 + T10-051/052 — deterministic chat layers.
 
-Two layers, one contract:
-- ``deterministic_turn`` matches ONLY true navigation commands (start over,
-  go back, next/prev case) before the gateway call — demo-critical, works
-  with the gateway down.
-- ``canned_turn`` holds every other canned answer (status, sources, case
-  selection, comparison/export proposals, …). With a live gateway these fall
-  through to the model (deterministic_turn → None); the canned text is the
-  gateway-down fallback (chat._fallback).
-
-Every reply carries the AgentRun envelope; mutating proposals carry
-confirmation tokens.
+Three layers, one contract:
+- ``deterministic_turn`` (pre-gateway): navigation commands AND action jobs —
+  fetch a NAMED case, run the comparison (offline/live), generate the report.
+  The owner gets exactly what she asked for, model-independent; mutating
+  proposals still carry the Ja/Nein confirm token (four-eyes intact).
+- ``canned_turn``: everything above PLUS status/sources/help/topics/
+  troubleshooting — the gateway-down fallback only; with a live gateway
+  those questions reach the model (deterministic_turn → None).
+- free-form questions match neither layer.
 """
 from __future__ import annotations
 
@@ -31,8 +29,6 @@ STATE = {
 
 
 class NavigationCommandTests(unittest.TestCase):
-    """The pre-gateway layer: true navigation commands only."""
-
     def _turn(self, message: str):
         return chat.deterministic_turn(message, STATE, "T10-042", "s1")
 
@@ -59,8 +55,67 @@ class NavigationCommandTests(unittest.TestCase):
                 self.assertIsNotNone(reply, msg)
                 self.assertEqual(reply.action["id"], expected)
 
-    def test_every_deterministic_reply_carries_envelope(self) -> None:
-        for msg in ("Start over", "zurück", "nächster Fall", "vorheriger Fall"):
+
+class ActionJobTests(unittest.TestCase):
+    """T10-052: fetch a named case / run the comparison / generate the report
+    work pre-gateway, reliably, on the owner's explicit request."""
+
+    def _turn(self, message: str):
+        return chat.deterministic_turn(message, STATE, "T10-052", "s1")
+
+    def test_fetch_a_named_case(self) -> None:
+        for msg, expected in (("öffne fall tc-2", "TC-2"), ("open case TC-2", "TC-2"),
+                              ("zeig mir TC-3", "TC-3"), ("hol mir fall 2", "TC-2")):
+            with self.subTest(msg=msg):
+                reply = self._turn(msg)
+                self.assertIsNotNone(reply, msg)
+                self.assertEqual(reply.action["id"], "open_evidence")
+                self.assertEqual(reply.action["params"], {"case_id": expected})
+                self.assertFalse(reply.needs_confirmation)  # read-only: executes at once
+        # the fetch names the deviation, not role trivia
+        ut = self._turn("öffne fall tc-2").utterance
+        self.assertIn("erwartet 20XX0101", ut)
+        self.assertNotIn("GLM-Flash", ut)
+        self.assertNotIn("Kolibri", ut)
+
+    def test_topic_word_without_id_falls_through_to_model(self) -> None:
+        # "die Abweichung"/"der Fehler" without a named case is a QUESTION —
+        # SÜSIE must not guess which case to open (T10-052)
+        for msg in ("zeig mir die abweichung", "gibt es fehler?", "was ist mit den fällen los?"):
+            with self.subTest(msg=msg):
+                self.assertIsNone(self._turn(msg), msg)
+
+    def test_run_comparison_offline_deterministic(self) -> None:
+        for msg in ("Starte den Abgleich mit der Softwareausgabe",
+                    "Führe den Abgleich durch",
+                    "Run the field comparison against the software output"):
+            with self.subTest(msg=msg):
+                reply = self._turn(msg)
+                self.assertIsNotNone(reply, msg)
+                self.assertEqual(reply.action["id"], "run_comparison")
+                self.assertTrue(reply.needs_confirmation)
+                self.assertEqual(reply.action["params"], {"live": False})
+                self.assertRegex(reply.utterance.lower(), r"deterministisch|deterministic")
+                self.assertNotIn("GLM-Flash", reply.utterance)
+
+    def test_generate_test_cases_deterministic(self) -> None:
+        reply = self._turn("generiere testfälle aus dem gesetz")
+        self.assertIsNotNone(reply)
+        self.assertEqual(reply.action["id"], "run_comparison")
+        self.assertTrue(reply.needs_confirmation)
+        self.assertEqual(reply.action["params"], {"live": True})
+        self.assertNotIn("Kolibri", reply.utterance)  # no role narration
+
+    def test_generate_report_deterministic(self) -> None:
+        reply = self._turn("Erstelle mir den Bericht als PDF")
+        self.assertIsNotNone(reply)
+        self.assertEqual(reply.action["id"], "export_report")
+        self.assertTrue(reply.needs_confirmation)
+        self.assertIn("Konformitätsaussage", reply.utterance)
+
+    def test_every_action_job_reply_carries_envelope(self) -> None:
+        for msg in ("öffne fall tc-2", "Starte den Abgleich", "generiere testfälle",
+                    "Erstelle den Bericht"):
             with self.subTest(msg=msg):
                 reply = self._turn(msg)
                 self.assertTrue(reply.agent_run.get("run_id"))
@@ -69,7 +124,7 @@ class NavigationCommandTests(unittest.TestCase):
 
 
 class FallThroughToModelTests(unittest.TestCase):
-    """Non-navigation intents reach the model; the canned text is fallback only."""
+    """Explanations reach the model; the canned text is fallback only."""
 
     def _deterministic(self, message: str):
         return chat.deterministic_turn(message, STATE, "T10-051", "s1")
@@ -77,25 +132,12 @@ class FallThroughToModelTests(unittest.TestCase):
     def _canned(self, message: str):
         return chat.canned_turn(message, STATE, "T10-051", "s1")
 
-    def test_status_sources_cases_and_commands_fall_through(self) -> None:
-        for msg in ("Wo stehe ich?", "Welche Quellen liegen zugrunde?",
-                    "öffne fall tc-2", "zeig mir die abweichung",
-                    "generiere testfälle aus dem gesetz",
-                    "Starte den Abgleich mit der Softwareausgabe",
-                    "Erstelle mir den Bericht als PDF"):
+    def test_status_and_sources_fall_through(self) -> None:
+        for msg in ("Wo stehe ich?", "Welche Quellen liegen zugrunde?", "Hilfe"):
             with self.subTest(msg=msg):
                 self.assertIsNone(self._deterministic(msg), msg)
 
-    def test_canned_layer_still_answers_them_for_the_fallback(self) -> None:
-        state = dict(STATE, source={
-            "id": "SRC-BP", "title": "Beispielpapier DTA EEL",
-            "issuer": "GKV-Spitzenverband", "version": "V13.3",
-            "valid_from": "01.01.2027"})
-        sources = chat.canned_turn("Welche Quellen liegen zugrunde?", state, "T10-051", "s1")
-        self.assertIsNotNone(sources)
-        self.assertIn("SRC-BP", sources.utterance)
-        self.assertIn("Beispielpapier", sources.utterance)
-
+    def test_canned_layer_still_answers_for_the_fallback(self) -> None:
         status = self._canned("Wo stehe ich?")
         self.assertIsNotNone(status)
         self.assertIsNone(status.action)
@@ -103,40 +145,11 @@ class FallThroughToModelTests(unittest.TestCase):
         self.assertIn("TC-2", status.utterance)
         self.assertIn("Beginn der Entgeltersatzleistung", status.utterance)
 
-    def test_canned_select_case_with_human_reason(self) -> None:
-        reply = self._canned("öffne fall tc-2")
-        self.assertIsNotNone(reply)
-        self.assertEqual(reply.action["id"], "open_evidence")
-        self.assertEqual(reply.action["params"], {"case_id": "TC-2"})
-        self.assertIn("erwartet 20XX0101", reply.utterance)
-
     def test_canned_deviation_without_case_id_selects_first_mismatch(self) -> None:
+        # offline fallback may pick the first mismatch; the pre-gateway layer may not
         reply = self._canned("zeig mir die abweichung")
         self.assertIsNotNone(reply)
         self.assertEqual(reply.action["params"], {"case_id": "TC-2"})
-
-    def test_canned_run_comparison_and_export_need_confirmation(self) -> None:
-        run = self._canned("generiere testfälle aus dem gesetz")
-        self.assertIsNotNone(run)
-        self.assertEqual(run.action["id"], "run_comparison")
-        self.assertTrue(run.needs_confirmation)
-        self.assertEqual(run.action["params"], {"live": True})
-        export = self._canned("Erstelle mir den Bericht als PDF")
-        self.assertIsNotNone(export)
-        self.assertEqual(export.action["id"], "export_report")
-        self.assertTrue(export.needs_confirmation)
-
-    def test_canned_software_abgleich_proposes_offline_comparison(self) -> None:
-        for msg in ("Starte den Abgleich mit der Softwareausgabe",
-                    "Führe den Abgleich durch",
-                    "Run the field comparison against the software output"):
-            with self.subTest(msg=msg):
-                reply = self._canned(msg)
-                self.assertIsNotNone(reply, msg)
-                self.assertEqual(reply.action["id"], "run_comparison")
-                self.assertTrue(reply.needs_confirmation)
-                self.assertEqual(reply.action["params"], {"live": False})
-                self.assertRegex(reply.utterance.lower(), r"deterministisch|deterministic")
 
     def test_free_form_questions_match_neither_layer(self) -> None:
         for msg in ("Was ist eine Vorerkrankung?", "Warum ist der Himmel blau?"):
