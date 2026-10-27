@@ -6,7 +6,7 @@
   "official_form_id": null,
   "renderer_version": "itsg.renderer/0.1.0",
   "field_map_version": "itsg.fieldmap/synth-1",
-  "generated_at": "2026-10-27T06:00:41+00:00",
+  "generated_at": "2026-10-27T07:25:36+00:00",
   "field_labels": {
     "case_id": "Fall-ID",
     "criterion_id": "Kriterium",

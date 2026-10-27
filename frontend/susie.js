@@ -38,7 +38,7 @@
       casesSub: "Ergebnisse je Fall: offizielle Erwartung gegen übermittelte Werte — Abweichungen sofort sichtbar",
       reportSub: "Der vollständige Prüfbericht: Befunde, empfohlene Maßnahmen, PDF-Export und Manipulationssiegel",
       sourcesSub: "Worauf die Prüfung beruht: Rechtsgrundlagen, Vorlage — und wer welche KI-Ausgabe freigegeben hat",
-      advGroup: "Prüfakte · Experten",
+      advGroup: "Expertenmodus",
       advCases: "Prüffälle-Tabelle", advCasesSub: "Soll/Ist-Tabelle je Fall — die vollständige Datengrundlage hinter den Prüffallkarten",
       advStories: "Story-Suiten", advStoriesSub: "200 Szenario-Fälle mit erwarteter Abweichung — zum Durchklicken und Nachvollziehen",
       advSources: "Quellen & Kriterien", advSourcesSub: "Quellen und Kriterien, aus denen die Prüflogik abgeleitet ist",
@@ -51,10 +51,72 @@
       onboard: () => `${timeGreeting()}. Ich bin SÜSIE — Ihre Assistentin für diese Systemprüfung. Mit wem arbeite ich?`,
       hello: (n) => `${timeGreeting()}, ${n}! Schön, dass Sie da sind. Ich bin SÜSIE, Ihre Assistentin für diese Prüfung — ich kenne jeden hinterlegten Prüffall, jede Quelle und jeden Beleg in dieser Prüfung. Ich erkläre Ihnen Befunde in klaren Worten, zeige den Feldvergleich, springe für Sie zu den Quellen, fasse den Prüfstand zusammen und führe Schritte nur auf Ihr ausdrückliches Wort aus. Fragen Sie mich zum Beispiel: „Wo stehe ich?“, „Zeig mir die Abweichung“ oder „Erstelle den Bericht“ — worauf möchten Sie zuerst schauen?`,
       greet: (n) => `${timeGreeting()}, ${n}! Schön, dass Sie wieder da sind. Ich kenne jeden hinterlegten Prüffall, jede Quelle und jeden Beleg in dieser Prüfung — fragen Sie mich z. B. „Wo stehe ich?“, „Zeig mir die Abweichung“ oder „Erstelle den Bericht als PDF“. Worauf möchten Sie zuerst schauen?`,
-      bottomNote: "Synthetische Daten — ohne Konformitätsaussage und ohne Rechtsberatung",
+      bottomNote: "Synthetische Daten",
+      bottomNoteTitle: "Synthetische Daten — ohne Konformitätsaussage und ohne Rechtsberatung",
+      regulations: "Regelwerke",
+      regulationsSub: "Indizierte Gesetzestexte durchsuchen und lesen — Abschnitt (Markdown) oder Original-PDF",
+      regSearchPh: "Regelwerke durchsuchen (Thema, §, Datenbaustein) …",
+      regAllDocs: "Alle Dokumente",
+      regEmpty: "Suchbegriff eingeben — oder ein Dokument wählen und stöbern.",
+      regNoResults: "Keine Treffer. Suchbegriff oder Dokumentfilter ändern.",
+      regChunks: "Abschnitte",
+      regOpenPdf: "Original-PDF",
+      regBackToText: "Zurück zum Abschnitt",
+      regPages: "Seiten",
+      regIn: "in",
+      searchCases: "Fälle durchsuchen (ID, Kategorie, Befund) …",
+      sortDefault: "Sortierung: Status", sortId: "ID A–Z", sortIdDesc: "ID Z–A", sortGroup: "Kategorie",
+      showCount: (n, total) => `${n} von ${total} Fällen`,
+      noCaseHits: "Keine Treffer — Filter oder Suche anpassen.",
+      allF: "Alle",
       loading: "Lade Prüffälle …",
       connecting: "Verbinde …", bridgeOk: "Bridge verbunden", bridgeBad: "Bridge gestört",
       bridgeOff: "Bridge offline — Frontend zeigt synthetischen Leerzustand",
+      privacyOn: "Geschützt", privacyOff: "Ungeschützt", privacyUnknown: "Datenschutz …",
+      privacyTitle: "Datenschutz-Schleuse aktiv",
+      privacySub: "Personenbezogene Daten werden vor jedem externen Kanal erkannt, ersetzt und nachgeprüft — ein Restbefund blockiert den Versand (Fail-closed).",
+      privacyPolicy: "Richtlinie", privacyKeyMode: "Pseudonymisierungsschlüssel",
+      privacyChannels: "Externe Kanäle", privacyWiring: "Verdrahtet",
+      privacyCategories: "Erkannte Kategorien", privacyMode: "Prinzip",
+      privacyChatWired: "SÜSIE-Chat → Wissensdienst", privacyLangfuseWired: "Tracing (Langfuse)",
+      privacyNone: "keine in dieser Sitzung",
+      helpTitle: "Hilfe & Support",
+      helpWhatsThisBtn: "Was ist das? — Erklärmodus starten",
+      helpWhatsThisOn: "Erklärmodus ist aktiv — Klicken Sie ein Element. ESC beendet.",
+      helpAsk: "SÜSIE fragen",
+      helpClose: "Schließen",
+      helpCapsTitle: "Das kann ich für Sie tun",
+      helpCaps: [
+        "Durch die Prüfung führen — „Wo stehe ich?“ liefert den Prüfstand mit jeder Abweichung",
+        "Alles erklären — Prüffälle, Quellen, Abgleich, Belegkette, Siegel, Datenschutz-Schleuse",
+        "Schritte auf Ihr Wort ausführen — Abgleich, Testfälle, Berichts-Export; nichts läuft ohne Ihre Bestätigung",
+        "Belege öffnen und zu Fundstellen springen — jeder Befund ist zurückverfolgbar",
+      ],
+      helpTroubleTitle: "Fehlerbehebung",
+      helpTrouble: [
+        "Bridge: der Punkt unten rechts muss grün sein — sonst lokalen Dienst neu starten und neu laden",
+        "Abgleich abgebrochen? Einfach erneut starten — die Prüfung bleibt immer in einem sauberen Zustand",
+        "Chat ohne Antwort? Die Navigation läuft lokal und funktioniert weiter",
+        "PDF-Export braucht zuerst einen abgeschlossenen Abgleich",
+      ],
+      helpTroubleAsk: "Das hat nicht geholfen — SÜSIE fragen",
+      helpWhatsThisTitle: "Der Erklärmodus („Was ist das?“)",
+      helpWhatsThisText: "Klicken Sie auf das Fragezeichen unten links, dann auf ein Element der Oberfläche — SÜSIE erklärt Ihnen in einem Flyover, wozu es dient. Auf „SÜSIE fragen“ können Sie direkt nachfragen.",
+      helpStartWhatsThis: "Erklärmodus starten",
+      whatsHint: "Erklärmodus: Klicken Sie ein Element — SÜSIE erklärt es. ESC beendet.",
+      whatsNoInfo: "Zu diesem Element habe ich keine Details hinterlegt — fragen Sie mich direkt, ich schaue es mir mit Ihnen an.",
+      whatsAskPrefix: "Was ist",
+      footAuto: (c, n) => `${c}/${n}`,
+      footAutoLabel: "Auto-Geprüft",
+      footAutoTitle: "Regressionstest: Die gesamte Prüflogik läuft automatisch gegen eine unabhängige Vergleichsliste (offizielles Beispielpapier + generierte Fälle).",
+      footLocal: "Lokal",
+      footLocalTitle: "Prüfdaten, Store und Audit-Log bleiben auf diesem Rechner. Nach außen geht nur das Nötigste, geschützt durch die Datenschutz-Schleuse: dem Sprachmodell wird der benötigte Textkontext pseudonymisiert übergeben (nie Personaldaten), und beim Siegeln geht nur der SHA-256-Fingerabdruck des Berichts zur Bestätigungsstelle.",
+      footFail: "Fail-closed",
+      footFailTitle: "Ohne Beleg kein Bestand: Fehlt eine Grundlage, ein Erwartungswert oder die Software-Ausgabe, bleibt das Ergebnis „Nicht bewertet“ — ein stiller Durchwink ist ausgeschlossen.",
+      footEyes: (n) => `4-Augen (${n})`,
+      footEyesTitle: "Vier-Augen-Prinzip: KI schlägt vor, der Mensch entscheidet. Der Autor einer KI-Ausgabe darf sie nicht selbst freigeben; jede Gate-Entscheidung trägt Name, Zeitstempel und Begründung.",
+      privacyOffline: "Offline", privacyRefused: "Fail-closed",
+      privacyRefusedTitle: "Datenschutz-Modul nicht ladbar — alle externen Aufrufe werden verweigert (fail closed). Die Daten bleiben lokal.",
       fullscreenTag: "Vollbild-Modus", overlayBtn: "Overlay-Modus",
       toFullscreen: "Vollbild-Modus", openFab: "SÜSIE Assistentin öffnen",
       themeTitle: "Hell / Dunkel umschalten",
@@ -98,7 +160,7 @@
       casesSub: "Results per case: official expectation vs. transmitted values — deviations visible at a glance",
       reportSub: "The full review report: findings, recommended actions, PDF export and tamper-evidence seal",
       sourcesSub: "What the review rests on: legal basis, template — and who approved which AI output",
-      advGroup: "Review dossiers · Experts",
+      advGroup: "Expert mode",
       advCases: "Case table", advCasesSub: "Expected/transmitted table per case — the full data behind the case cards",
       advStories: "Story suites", advStoriesSub: "200 scenario cases with an expected deviation — browse and verify",
       advSources: "Sources & criteria", advSourcesSub: "Sources and criteria the review logic was derived from",
@@ -111,10 +173,72 @@
       onboard: () => `${timeGreeting()}. I am SÜSIE — your assistant for this system review. Who am I working with?`,
       hello: (n) => `${timeGreeting()}, ${n}! Great to have you. I am SÜSIE, your assistant for this review — I know every case, every source and every piece of evidence in this review. I explain findings in plain words, show the field-by-field comparison, jump to the sources for you, summarize where the review stands, and only execute steps on your explicit word. Ask me, for example: “Where do I stand?”, “Show me the deviation” or “Create the report” — what would you like to look at first?`,
       greet: (n) => `${timeGreeting()}, ${n}! Good to see you again. I know every case, every source and every piece of evidence in this review — ask me e.g. “Where do I stand?”, “Show me the deviation” or “Create the report as PDF”. What would you like to look at first?`,
-      bottomNote: "Synthetic data — no conformance claim, no legal advice",
+      bottomNote: "Synthetic data",
+      bottomNoteTitle: "Synthetic data — no conformance claim, no legal advice",
+      regulations: "Regulations",
+      regulationsSub: "Search and read the indexed law texts — section (markdown) or the original PDF",
+      regSearchPh: "Search the regulations (topic, §, data element) …",
+      regAllDocs: "All documents",
+      regEmpty: "Type a search term — or pick a document and browse.",
+      regNoResults: "No hits. Change the search term or document filter.",
+      regChunks: "sections",
+      regOpenPdf: "Original PDF",
+      regBackToText: "Back to the section",
+      regPages: "pages",
+      regIn: "in",
+      searchCases: "Search cases (ID, category, finding) …",
+      sortDefault: "Sort: status", sortId: "ID A–Z", sortIdDesc: "ID Z–A", sortGroup: "Category",
+      showCount: (n, total) => `${n} of ${total} cases`,
+      noCaseHits: "No hits — adjust the filters or search.",
+      allF: "All",
       loading: "Loading cases …",
       connecting: "Connecting …", bridgeOk: "Bridge connected", bridgeBad: "Bridge impaired",
       bridgeOff: "Bridge offline — frontend shows synthetic empty state",
+      privacyOn: "Protected", privacyOff: "Unprotected", privacyUnknown: "Privacy …",
+      privacyTitle: "Privacy airlock active",
+      privacySub: "Personal data is detected, replaced and re-checked before every external channel — any residual finding blocks the send (fail closed).",
+      privacyPolicy: "Policy", privacyKeyMode: "Pseudonymization key",
+      privacyChannels: "External channels", privacyWiring: "Wired in",
+      privacyCategories: "Categories detected", privacyMode: "Mode",
+      privacyChatWired: "SÜSIE chat → knowledge service", privacyLangfuseWired: "Tracing (Langfuse)",
+      privacyNone: "none in this session",
+      helpTitle: "Help & support",
+      helpWhatsThisBtn: "What's this? — start explain mode",
+      helpWhatsThisOn: "Explain mode is active — click any element. ESC to exit.",
+      helpAsk: "Ask SÜSIE",
+      helpClose: "Close",
+      helpCapsTitle: "What I can do for you",
+      helpCaps: [
+        "Guide the review — “Where do I stand?” gives the current status with every deviation",
+        "Explain everything — cases, sources, the comparison, evidence chain, seal, privacy airlock",
+        "Run steps on your word — comparison, test cases, report export; nothing runs without your confirmation",
+        "Open evidence and jump to sources — every finding is traceable",
+      ],
+      helpTroubleTitle: "Troubleshooting",
+      helpTrouble: [
+        "Bridge: the dot bottom-right must be green — otherwise restart the local service and reload",
+        "Comparison aborted? Start it again — the review always stays in a clean state",
+        "Chat without an answer? Navigation runs locally and keeps working",
+        "The PDF export needs a completed comparison first",
+      ],
+      helpTroubleAsk: "That did not help — ask SÜSIE",
+      helpWhatsThisTitle: "Explain mode (“What's this?”)",
+      helpWhatsThisText: "Click the question mark bottom-left, then any element on the surface — SÜSIE explains what it is for in a flyover. “Ask SÜSIE” lets you follow up directly.",
+      helpStartWhatsThis: "Start explain mode",
+      whatsHint: "Explain mode: click an element — SÜSIE explains it. ESC to exit.",
+      whatsNoInfo: "I have no details registered for this element — ask me directly and we will look at it together.",
+      whatsAskPrefix: "What is",
+      footAuto: (c, n) => `${c}/${n}`,
+      footAutoLabel: "Auto-tested",
+      footAutoTitle: "Regression test: the entire review logic runs automatically against an independent ground truth (official sample document + generated cases).",
+      footLocal: "Local",
+      footLocalTitle: "Review data, store and audit log stay on this machine. Only the necessary minimum ever leaves, protected by the privacy airlock: the LLM receives the required text context pseudonymized (never personal data), and sealing sends only the report's SHA-256 fingerprint to the confirmation office.",
+      footFail: "Fail-closed",
+      footFailTitle: "No evidence, no pass: a missing basis, expected value or software output keeps the result “not evaluated” — a silent pass is impossible.",
+      footEyes: (n) => `4-eyes (${n})`,
+      footEyesTitle: "Four-eyes principle: AI proposes, the human decides. The author of an AI output may not approve it; every gate decision carries name, timestamp and rationale.",
+      privacyOffline: "Offline", privacyRefused: "Fail-closed",
+      privacyRefusedTitle: "Privacy module not loadable — all external calls are refused (fail closed). Data stays local.",
       fullscreenTag: "Fullscreen mode", overlayBtn: "Overlay mode",
       toFullscreen: "Fullscreen mode", openFab: "Open SÜSIE assistant",
       themeTitle: "Toggle light / dark",
@@ -252,7 +376,14 @@
     $("theme-toggle").title = t("themeTitle");
     $("susie-mode-tag").textContent = t("fullscreenTag");
     $("to-overlay").querySelector("span").textContent = t("overlayBtn");
-    $("bottom-note").textContent = t("bottomNote");
+    const bottomNote = $("bottom-note");
+    bottomNote.textContent = t("bottomNote");
+    bottomNote.title = t("bottomNoteTitle");  // full sentence as flyover (T10-045)
+    const caseSearch = $("case-search");
+    if (caseSearch) caseSearch.placeholder = t("searchCases");
+    syncPrivacyBadge();          // T10-044: badge follows the language immediately
+    $("whats-this").title = t("helpWhatsThisBtn").split(" — ")[0];
+    $("help-support").title = t("helpTitle");
     const dot = $("bridge-dot");
     if (dot.classList.contains("ok") || dot.classList.contains("bad")) {
       $("bridge-label").textContent = dot.classList.contains("ok") ? t("bridgeOk") : t("bridgeBad");
@@ -275,6 +406,18 @@
     selectedCase: null,
     openEvidence: new Set(),
     busy: false,
+    // case list: search / status filter / sort (T10-045)
+    caseQ: "",
+    caseStatus: "all",
+    caseSort: "default",
+    // regulations browser (T10-045)
+    regLoaded: false,
+    regDocs: [],
+    regQ: "",
+    regDoc: "",
+    regResults: null,
+    regSelected: null,       // { path, meta } — chunk currently open in the reader
+    regPdf: null,            // doc id when the reader shows the original PDF
   };
 
   // ---------- field glossary: wire-format codes -> human words ----------
@@ -303,8 +446,20 @@
     "current_au": { de: "Aktuelle Arbeitsunfähigkeit", en: "Current incapacity" },
     "prior_episodes": { de: "Vorerkrankungen (frühere AUs)", en: "Prior incapacity episodes" },
     "reporting_date": { de: "Meldedatum", en: "Reporting date" },
+    "current_start": { de: "Beginn aktuelle AU", en: "Current incapacity start" },
+    "current_end": { de: "Ende aktuelle AU", en: "Current incapacity end" },
+    "today": { de: "Stichtag", en: "Reference date" },
+    "current_cert": { de: "AU bescheinigt", en: "Incapacity certified" },
+    "insurance": { de: "Versicherungsart", en: "Insurance type" },
+    "prior": { de: "Vorerkrankungen", en: "Prior episodes" },
   };
   const fieldLabel = (f) => (FIELD_LABELS[String(f).trim()] || {})[LANG] || String(f);
+  // compact readable rendering for nested scenario values (never "[object Object]")
+  const fmtInputValue = (v) => {
+    if (Array.isArray(v)) return v.map(fmtInputValue).join(", ");
+    if (v && typeof v === "object") return Object.entries(v).map(([k, v2]) => `${k}: ${fmtInputValue(v2)}`).join(" ");
+    return String(v);
+  };
 
   // field-level comparison table (deterministic, from expected/observed dicts)
   function comparisonTable(c) {
@@ -325,7 +480,7 @@
       const differs = o !== undefined && String(o) !== String(e);
       const missing = o === undefined || o === null || o === "";
       if (differs || missing) diffs++;
-      const tr = el("tr", differs || (missing && o !== undefined) ? "cmp-diff" : "");
+      const tr = el("tr", differs || missing ? "cmp-diff" : "");
       tr.appendChild(el("td", "cmp-field", fieldLabel(k)));
       tr.appendChild(el("td", "mono", e === undefined ? "—" : String(e)));
       tr.appendChild(el("td", "mono" + (differs ? " cmp-bad" : ""),
@@ -545,13 +700,17 @@
   function showView(v) {
     if (v !== S.view) { S.viewStack = S.viewStack || []; S.viewStack.push(S.view); }
     S.view = v;
-    for (const id of ["cases", "report", "sources", "advanced"]) $(`view-${id}`).hidden = id !== v;
+    for (const id of ["cases", "report", "sources", "advanced", "regulations"]) $(`view-${id}`).hidden = id !== v;
+    $("case-summary").hidden = v !== "cases";  // the case counts mean nothing elsewhere
+    document.body.dataset.view = v;
+    if (v === "regulations" && !S.regLoaded) loadRegulations();
     document.querySelectorAll(".side-link").forEach((b) =>
       b.classList.toggle("active", b.dataset.view === v));
     // the page heading follows the view — never a stale title anywhere
     $("topbar-title").textContent = v === "advanced"
       ? (S.advTitle || t("advGroup"))
       : t(v);
+    $("topbar-sub").textContent = t(v + "Sub") || t("topSub");
     document.querySelectorAll(".side-adv").forEach((b) =>
       b.classList.toggle("active", v === "advanced" && b.dataset.adv === S.advView));
     document.querySelectorAll(".side-link").forEach((b) => {
@@ -582,13 +741,89 @@
     c.expected_basis || "",
   ].join(" ").toLowerCase();
 
+  // ---- case list toolbar (T10-045): search + status filter + sort ----------
+  const groupOf = (c) => String(c.id || "").split("-")[0];
+  const byIdDe = (a, b) => String(a.id).localeCompare(String(b.id), "de", { numeric: true });
+
+  function visibleCases() {
+    const q = (S.filter || "").toLowerCase();
+    let cases = (S.appState?.cases || []).filter((c) => !q || searchable(c).includes(q));
+    if (S.caseStatus !== "all") cases = cases.filter((c) => c.status === S.caseStatus);
+    if (S.caseSort === "id") cases = [...cases].sort(byIdDe);
+    else if (S.caseSort === "id-desc") cases = [...cases].sort((a, b) => byIdDe(b, a));
+    else if (S.caseSort === "group") cases = [...cases].sort((a, b) =>
+      groupOf(a).localeCompare(groupOf(b), "de") || byIdDe(a, b));
+    return cases; // "default": store order (status severity, then id)
+  }
+
+  function initCaseToolbar() {
+    const bar = $("case-toolbar");
+    if (!bar || bar.dataset.init) return;
+    bar.dataset.init = "1";
+    bar.textContent = "";
+    const search = el("input", "case-search");
+    search.type = "search";
+    search.id = "case-search";
+    search.setAttribute("aria-label", t("searchCases"));
+    let debounce = 0;
+    search.addEventListener("input", () => {
+      S.filter = search.value.trim();  // state first: toolbar syncs must never clobber it
+      clearTimeout(debounce);
+      debounce = setTimeout(renderCases, 140);
+    });
+    bar.appendChild(search);
+    const seg = el("div", "seg");
+    seg.id = "case-status-filter";
+    seg.setAttribute("role", "group");
+    bar.appendChild(seg);
+    const sort = el("select", "case-sort");
+    sort.id = "case-sort";
+    sort.setAttribute("aria-label", LANG === "de" ? "Sortieren" : "Sort");
+    for (const [v, key] of [["default", "sortDefault"], ["id", "sortId"],
+                            ["id-desc", "sortIdDesc"], ["group", "sortGroup"]]) {
+      const opt = el("option", "", t(key));
+      opt.value = v;
+      sort.appendChild(opt);
+    }
+    sort.value = S.caseSort;
+    sort.addEventListener("change", () => { S.caseSort = sort.value; renderCases(); });
+    bar.appendChild(sort);
+    const count = el("span", "case-count");
+    count.id = "case-count";
+    bar.appendChild(count);
+    search.placeholder = t("searchCases");
+  }
+
+  function renderCaseToolbar(total) {
+    initCaseToolbar();
+    const bar = $("case-toolbar");
+    if (!bar) return;
+    const search = bar.querySelector(".case-search");
+    if (search && document.activeElement !== search && search.value !== (S.filter || "")) {
+      search.value = S.filter || "";  // chat commands can drive the query too
+    }
+    const counts = { all: total };
+    for (const c of S.appState?.cases || []) counts[c.status] = (counts[c.status] || 0) + 1;
+    const seg = $("case-status-filter");
+    seg.textContent = "";
+    for (const st of ["all", "PASS", "MISMATCH", "NOT_EVALUATED"]) {
+      const chip = el("button", "seg-item" + (S.caseStatus === st ? " active" : ""),
+        `${st === "all" ? t("allF") : statusLabel(st)} ${counts[st] ?? 0}`);
+      chip.type = "button";
+      chip.addEventListener("click", () => { S.caseStatus = st; renderCases(); });
+      seg.appendChild(chip);
+    }
+    const shown = visibleCases().length;
+    $("case-count").textContent = t("showCount", shown, total);
+  }
+
   function renderCases() {
     const list = $("case-list"); list.textContent = "";
-    const cases = (S.appState?.cases || []).filter((c) =>
-      !S.filter || searchable(c).includes(S.filter.toLowerCase()));
+    const all = S.appState?.cases || [];
+    const cases = visibleCases();
 
     const counts = {};
-    for (const c of S.appState?.cases || []) counts[c.status] = (counts[c.status] || 0) + 1;
+    for (const c of all) counts[c.status] = (counts[c.status] || 0) + 1;
     const chips = $("case-summary"); chips.textContent = "";
     for (const [st, n] of Object.entries(counts)) {
       const b = el("span", `badge ${st === "PASS" ? "badge-pass" : st === "MISMATCH" ? "badge-mismatch" : "badge-not-evaluated"}`, `${n} ${statusLabel(st)}`);
@@ -596,7 +831,9 @@
       if (b.title) b.classList.add("has-tip");
       chips.appendChild(b);
     }
-    if (!cases.length) { list.appendChild(el("div", "empty", t("emptyCases"))); return; }
+    renderCaseToolbar(all.length);
+    if (!all.length) { list.appendChild(el("div", "empty", t("emptyCases"))); return; }
+    if (!cases.length) { list.appendChild(el("div", "empty", t("noCaseHits"))); return; }
 
     for (const c of cases) {
       const isOpen = S.openEvidence.has(c.id);
@@ -623,42 +860,17 @@
       chev.setAttribute("aria-hidden", "true");
       head.appendChild(chev);
       card.appendChild(head);
-      const critMeta = (S.appState?.criteria || []).find((x) => x.id === c.criterion_id);
-      const metaText = critMeta?.description || c.criterion_id || "—";
-      const metaP = el("p", "card-meta", metaText.length > 220 ? metaText.slice(0, metaText.lastIndexOf(" ", 220)) + " …" : metaText);
-      card.appendChild(metaP);
       const crit = (S.appState?.criteria || []).find((x) => x.id === c.criterion_id);
-      const hr = humanReason(c);
-      if (hr.intro) card.appendChild(el("p", "card-reason", hr.intro));
-      if (hr.body) card.appendChild(el("p", hr.intro ? "card-detail" : "card-reason", hr.body));
-
-      // collapsed mismatch cards show the decisive deviation WITHOUT a click
-      if (!isOpen && c.status === "MISMATCH" && c.expected && c.observed) {
-        const diffs = Object.keys(c.expected)
-          .filter((k) => c.observed[k] !== undefined && String(c.observed[k]) !== String(c.expected[k]))
-          .slice(0, 3);
-        if (diffs.length) {
-          const mt = el("table", "cmp-table cmp-mini");
-          const thead = el("thead");
-          const hr = el("tr");
-          hr.appendChild(el("th", "", ""));
-          hr.appendChild(el("th", "", t("cmpExpected")));
-          hr.appendChild(el("th", "", t("cmpObserved")));
-          thead.appendChild(hr); mt.appendChild(thead);
-          const tb = el("tbody");
-          for (const k of diffs) {
-            const tr = el("tr", "cmp-diff");
-            tr.appendChild(el("td", "cmp-field", fieldLabel(k)));
-            tr.appendChild(el("td", "mono", String(c.expected[k])));
-            tr.appendChild(el("td", "mono cmp-bad", String(c.observed[k])));
-            tb.appendChild(tr);
-          }
-          mt.appendChild(tb);
-          card.appendChild(mt);
-        }
-      }
-
+      // collapsed = collapsed: details (criterion, reason, comparison) only on open.
+      // The old always-on mini deviation table made 146 MISMATCH cards read as
+      // "expanded by default" — removed in T10-045.
       if (isOpen) {
+        const metaText = crit?.description || c.criterion_id || "—";
+        card.appendChild(el("p", "card-meta",
+          metaText.length > 220 ? metaText.slice(0, metaText.lastIndexOf(" ", 220)) + " …" : metaText));
+        const hr = humanReason(c);
+        if (hr.intro) card.appendChild(el("p", "card-reason", hr.intro));
+        if (hr.body) card.appendChild(el("p", hr.intro ? "card-detail" : "card-reason", hr.body));
         const cmp = comparisonTable(c);
         if (cmp) {
           card.appendChild(el("p", "card-subhead", LANG === "de" ? "Feldvergleich (Soll / Ist)" : "Field comparison (expected / transmitted)"));
@@ -668,7 +880,7 @@
         const row = (k, v) => { kv.appendChild(el("dt", "", k)); kv.appendChild(el("dd", "", String(v ?? "—"))); };
         if (c.inputs && Object.keys(c.inputs).length) {
           row(LANG === "de" ? "Sachverhalt (Eingaben)" : "Scenario (inputs)",
-            Object.entries(c.inputs).map(([k, v]) => `${fieldLabel(k)}: ${v}`).join(" · "));
+            Object.entries(c.inputs).map(([k, v]) => `${fieldLabel(k)}: ${fmtInputValue(v)}`).join(" · "));
         }
         row(t("basis"), c.expected_basis);
         if (c.run_at) row(t("runAt"), fmtDateTime(c.run_at));
@@ -927,49 +1139,320 @@
     if (!src && !tpl) body.appendChild(el("div", "empty", t("emptySources")));
   }
 
-  // trust strip — the three sentences a government reviewer can repeat to their boss
+  // footer footnotes (T10-044, owner directive): the trust pills moved out of the
+  // header into the bottom bar, next to the synthetic-data note. The "local"
+  // wording matches the privacy panel: the store and audit log stay local; the
+  // only outward channels are the airlock-protected LLM context and the seal
+  // fingerprint.
   function renderTrust() {
-    const strip = $("trust-strip");
+    const strip = $("foot-notes");
     if (!strip) return;
     strip.textContent = "";
-    strip.hidden = false;
     const st = S.appState || {};
     const b = st.backend || {};
     const h = st.harness;
-    // each pill: bold lead label + one short plain sentence (what it means,
-    // not how it works) — details live in the tooltip
+    // icon + short label; the full sentence lives in the flyover (title) — T10-045
+    const ICONS = {
+      check: '<circle cx="10" cy="10" r="7" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M6.8 10.2l2.2 2.2 4.2-4.8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>',
+      lock: '<rect x="5" y="9" width="10" height="7" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M7.5 9V7a2.5 2.5 0 0 1 5 0v2" fill="none" stroke="currentColor" stroke-width="1.6"/>',
+      shield: '<path d="M10 2.5 16 5v4.5c0 4.1-2.6 7-6 8.1-3.4-1.1-6-4-6-8.1V5z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M7.2 10l2 2 3.6-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>',
+      eyes: '<circle cx="7" cy="10" r="2.6" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="13.5" cy="10" r="2.6" fill="none" stroke="currentColor" stroke-width="1.5"/>',
+    };
     const items = [];
-    if (h) items.push({
-      lead: LANG === "de" ? "Automatisch geprüft" : "Auto-tested",
-      text: LANG === "de" ? `${h.correct}/${h.cases} Testfälle korrekt` : `${h.correct}/${h.cases} test cases correct`,
-      title: LANG === "de"
-        ? `Regressionstest: Die gesamte Prüflogik läuft automatisch gegen eine unabhängige Vergleichsliste (offizielles Beispielpapier + generierte Fälle). Ergebnis: ${h.correct}/${h.cases} korrekt, ${h.false_alarms} Fehlalarme bei ${h.clean_cases ?? "—"} sauberen Fällen.`
-        : `Regression test against an independent ground truth. Result: ${h.correct}/${h.cases} correct, ${h.false_alarms} false alarms.`,
-    });
+    if (h) items.push({ icon: "check", label: `${t("footAutoLabel")} ${t("footAuto", h.correct, h.cases)}`, title: t("footAutoTitle") });
     items.push(
-      { lead: LANG === "de" ? "Nur lokal" : "Local only",
-        text: LANG === "de" ? "keine Daten verlassen diesen Rechner"
-                            : "no data leaves this machine",
-        title: LANG === "de" ? "Prüfdaten, Speicher und Audit-Log laufen auf diesem Rechner. Nach außen geht nur zweimal das Nötigste: dem Sprachmodell wird der benötigte Textkontext übergeben (nie Personaldaten), und beim Siegeln geht nur der SHA-256-Fingerabdruck des Berichts zur Bestätigungsstelle."
-                             : "Only the LLM text context and (when sealing) the report's SHA-256 fingerprint ever leave; never personal data." },
-      { lead: LANG === "de" ? "Ohne Beleg kein Bestand" : "No evidence, no pass",
-        text: LANG === "de" ? "Fehlende Nachweise gelten als „nicht bewertet“"
-                            : "Missing evidence counts as “not evaluated”",
-        title: LANG === "de" ? "Fail-closed-Prinzip: Fehlt eine Grundlage, ein Erwartungswert oder die Software-Ausgabe, bleibt das Ergebnis „Nicht bewertet“ — ein stiller Durchwink ist ausgeschlossen."
-                             : "Fail-closed: missing basis, expected value or software output keeps the result “not evaluated”." },
-      { lead: LANG === "de" ? "4-Augen-Prinzip" : "Four-eyes principle",
-        text: LANG === "de" ? `KI schlägt vor, der Mensch entscheidet (${b.gates ?? "—"} protokolliert)`
-                            : `AI proposes, the human decides (${b.gates ?? "—"} recorded)`,
-        title: LANG === "de" ? "Vier-Augen-Prinzip: Der Autor einer KI-Ausgabe darf sie nicht selbst freigeben; jede Gate-Entscheidung trägt Name, Zeitstempel und Begründung."
-                             : "The author of an AI output may not approve it; every gate decision carries name, timestamp and rationale." },
+      { icon: "lock", label: t("footLocal"), title: t("footLocalTitle") },
+      { icon: "shield", label: t("footFail"), title: t("footFailTitle") },
+      { icon: "eyes", label: t("footEyes", b.gates ?? "—"), title: t("footEyesTitle") },
     );
     for (const it of items) {
-      const chip = el("span", "chip trust-chip");
-      chip.appendChild(el("strong", "", it.lead + ": "));
-      chip.appendChild(document.createTextNode(it.text));
+      const chip = el("span", "foot-note has-tip");
+      const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      svg.setAttribute("viewBox", "0 0 20 20");
+      svg.setAttribute("aria-hidden", "true");
+      svg.innerHTML = ICONS[it.icon];  // static literal, never user data
+      chip.appendChild(svg);
+      chip.appendChild(el("span", "foot-note-label", it.label));
       chip.title = it.title;
       strip.appendChild(chip);
     }
+  }
+
+  // =========================================================================
+  // Regulations browser (T10-045): browse + search the indexed law corpus,
+  // read a section as markdown or the original PDF. Data comes only from
+  // /api/regulations* (containment-checked server side).
+  // =========================================================================
+
+  // Escape FIRST, then add markup — the chunk text is untrusted, so the only
+  // tags present are the ones this function generates.
+  function mdToSafeHtml(md) {
+    const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+    const fmt = (s) => s.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+    // strip the YAML front matter the generator prepends (shown in the header instead)
+    const body = String(md).replace(/^---\s*\n[\s\S]*?\n---\s*\n?/, "");
+    const html = [];
+    let listOpen = false;
+    let para = [];
+    let fence = false;
+    const flushPara = () => { if (para.length) { html.push("<p>" + fmt(para.join("<br>")) + "</p>"); para = []; } };
+    const closeList = () => { if (listOpen) { html.push("</ul>"); listOpen = false; } };
+    for (const raw of esc(body).split(/\r?\n/)) {
+      const line = raw.trimEnd();
+      if (/^```/.test(line)) {  // fenced block: verbatim, monospace
+        flushPara(); closeList();
+        html.push(fence ? "</pre>" : '<pre class="md-fence">');
+        fence = !fence;
+        continue;
+      }
+      if (fence) { html.push(line); continue; }
+      const h = line.match(/^(#{1,6})\s+(.*)$/);
+      if (h) { flushPara(); closeList(); html.push(`<h${h[1].length}>${fmt(h[2])}</h${h[1].length}>`); continue; }
+      if (/^\s*[-*]\s+/.test(line)) {
+        flushPara();
+        if (!listOpen) { html.push("<ul>"); listOpen = true; }
+        html.push(`<li>${fmt(line.replace(/^\s*[-*]\s+/, ""))}</li>`);
+        continue;
+      }
+      if (/^\|/.test(line)) { flushPara(); closeList(); html.push(`<div class="md-line">${line}</div>`); continue; }
+      if (!line.trim()) { flushPara(); closeList(); continue; }
+      closeList();
+      para.push(line);
+    }
+    flushPara();
+    closeList();
+    return html.join("");
+  }
+
+  async function loadRegulations() {
+    S.regLoaded = true;
+    try {
+      const r = await fetch("/api/regulations");
+      const body = await r.json();
+      S.regDocs = body.ok ? body.docs : [];
+    } catch {
+      S.regDocs = [];
+    }
+    renderRegulations();
+  }
+
+  async function regRunSearch() {
+    const q = S.regQ.trim();
+    if (!q && !S.regDoc) { S.regResults = null; renderRegResults(); return; }
+    const params = new URLSearchParams({ q: q || "*", limit: "200" });
+    if (S.regDoc) params.set("doc", S.regDoc);
+    try {
+      const r = await fetch(`/api/regulations/search?${params}`);
+      const body = await r.json();
+      S.regResults = body.ok ? body.results : [];
+    } catch {
+      S.regResults = [];
+    }
+    renderRegResults();
+  }
+
+  async function regOpenChunk(path) {
+    try {
+      const r = await fetch(`/api/regulations/chunk?path=${encodeURIComponent(path)}`);
+      const body = await r.json();
+      if (body.ok) { S.regSelected = body; S.regPdf = null; renderRegReader(); return; }
+    } catch { /* reader stays empty, honest error below */ }
+    S.regSelected = { error: true };
+    renderRegReader();
+  }
+
+  function renderRegShell() {
+    const root = $("reg-body");
+    if (!root || root.dataset.init) return;
+    root.dataset.init = "1";
+    root.textContent = "";
+    const bar = el("div", "reg-toolbar");
+    const search = el("input", "reg-search");
+    search.type = "search";
+    search.placeholder = t("regSearchPh");
+    search.setAttribute("aria-label", t("regSearchPh"));
+    let debounce = 0;
+    search.addEventListener("input", () => {
+      S.regQ = search.value;
+      clearTimeout(debounce);
+      debounce = setTimeout(regRunSearch, 200);
+    });
+    bar.appendChild(search);
+    const select = el("select", "reg-doc-select");
+    select.setAttribute("aria-label", t("regAllDocs"));
+    select.addEventListener("change", () => {
+      S.regDoc = select.value;
+      regRunSearch();
+    });
+    bar.appendChild(select);
+    root.appendChild(bar);
+    const cols = el("div", "reg-cols");
+    cols.appendChild(el("div", "reg-results", ""));
+    cols.appendChild(el("div", "reg-reader", ""));
+    root.appendChild(cols);
+  }
+
+  function renderRegulations() {
+    renderRegShell();
+    const select = document.querySelector("#reg-body .reg-doc-select");
+    if (select) {
+      select.textContent = "";
+      const all = el("option", "", `${t("regAllDocs")} (${S.regDocs.length})`);
+      all.value = "";
+      select.appendChild(all);
+      for (const d of S.regDocs) {
+        const opt = el("option", "", `${d.doc} — ${d.title} (${d.chunks} ${t("regChunks")})`);
+        opt.value = d.doc;
+        select.appendChild(opt);
+      }
+      select.value = S.regDoc;
+    }
+    renderRegResults();
+    renderRegReader();
+  }
+
+  function renderRegResults() {
+    const box = document.querySelector("#reg-body .reg-results");
+    if (!box) return;
+    box.textContent = "";
+    if (!S.regDocs.length) {
+      box.appendChild(el("div", "empty", LANG === "de"
+        ? "Regelkorpus nicht erreichbar — Bridge neu starten."
+        : "Regulation corpus unreachable — restart the bridge."));
+      return;
+    }
+    if (!S.regResults) {
+      // no query yet: browse by document — the corpus IS the navigation
+      if (!S.regDoc) {
+        const docs = el("div", "reg-doc-list");
+        for (const d of S.regDocs) {
+          const item = el("button", "reg-doc");
+          item.type = "button";
+          item.appendChild(el("span", "reg-doc-id", d.doc));
+          const t2 = el("span", "reg-doc-main");
+          t2.appendChild(el("span", "reg-doc-title", d.title));
+          t2.appendChild(el("span", "reg-doc-where",
+            `${d.chunks} ${t("regChunks")}${d.version ? " · v" + d.version : ""}`));
+          item.appendChild(t2);
+          if (d.pdf_available) item.appendChild(el("span", "reg-doc-pdf", "PDF"));
+          item.addEventListener("click", () => {
+            S.regDoc = d.doc;
+            const select = document.querySelector("#reg-body .reg-doc-select");
+            if (select) select.value = d.doc;
+            regRunSearch();
+          });
+          docs.appendChild(item);
+        }
+        box.appendChild(docs);
+        return;
+      }
+      box.appendChild(el("div", "empty", t("regEmpty")));
+      // browse the selected document's sections
+      const doc = S.regDocs.find((d) => d.doc === S.regDoc);
+      if (doc) regBrowseDoc(doc);
+      return;
+    }
+    if (!S.regResults.length) { box.appendChild(el("div", "empty", t("regNoResults"))); return; }
+    const list = el("div", "reg-hit-list");
+    for (const hit of S.regResults) {
+      const item = el("button", "reg-hit");
+      item.type = "button";
+      item.appendChild(el("span", "reg-hit-where",
+        `${hit.doc_title || hit.doc}${hit.section ? " · " + hit.section : ""}${hit.pages ? " · S. " + hit.pages : ""}`));
+      item.appendChild(el("span", "reg-hit-title", hit.title || ""));
+      item.appendChild(el("span", "reg-hit-snippet", hit.snippet || ""));
+      item.addEventListener("click", () => {
+        list.querySelectorAll(".reg-hit.active").forEach((n) => n.classList.remove("active"));
+        item.classList.add("active");
+        regOpenChunk(hit.path);
+      });
+      list.appendChild(item);
+    }
+    box.appendChild(list);
+  }
+
+  // browse mode (no query): list the selected document's sections in order
+  async function regBrowseDoc(doc) {
+    try {
+      const r = await fetch(`/api/regulations/search?q=*&doc=${encodeURIComponent(doc.doc)}&limit=500`);
+      const body = await r.json();
+      const box = document.querySelector("#reg-body .reg-results");
+      if (!box || S.regResults) return;  // a search arrived in the meantime
+      if (!body.ok) return;
+      const list = el("div", "reg-hit-list");
+      for (const hit of body.results) {
+        const item = el("button", "reg-hit");
+        item.type = "button";
+        item.appendChild(el("span", "reg-hit-where",
+          `${hit.section ? "§ " + hit.section + " · " : ""}${hit.pages ? "S. " + hit.pages : ""}`));
+        item.appendChild(el("span", "reg-hit-title", hit.title || ""));
+        item.addEventListener("click", () => {
+          list.querySelectorAll(".reg-hit.active").forEach((n) => n.classList.remove("active"));
+          item.classList.add("active");
+          regOpenChunk(hit.path);
+        });
+        list.appendChild(item);
+      }
+      box.appendChild(list);
+    } catch { /* results pane keeps the empty hint */ }
+  }
+
+  function renderRegReader() {
+    const box = document.querySelector("#reg-body .reg-reader");
+    if (!box) return;
+    box.textContent = "";
+    if (S.regPdf) {
+      // original PDF view: browser-native viewer in an iframe, back button on top
+      const head = el("div", "reg-reader-head");
+      const back = el("button", "ghost-btn", `← ${t("regBackToText")}`);
+      back.type = "button";
+      back.addEventListener("click", () => { S.regPdf = null; renderRegReader(); });
+      head.appendChild(back);
+      const doc = S.regDocs.find((d) => d.doc === S.regPdf);
+      if (doc && doc.pdf_available) {
+        const open = el("button", "ghost-btn", t("regOpenPdf"));
+        open.type = "button";
+        open.addEventListener("click", () => window.open(`/api/regulations/pdf?doc=${encodeURIComponent(S.regPdf)}`, "_blank"));
+        head.appendChild(open);
+      }
+      box.appendChild(head);
+      const frame = el("iframe", "reg-pdf-frame");
+      frame.title = t("regOpenPdf");
+      frame.src = `/api/regulations/pdf?doc=${encodeURIComponent(S.regPdf)}`;
+      box.appendChild(frame);
+      return;
+    }
+    if (!S.regSelected) {
+      box.appendChild(el("div", "empty", LANG === "de"
+        ? "Abschnitt auswählen — Suche links oder stöbern."
+        : "Pick a section — search on the left or browse."));
+      return;
+    }
+    if (S.regSelected.error) {
+      box.appendChild(el("div", "empty", LANG === "de"
+        ? "Abschnitt nicht ladbar."
+        : "Section could not be loaded."));
+      return;
+    }
+    const m = S.regSelected;
+    const head = el("div", "reg-reader-head");
+    const title = el("div", "reg-reader-title");
+    title.appendChild(el("strong", null, m.doc_title || m.doc || ""));
+    title.appendChild(el("span", "reg-reader-where",
+      `${m.section ? "§ " + m.section : ""}${m.title ? " — " + m.title : ""}${m.pages ? " · " + t("regPages") + " " + m.pages : ""}${m.version ? " · v" + m.version : ""}`));
+    head.appendChild(title);
+    const doc = S.regDocs.find((d) => d.doc === m.doc);
+    if (doc && doc.pdf_available) {
+      const pdfBtn = el("button", "ghost-btn", t("regOpenPdf"));
+      pdfBtn.type = "button";
+      pdfBtn.addEventListener("click", () => { S.regPdf = doc.doc; renderRegReader(); });
+      head.appendChild(pdfBtn);
+    }
+    box.appendChild(head);
+    const article = el("article", "reg-md");
+    article.innerHTML = mdToSafeHtml(m.text || "");  // escaped-first markdown
+    box.appendChild(article);
   }
 
   // =========================================================================
@@ -1449,6 +1932,330 @@
     }
   }
   pollHealth(); setInterval(pollHealth, 15000);
+
+  // ---------- Datenschutz-Schleuse badge + panel (T10-043) ----------
+  // The badge states what the backend reports — nothing is claimed client-side.
+  S.privacy = null;
+  let privacyOpen = false;
+
+  const destLabel = (name) => ({ hessian_ai: t("privacyChatWired"), langfuse: t("privacyLangfuseWired") }[name] || name);
+
+  function renderPrivacyPanel() {
+    const panel = $("privacy-panel");
+    if (!privacyOpen || !S.privacy) { panel.hidden = true; return; }
+    const p = S.privacy;
+    panel.textContent = "";
+    // A refused airlock (module not loadable) must say WHY — never a silent row of "—".
+    if (p.ok === false) {
+      panel.appendChild(el("p", "privacy-refused", p.reason || t("privacyRefusedTitle")));
+      panel.appendChild(el("p", "privacy-refused-note",
+        LANG === "de" ? "Fail-closed: die Daten bleiben lokal, nichts geht nach außen."
+                      : "Fail-closed: data stays local, nothing leaves."));
+      panel.hidden = false;
+      return;
+    }
+    const head = el("div", "privacy-head");
+    const shield = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    shield.setAttribute("viewBox", "0 0 20 20"); shield.setAttribute("class", "shield-ico");
+    shield.setAttribute("aria-hidden", "true");
+    const p1 = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    p1.setAttribute("d", "M10 2.5 16 5v4.5c0 4.1-2.6 7-6 8.1-3.4-1.1-6-4-6-8.1V5z");
+    const p2 = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    p2.setAttribute("class", "shield-check"); p2.setAttribute("d", "M7.2 10l2 2 3.6-4");
+    for (const a of [p1, p2]) {
+      a.setAttribute("fill", "none"); a.setAttribute("stroke", "currentColor");
+      a.setAttribute("stroke-width", "1.6"); a.setAttribute("stroke-linecap", "round");
+      a.setAttribute("stroke-linejoin", "round"); shield.appendChild(a);
+    }
+    head.appendChild(shield);
+    const ht = el("div", "privacy-head-text");
+    ht.appendChild(el("strong", null, t("privacyTitle")));
+    ht.appendChild(el("p", null, t("privacySub")));
+    head.appendChild(ht);
+    panel.appendChild(head);
+
+    const rows = el("dl", "privacy-rows");
+    const row = (dt, dd) => { rows.appendChild(el("dt", null, dt)); rows.appendChild(el("dd", null, dd)); };
+    row(t("privacyPolicy"), String(p.policy_version || "—"));
+    row(t("privacyKeyMode"), String(p.key_mode || "—"));
+    const dests = p.destinations && typeof p.destinations === "object"
+      ? Object.entries(p.destinations).map(([name, cfg]) => `${destLabel(name)} — ${cfg && cfg.mode ? cfg.mode : "?"}`).join(" · ")
+      : "—";
+    row(t("privacyChannels"), dests);
+    const wired = p.wired && typeof p.wired === "object" ? Object.values(p.wired).join(" · ") : "—";
+    row(t("privacyWiring"), wired);
+    const cats = Array.isArray(p.categories) && p.categories.length ? p.categories.join(", ") : t("privacyNone");
+    row(t("privacyCategories"), cats);
+    panel.appendChild(rows);
+    panel.hidden = false;
+  }
+
+  async function pollPrivacy() {
+    const badge = $("privacy-badge");
+    try {
+      const r = await fetch("/api/privacy");
+      const body = await r.json();
+      S.privacy = body;
+      delete badge.dataset.offline;  // an answer arrived: ok:false is "refused", not offline
+    } catch {
+      S.privacy = null;
+      badge.dataset.offline = "1";
+    }
+    syncPrivacyBadge();
+    renderPrivacyPanel();
+  }
+
+  // badge state + label from the LAST backend answer — re-applied on language
+  // toggle so the button always speaks the current language (T10-044 fix).
+  // Three states (T10-045): ok (green) / offline (neutral — bridge unreachable,
+  // which is NOT "unprotected") / refused (red — airlock loaded but refused).
+  function syncPrivacyBadge() {
+    const badge = $("privacy-badge"), label = $("privacy-label");
+    const offline = badge.dataset.offline === "1";
+    const refused = !offline && S.privacy && S.privacy.ok === false;
+    const ok = !offline && !refused && S.privacy && S.privacy.ok && S.privacy.active;
+    badge.hidden = false;
+    badge.className = `privacy-badge ${ok ? "ok" : refused ? "refused" : offline ? "off" : "bad"}`;
+    badge.title = ok ? t("privacyTitle")
+      : refused ? (S.privacy?.reason || t("privacyRefusedTitle"))
+      : offline ? (LANG === "de" ? "Bridge nicht erreichbar — Status unbekannt."
+                                  : "Bridge unreachable — status unknown.")
+      : t("privacyOff");
+    label.textContent = ok ? t("privacyOn")
+      : refused ? t("privacyRefused")
+      : offline ? t("privacyOffline")
+      : t("privacyOff");
+  }
+  $("privacy-badge").addEventListener("click", () => {
+    privacyOpen = !privacyOpen;
+    $("privacy-badge").setAttribute("aria-expanded", String(privacyOpen));
+    renderPrivacyPanel();
+  });
+  document.addEventListener("click", (e) => {
+    if (privacyOpen && !e.target.closest("#privacy-panel") && !e.target.closest("#privacy-badge")) {
+      privacyOpen = false;
+      $("privacy-badge").setAttribute("aria-expanded", "false");
+      renderPrivacyPanel();
+    }
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && privacyOpen) {
+      privacyOpen = false;
+      $("privacy-badge").setAttribute("aria-expanded", "false");
+      renderPrivacyPanel();
+    }
+  });
+  pollPrivacy(); setInterval(pollPrivacy, 30000);
+
+  // ---------- Help & Support + "What's this?" mode (T10-044) ----------
+  // Deterministic explain-surface: flyover texts are a local registry (offline-safe,
+  // DE/EN); "Ask SÜSIE" hands the topic to the assistant, whose deterministic layer
+  // answers the registered topics and the model handles the rest (cite-or-abstain).
+  const HELP_UI = {
+    "susie-entry": {
+      title: { de: "SÜSIE — Logo", en: "SÜSIE — logo" },
+      text: { de: "Klick öffnet SÜSIE im Vollbild-Modus. SÜSIE ist Ihre Assistentin für diese Systemprüfung: sie erklärt, führt auf Ihr Wort aus und protokolliert jeden Schritt.",
+              en: "Click opens SÜSIE in fullscreen. SÜSIE is your assistant for this system review: she explains, executes on your word and records every step." },
+      ask: null,
+    },
+    "nav-regulations": {
+      title: { de: "Regelwerke", en: "Regulations" },
+      text: { de: "Durchsuchen und lesen Sie die indizierten Gesetzestexte (VB, GG, Beispielpapier, Rundschreiben) — als Abschnitt im Markdown-Reader oder als Original-PDF.",
+              en: "Search and read the indexed law texts (VB, GG, sample document, circulars) — as a section in the markdown reader or as the original PDF." },
+      ask: null,
+    },
+    "fab": {
+      title: { de: "SÜSIE Assistentin", en: "SÜSIE assistant" },
+      text: { de: "Öffnet den SÜSIE-Chat als Flyover. Fragen Sie frei heraus — Navigation und Status laufen lokal, ganz ohne Sprachdienst.",
+              en: "Opens the SÜSIE chat as a flyover. Ask freely — navigation and status run locally, no language service needed." },
+      ask: null,
+    },
+    "nav-cases": {
+      title: { de: "Prüffälle", en: "Cases" },
+      text: { de: "Die Prüffallkartei: je Fall der Soll/Ist-Vergleich zwischen offizieller Erwartung und übermittelter Softwareausgabe. Abweichungen sind sofort sichtbar.",
+              en: "The case file: per case, the expected/transmitted comparison between the official expectation and the software output. Deviations visible at a glance." },
+      ask: { de: "Was sind die Prüffälle?", en: "What are the cases?" } },
+    "nav-report": {
+      title: { de: "Prüfbericht", en: "Report" },
+      text: { de: "Der vollständige Prüfbericht: Zusammenfassung mit Empfehlungen, alle Befunde im Detail, Belegkette und PDF-Export mit Manipulationssiegel.",
+              en: "The full review report: summary with recommended actions, all findings in detail, evidence chain and PDF export with tamper-evidence seal." },
+      ask: { de: "Was ist der Prüfbericht?", en: "What is the report?" } },
+    "nav-sources": {
+      title: { de: "Quellen", en: "Sources" },
+      text: { de: "Worauf die Prüfung beruht: Rechtsgrundlagen mit Version, Gültigkeit und SHA-256 — und wer welche KI-Ausgabe freigegeben hat.",
+              en: "What the review rests on: legal bases with version, validity and SHA-256 — and who approved which AI output." },
+      ask: { de: "Was sind die Quellen?", en: "What are the sources?" } },
+    "gen-cases": {
+      title: { de: "Testfälle aus dem Gesetz erstellen", en: "Create test cases from the law" },
+      text: { de: "Startet den KI-Prüflauf: Gesetz → Anforderungen → Testfälle. Nichts wird ausgeführt, bevor Sie es nicht ausdrücklich bestätigt haben (4-Augen-Prinzip).",
+              en: "Starts the AI review run: law → requirements → test cases. Nothing executes before your explicit confirmation (four-eyes principle)." },
+      ask: { de: "Wie werden Testfälle aus dem Gesetz erstellt?", en: "How are test cases generated from the law?" } },
+    "run-compare": {
+      title: { de: "Abgleich starten", en: "Run comparison" },
+      text: { de: "Deterministischer Feldvergleich in Code — ohne KI, in Sekunden. Zeigt je Feld: offizielle Erwartung gegen übermittelten Wert.",
+              en: "Deterministic field comparison in code — no AI, seconds. Shows per field: official expectation vs. transmitted value." },
+      ask: { de: "Was ist der Abgleich?", en: "What is the comparison?" } },
+    "case-list": {
+      title: { de: "Prüffallkarten", en: "Case cards" },
+      text: { de: "Jede Karte: Falltyp, Status-Badge, klare Befund-Sätze und die Belegkette bis zur Quelle. „Ohne Beleg kein Bestand“ — fehlende Nachweise gelten als nicht bewertet.",
+              en: "Each card: case type, status badge, plain-language findings and the evidence chain back to the source. “No evidence, no pass” — missing evidence counts as not evaluated." },
+      ask: { de: "Was zeigen die Prüffallkarten?", en: "What do the case cards show?" } },
+    "report-body": {
+      title: { de: "Berichtsansicht", en: "Report view" },
+      text: { de: "Hier steht der Prüfstand als Bericht: Befunde, empfohlene Maßnahmen (deterministisch abgeleitet) und die Freigabe-Status je Fall.",
+              en: "The review status as a report: findings, recommended actions (deterministically derived) and release status per case." },
+      ask: { de: "Was ist der Prüfbericht?", en: "What is the report?" } },
+    "sources-body": {
+      title: { de: "Quellen & Kriterien", en: "Sources & criteria" },
+      text: { de: "Quellen mit Versions-/Checksummen-Nachweis und die Kriterien mit ihrer Erwartungs-Grundlage. Jede Quelle ist per G0-Gate menschlich freigegeben.",
+              en: "Sources with version/checksum proof and the criteria with their expectation basis. Every source is human-approved through a G0 gate." },
+      ask: { de: "Was sind die Quellen?", en: "What are the sources?" } },
+    "privacy-badge": {
+      title: { de: "Datenschutz-Schleuse", en: "Privacy airlock" },
+      text: { de: "Das grüne Schild zeigt: Personenbezogene Daten werden vor jedem externen Kanal erkannt, ersetzt und nachgeprüft. Ein Klick öffnet die Details.",
+              en: "The green shield shows: personal data is detected, replaced and re-checked before every external channel. Click for the details." },
+      ask: { de: "Was ist die Datenschutz-Schleuse?", en: "What is the privacy airlock?" } },
+    "bridge": {
+      title: { de: "Bridge-Status", en: "Bridge status" },
+      text: { de: "Der Punkt zeigt, ob der lokale Brückendienst antwortet: grün = verbunden, rot = gestört. Bei rot: Dienst neu starten und die Seite neu laden.",
+              en: "The dot shows whether the local bridge service responds: green = connected, red = impaired. If red: restart the service and reload." },
+      ask: { de: "Was ist die Bridge?", en: "What is the bridge?" } },
+    "foot-synthetic": {
+      title: { de: "Synthetische Daten", en: "Synthetic data" },
+      text: { de: "Diese Prüfung läuft ausschließlich mit fabrizierten Testdaten — keine echten Personaldaten. Die Berichtsvorlage ist synthetisch, deshalb enthält der Bericht keine Konformitätsaussage.",
+              en: "This review runs on fabricated test data only — no real personal data. The report template is synthetic, so the report makes no conformance claim." },
+      ask: { de: "Warum synthetische Daten?", en: "Why synthetic data?" } },
+    "lang-toggle": { ask: null },
+    "theme-toggle": {
+      title: { de: "Darstellung umschalten", en: "Toggle appearance" },
+      text: { de: "Zwischen hellem und dunklem Design umschalten.", en: "Switch between light and dark design." },
+      ask: null },
+    "whats-this": {
+      title: { de: "Erklärmodus", en: "Explain mode" },
+      text: { de: "Gerade aktiv: Klicken Sie irgendein Element und SÜSIE erklärt es hier im Flyover. ESC beendet den Modus.",
+              en: "Currently active: click any element and SÜSIE explains it in this flyover. ESC exits the mode." },
+      ask: null },
+    "help-support": {
+      title: { de: "Hilfe & Support", en: "Help & support" },
+      text: { de: "Öffnet die Hilfe: Was SÜSIE kann, Fehlerbehebung und der Erklärmodus.",
+              en: "Opens help: what SÜSIE can do, troubleshooting and explain mode." },
+      ask: null },
+  };
+  const helpPanel = $("help-panel");
+  let helpOpen = false;
+
+  function askSUSIE(question) {
+    setMode(S.mode === "fullscreen" ? "fullscreen" : "overlay");
+    if (!S.busy) sendMessage(question);
+  }
+
+  function renderHelpPanel() {
+    helpPanel.textContent = "";
+    helpPanel.appendChild(el("strong", "help-title", t("helpTitle")));
+    const intro = el("p", "help-intro");
+    intro.textContent = (LANG === "de"
+      ? "Ich bin SÜSIE — Ihre Assistentin für diese Systemprüfung. Ich kenne jeden Prüffall, jede Quelle und jeden Beleg; ich erkläre, führe aus und protokolliere. Entscheidungen treffen Sie."
+      : "I am SÜSIE — your assistant for this system review. I know every case, every source and every piece of evidence; I explain, execute and record. You make the decisions.");
+    helpPanel.appendChild(intro);
+
+    helpPanel.appendChild(el("h3", null, t("helpCapsTitle")));
+    const caps = el("ul", "help-list");
+    for (const c of t("helpCaps")) caps.appendChild(el("li", "", c));
+    helpPanel.appendChild(caps);
+    const askRow = el("div", "help-actions");
+    const askBtn = el("button", "help-act", t("helpAsk"));
+    askBtn.addEventListener("click", () => { closeHelp(); askSUSIE(LANG === "de" ? "Hilfe" : "Help"); });
+    askRow.appendChild(askBtn);
+    helpPanel.appendChild(askRow);
+
+    helpPanel.appendChild(el("h3", null, t("helpTroubleTitle")));
+    const tips = el("ul", "help-list");
+    for (const c of t("helpTrouble")) tips.appendChild(el("li", "", c));
+    helpPanel.appendChild(tips);
+    const troubleRow = el("div", "help-actions");
+    const tBtn = el("button", "help-act", t("helpTroubleAsk"));
+    tBtn.addEventListener("click", () => {
+      closeHelp();
+      askSUSIE(LANG === "de" ? "Etwas funktioniert nicht" : "Something is not working");
+    });
+    troubleRow.appendChild(tBtn);
+    helpPanel.appendChild(troubleRow);
+
+    helpPanel.appendChild(el("h3", null, t("helpWhatsThisTitle")));
+    helpPanel.appendChild(el("p", "help-intro", t("helpWhatsThisText")));
+    const wtRow = el("div", "help-actions");
+    const wtBtn = el("button", "help-act", t("helpStartWhatsThis"));
+    wtBtn.addEventListener("click", () => {
+      closeHelp();
+      setWhatsThis(true);
+    });
+    wtRow.appendChild(wtBtn);
+    helpPanel.appendChild(wtRow);
+  }
+
+  function closeHelp() {
+    helpOpen = false;
+    helpPanel.hidden = true;
+  }
+  $("help-support").addEventListener("click", () => {
+    helpOpen = !helpOpen;
+    if (helpOpen) renderHelpPanel();
+    helpPanel.hidden = !helpOpen;
+  });
+
+  // -- Windows-9x "What's this?" mode: ? cursor, click element, SÜSIE flyover ----
+  let whatsOn = false;
+  const whatsTip = $("whats-tip");
+
+  function setWhatsThis(on) {
+    whatsOn = on;
+    document.body.classList.toggle("whats-this", on);
+    $("whats-this").setAttribute("aria-pressed", String(on));
+    $("whats-hint").textContent = t("whatsHint");
+    $("whats-hint").hidden = !on;
+    if (!on) whatsTip.hidden = true;
+  }
+
+  function showWhatsTip(target, id) {
+    const info = id ? HELP_UI[id] : null;
+    const known = id && info && info.text;
+    whatsTip.textContent = "";
+    const title = (known ? info.title[LANG]
+      : (id && id !== "whats-tip" ? (LANG === "de" ? "Kein Eintrag" : "No entry") : (LANG === "de" ? "Unbekanntes Element" : "Unknown element")));
+    whatsTip.appendChild(el("strong", null, title));
+    const txt = known ? info.text[LANG] : t("whatsNoInfo");
+    for (const line of txt.split("\n")) whatsTip.appendChild(el("p", null, line));
+    const ask = info && info.ask;
+    if (ask) {
+      const btn = el("button", "help-act", t("helpAsk"));
+      btn.addEventListener("click", () => {
+        setWhatsThis(false);
+        askSUSIE(ask[LANG]);
+      });
+      whatsTip.appendChild(btn);
+    }
+    whatsTip.hidden = false;
+    const r = target.getBoundingClientRect();
+    const tw = whatsTip.offsetWidth, th = whatsTip.offsetHeight;
+    let top = r.bottom + 8;
+    if (top + th > window.innerHeight - 8) top = Math.max(8, r.top - th - 8);
+    let left = Math.min(Math.max(8, r.left), window.innerWidth - tw - 8);
+    whatsTip.style.top = `${top}px`;
+    whatsTip.style.left = `${left}px`;
+  }
+
+  $("whats-this").addEventListener("click", () => setWhatsThis(!whatsOn));
+  document.addEventListener("click", (e) => {
+    if (!whatsOn) return;
+    if (e.target.closest("#whats-tip") || e.target.closest("#whats-this")) return;
+    e.preventDefault();
+    e.stopPropagation();
+    const holder = e.target.closest("[data-help]");
+    showWhatsTip(holder || e.target, holder?.dataset.help || null);
+  }, true);
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && whatsOn) setWhatsThis(false);
+  });
 
   // change-detection: the 20 s poll must never re-render (and snap shut the
   // evidence the reviewer is reading) when the store data is unchanged

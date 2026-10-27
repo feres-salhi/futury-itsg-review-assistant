@@ -18,8 +18,10 @@ python-frontmatter
 pydantic>=2
 python-dotenv
 
-# T10-043: Lisa's orchestrator (orchestrator/llm.py) speaks the Anthropic
-# SDK natively; provider/model selection is env-driven (see orchestrator/llm.py).
+# T10-043: Lisa's orchestrator (orchestrator/graph.py, llm.py) — LangGraph drives the
+# two graphs; the LLM calls speak the Anthropic SDK natively (env-driven models,
+# see orchestrator/llm.py). Both were missing from her branch's requirements.
+langgraph>=0.2
 anthropic>=0.40
 
 # Development (optional): the test suite also runs without it via

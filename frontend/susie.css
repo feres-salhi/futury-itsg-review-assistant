@@ -720,3 +720,244 @@ h2 { font-size: 1.1rem; letter-spacing: -.01em; margin: 0 0 .5rem; }
   border: 1px solid var(--line, #e6e4e1); border-radius: var(--radius-card, 14px);
   background: var(--surface, #fff);
 }
+
+/* ---------- Datenschutz-Schleuse badge + panel (T10-043) ---------- */
+.privacy-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 3px 10px 3px 8px;
+  border: 1px solid var(--line-strong); border-radius: 999px;
+  background: var(--surface-2);
+  font: inherit; font-size: .78rem; font-weight: 600; color: var(--ink-2);
+  cursor: pointer; transition: border-color .2s var(--ease-out), background .2s var(--ease-out);
+}
+.privacy-badge:hover { border-color: var(--accent-line); background: var(--accent-soft); }
+.privacy-badge .shield-ico { width: 15px; height: 15px; }
+.privacy-badge.ok { color: var(--pass-ink); border-color: var(--pass-bg); }
+.privacy-badge.ok .shield-ico { color: #2e9e4f; }
+.privacy-badge.bad { color: var(--fail-ink); border-color: var(--fail-bg); }
+.privacy-badge.bad .shield-ico { color: var(--accent); }
+.privacy-panel {
+  position: fixed; z-index: 60; right: 16px; bottom: calc(var(--bottom-h) + 10px);
+  width: min(420px, calc(100vw - 32px));
+  background: var(--surface); border: 1px solid var(--line-strong);
+  border-radius: var(--radius-card); box-shadow: var(--shadow-panel);
+  padding: 16px 18px;
+  font-size: .82rem; color: var(--ink);
+}
+.privacy-head { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 12px; }
+.privacy-head .shield-ico { width: 26px; height: 26px; color: #2e9e4f; flex: none; margin-top: 2px; }
+.privacy-head-text strong { display: block; font-size: .92rem; margin-bottom: 2px; }
+.privacy-head-text p { margin: 0; color: var(--ink-2); line-height: 1.45; }
+.privacy-rows { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; margin: 0; }
+.privacy-rows dt { font-weight: 600; color: var(--ink-2); white-space: nowrap; }
+.privacy-rows dd { margin: 0; overflow-wrap: anywhere; }
+[data-theme="dark"] .privacy-badge.ok .shield-ico,
+[data-theme="dark"] .privacy-head .shield-ico { color: var(--pass-ink); }
+@media (max-width: 640px) {
+  .privacy-badge span#privacy-label { display: none; }
+  .privacy-panel { right: 8px; left: 8px; width: auto; }
+}
+
+/* ---------- footer footnotes (T10-044): trust pills moved from the header ---------- */
+.foot-notes { display: inline-flex; align-items: center; gap: 14px; min-width: 0; }
+.foot-note {
+  font-size: .7rem; color: var(--ink-2); white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis; max-width: 340px;
+}
+@media (max-width: 1180px) { .foot-note:nth-child(n+3) { display: none; } }
+@media (max-width: 900px) { .foot-notes { display: none; } }
+
+/* ---------- Help & Support panel + What's-this mode (T10-044) ---------- */
+.help-panel {
+  position: fixed; z-index: 70; left: 16px; bottom: calc(var(--bottom-h) + 10px);
+  width: min(430px, calc(100vw - 32px));
+  max-height: min(70vh, 560px); overflow: auto;
+  background: var(--surface); border: 1px solid var(--line-strong);
+  border-radius: var(--radius-card); box-shadow: var(--shadow-panel);
+  padding: 16px 18px; font-size: .82rem; color: var(--ink);
+}
+.help-panel .help-title { display: block; font-size: .95rem; margin-bottom: 6px; }
+.help-panel h3 { font-size: .84rem; margin: 14px 0 4px; }
+.help-panel .help-intro { margin: 0 0 6px; color: var(--ink-2); line-height: 1.45; }
+.help-list { margin: 0 0 8px; padding-left: 18px; }
+.help-list li { margin: 3px 0; line-height: 1.4; }
+.help-actions { display: flex; gap: 8px; margin: 6px 0 2px; }
+.help-act {
+  font: inherit; font-size: .78rem; font-weight: 600;
+  padding: 5px 12px; border-radius: 999px; cursor: pointer;
+  border: 1px solid var(--accent-line); background: var(--accent-soft); color: var(--accent-ink);
+  transition: background .2s var(--ease-out);
+}
+.help-act:hover { background: var(--accent-line); }
+#whats-this[aria-pressed="true"] { color: var(--accent-ink); background: var(--accent-soft); }
+body.whats-this, body.whats-this * { cursor: help !important; }
+.whats-hint {
+  position: fixed; z-index: 80; top: 10px; left: 50%; transform: translateX(-50%);
+  background: var(--accent); color: #fff;
+  font-size: .78rem; font-weight: 600;
+  padding: 6px 14px; border-radius: 999px; box-shadow: var(--shadow-panel);
+  pointer-events: none;
+}
+.whats-tip {
+  position: fixed; z-index: 80; width: min(340px, calc(100vw - 24px));
+  background: var(--surface); border: 1px solid var(--accent-line);
+  border-radius: var(--radius-ctl); box-shadow: var(--shadow-panel);
+  padding: 12px 14px; font-size: .8rem; color: var(--ink);
+}
+.whats-tip strong { display: block; margin-bottom: 4px; font-size: .84rem; }
+.whats-tip p { margin: 0 0 6px; color: var(--ink-2); line-height: 1.45; }
+
+/* ---------- T10-045: case list toolbar (search / status filter / sort) ---------- */
+.case-toolbar {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  margin: 0 0 14px;
+}
+.case-search {
+  flex: 1 1 240px; min-width: 200px; max-width: 26rem;
+  height: 36px; padding: 0 12px; font: inherit; font-size: .85rem; color: var(--ink);
+  background: var(--surface); border: 1px solid var(--line-strong);
+  border-radius: var(--radius-ctl);
+}
+.case-search:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-color: transparent; }
+.seg { display: inline-flex; align-items: center; gap: 4px; height: 36px; padding: 0 3px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-ctl); }
+.seg-item {
+  border: none; background: transparent; color: var(--ink-2);
+  font: inherit; font-size: .75rem; padding: 5px 10px; border-radius: 7px; cursor: pointer;
+  white-space: nowrap;
+}
+.seg-item:hover { color: var(--ink); background: var(--surface-2); }
+.seg-item.active { background: var(--accent-soft); color: var(--accent-ink); font-weight: 600; }
+[data-theme="dark"] .seg-item.active { background: rgba(228, 69, 107, .18); color: #ff8fa8; }
+.case-sort {
+  height: 36px; font: inherit; font-size: .78rem; color: var(--ink);
+  padding: 0 8px; background: var(--surface); border: 1px solid var(--line-strong);
+  border-radius: var(--radius-ctl);
+}
+.case-count { font-size: .75rem; color: var(--ink-2); white-space: nowrap; }
+
+/* collapsed case cards: single row, nothing pre-expanded (T10-045) */
+.card:not([aria-expanded="true"]) { cursor: pointer; }
+.card:not([aria-expanded="true"]) .card-head { align-items: center; }
+
+/* ---------- T10-045: regulations browser ---------- */
+.reg-body { display: flex; flex-direction: column; gap: 14px; height: 100%; min-height: 0; }
+.reg-toolbar {
+  display: grid; grid-template-columns: minmax(280px, 380px) 1fr; gap: 14px;
+}
+.reg-search {
+  width: 100%;
+  height: 36px; padding: 0 12px; font: inherit; font-size: .85rem; color: var(--ink);
+  background: var(--surface); border: 1px solid var(--line-strong);
+  border-radius: var(--radius-ctl); box-sizing: border-box;
+}
+.reg-search:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-color: transparent; }
+.reg-doc-select {
+  width: 100%; height: 36px; font: inherit; font-size: .78rem; color: var(--ink);
+  padding: 0 8px; background: var(--surface); border: 1px solid var(--line-strong);
+  border-radius: var(--radius-ctl); box-sizing: border-box;
+}
+.reg-cols {
+  display: grid; grid-template-columns: minmax(280px, 380px) 1fr; gap: 14px;
+  align-items: stretch; flex: 1 1 auto; min-height: 0;
+}
+@media (max-width: 900px) { .reg-cols { grid-template-columns: 1fr; } }
+.reg-results {
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--radius-card); padding: 8px;
+  height: min(600px, calc(100vh - var(--bottom-h) - 220px));
+  min-height: 320px; overflow: auto;
+}
+.reg-hit {
+  display: flex; flex-direction: column; gap: 3px; width: 100%; text-align: left;
+  border: none; background: transparent; color: var(--ink);
+  font: inherit; padding: 9px 10px; border-radius: var(--radius-ctl); cursor: pointer;
+}
+.reg-hit:hover { background: var(--surface-2); }
+.reg-hit.active { background: var(--accent-soft); }
+[data-theme="dark"] .reg-hit.active { background: rgba(228, 69, 107, .18); }
+.reg-hit-where { font-size: .7rem; color: var(--ink-2); }
+.reg-hit-title { font-size: .83rem; font-weight: 600; }
+.reg-hit-snippet { font-size: .75rem; color: var(--ink-2); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.reg-reader {
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--radius-card); padding: 16px 18px;
+  max-height: calc(100vh - var(--bottom-h) - 190px); overflow: auto;
+  display: flex; flex-direction: column; gap: 12px; min-height: 320px;
+}
+.reg-reader-head {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
+  padding-bottom: 10px; border-bottom: 1px solid var(--line);
+}
+.reg-reader-title { display: flex; flex-direction: column; gap: 2px; }
+.reg-reader-title strong { font-size: .95rem; }
+.reg-reader-where { font-size: .74rem; color: var(--ink-2); }
+.reg-pdf-frame { width: 100%; flex: 1 1 auto; min-height: 60vh; border: 1px solid var(--line); border-radius: var(--radius-ctl); background: var(--surface-2); }
+.reg-md { font-size: .86rem; line-height: 1.55; color: var(--ink); }
+.reg-md h1, .reg-md h2, .reg-md h3, .reg-md h4, .reg-md h5, .reg-md h6 { margin: 1em 0 .4em; line-height: 1.3; }
+.reg-md h1 { font-size: 1.15rem; } .reg-md h2 { font-size: 1.05rem; } .reg-md h3 { font-size: .95rem; }
+.reg-md p, .reg-md ul { margin: .5em 0; }
+.reg-md ul { padding-left: 1.3em; }
+.reg-md li { margin: .15em 0; }
+.reg-md .md-line { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .78rem; white-space: pre; overflow-x: auto; padding: 2px 0; }
+.reg-md strong { font-weight: 650; }
+.reg-refused { color: var(--fail-ink); background: var(--fail-bg); padding: 8px 10px; border-radius: var(--radius-ctl); font-size: .8rem; }
+
+/* ---------- T10-045: privacy badge third state + footer icon chips ---------- */
+.privacy-badge.off { color: var(--ink-2); background: var(--mute-bg); }
+.privacy-badge.refused { color: var(--fail-ink); background: var(--fail-bg); }
+.foot-note { display: inline-flex; align-items: center; gap: 5px; }
+.foot-note svg { width: 13px; height: 13px; flex: none; }
+.foot-note-label { white-space: nowrap; }
+#bottom-note { white-space: nowrap; }
+
+/* ---------- T10-045 impeccable pass: regulations browse + reading comfort ---------- */
+/* documents as the entry navigation: the corpus IS the menu */
+.reg-doc-list { display: flex; flex-direction: column; gap: 2px; }
+.reg-doc {
+  display: flex; align-items: flex-start; gap: 10px; width: 100%; text-align: left;
+  border: none; background: transparent; color: var(--ink);
+  font: inherit; padding: 10px; border-radius: var(--radius-ctl); cursor: pointer;
+}
+.reg-doc:hover { background: var(--surface-2); }
+.reg-doc:focus-visible, .reg-hit:focus-visible, .seg-item:focus-visible {
+  outline: 2px solid var(--accent); outline-offset: -2px;
+}
+.reg-doc-id {
+  flex: none; width: 64px; text-align: center;
+  font-size: .68rem; font-weight: 700; letter-spacing: .02em;
+  line-height: 16px; padding: 2px 4px; align-self: flex-start;
+  color: var(--accent-ink); background: var(--accent-soft);
+  border-radius: 6px; box-sizing: border-box;
+}
+[data-theme="dark"] .reg-doc-id { color: #ff8fa8; background: rgba(228, 69, 107, .16); }
+.reg-doc-main { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.reg-doc-title { font-size: .83rem; font-weight: 600; }
+.reg-doc-where { font-size: .72rem; color: var(--ink-2); }
+.reg-doc-pdf {
+  flex: none; margin-left: auto; align-self: flex-start;
+  font-size: .66rem; font-weight: 700; line-height: 14px;
+  color: var(--ink-2); border: 1px solid var(--line-strong);
+  padding: 2px 6px; border-radius: 5px; letter-spacing: .04em;
+}
+/* reading measure: the verse of a law text should not run the full pane */
+.reg-md { max-width: 72ch; }
+/* result/reader panes: equal rhythm, reader breathes */
+.reg-reader { padding: 18px 22px; }
+.reg-reader-head { align-items: flex-start; padding-bottom: 12px; }
+/* the case summary chips belong to the cases view — enforced at CSS level too */
+body:not([data-view="cases"]) .summary-chips { display: none; }
+.reg-md pre.md-fence {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: .74rem; line-height: 1.5; white-space: pre; overflow-x: auto;
+  background: var(--surface-2); border: 1px solid var(--line);
+  border-radius: var(--radius-ctl); padding: 10px 12px; margin: .6em 0;
+}
+
+/* ---------- T10-045 alignment pass ---------- */
+.case-toolbar, .reg-toolbar { align-items: center; }
+.case-toolbar .case-count { line-height: 36px; }
+.ghost-btn { white-space: nowrap; }
+.reg-reader-head .ghost-btn { flex: none; align-self: center; }
+
+/* centered empty state inside the reader pane */
+.reg-reader .empty { margin: auto; text-align: center; }

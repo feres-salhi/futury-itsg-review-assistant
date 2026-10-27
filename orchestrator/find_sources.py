@@ -74,8 +74,10 @@ def main():
               "ai_vs_A": measure(paths, GOLD_A), "ai_vs_B": measure(paths, GOLD_B),
               "dropped_unknown_paths": len(ans.get("relevant", [])) - len(picked), "picked": picked}
     if span:
+        from privacy.langfuse_guard import LangfuseGuard
+        guard = LangfuseGuard()
         span.update_trace(name="find-sources", session_id=run_id, tags=["Team10", "agents", "sources"],
-                          output={k: result[k] for k in ("shortlist", "ai_vs_A", "ai_vs_B")})
+                          output=guard.safe({k: result[k] for k in ("shortlist", "ai_vs_A", "ai_vs_B")}))
         for k in ("ai_vs_A", "ai_vs_B"):
             span.score_trace(name=f"source_recall_{k[-1]}", value=result[k]["recall"], data_type="NUMERIC")
         root.__exit__(None, None, None)

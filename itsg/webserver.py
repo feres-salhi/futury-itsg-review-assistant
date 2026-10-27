@@ -58,6 +58,7 @@ import argparse
 import contextlib
 import io
 import json
+import os
 import re
 import subprocess
 import sys
@@ -100,6 +101,166 @@ _CHAT_ID = re.compile(r"^CHAT-(\d+)$")
 REVIEW_FINDINGS_CAP = 50
 REVIEW_HISTORY_LIMIT = 10
 REVIEW_RUN_TIMEOUT_S = 120
+
+# Regulations browser (T10-045): the indexed chunk corpus under chunks/ plus the
+# original PDFs. Chunk paths and PDF lookups are containment-checked against
+# these fixed roots; no request input ever escapes them.
+CHUNKS_DIR = ROOT / "chunks"
+CHUNK_INDEX_PATH = CHUNKS_DIR / "chunks.jsonl"
+PDF_BASES = (ROOT / "ITSG Files",)
+REGULATIONS_QUERY_CAP = 200
+REGULATIONS_LIMIT_CAP = 50
+
+_reg_chunk_cache: list[dict] | None = None
+_pdf_file_cache: dict[str, Path | None] | None = None
+
+
+def _reg_chunks() -> list[dict]:
+    """The chunk index (cached): one flat list of chunk metadata + text."""
+    global _reg_chunk_cache
+    if _reg_chunk_cache is None:
+        chunks: list[dict] = []
+        try:
+            with open(CHUNK_INDEX_PATH, encoding="utf-8") as fh:
+                for line in fh:
+                    line = line.strip()
+                    if line:
+                        entry = json.loads(line)
+                        if isinstance(entry, dict):
+                            chunks.append(entry)
+        except Exception:
+            pass
+        _reg_chunk_cache = chunks
+    return _reg_chunk_cache
+
+
+def _pdf_index() -> dict[str, Path | None]:
+    """Allowlist of original PDFs: source filename → resolved path (cached)."""
+    global _pdf_file_cache
+    if _pdf_file_cache is None:
+        index: dict[str, Path | None] = {}
+        for base in PDF_BASES:
+            if base.is_dir():
+                for candidate in base.rglob("*.pdf"):
+                    index.setdefault(candidate.name, candidate.resolve())
+        _pdf_file_cache = index
+    return _pdf_file_cache
+
+
+def regulations_overview() -> dict:
+    """Documents available in the indexed corpus, for the UI browser."""
+    chunks = _reg_chunks()
+    if not chunks:
+        return {"ok": False, "error": "chunk index empty or unreadable", "docs": []}
+    docs: dict[str, dict] = {}
+    for entry in chunks:
+        doc_id = str(entry.get("doc") or "?")
+        doc = docs.setdefault(doc_id, {
+            "doc": doc_id,
+            "title": entry.get("doc_title") or doc_id,
+            "version": str(entry.get("version") or ""),
+            "source_file": entry.get("source_file") or "",
+            "chunks": 0,
+        })
+        doc["chunks"] += 1
+    pdfs = _pdf_index()
+    for doc in docs.values():
+        doc["pdf_available"] = bool(doc["source_file"] and doc["source_file"] in pdfs)
+    return {"ok": True, "total_chunks": len(chunks),
+            "docs": sorted(docs.values(), key=lambda d: d["doc"])}
+
+
+def regulations_search(q: str, doc: str = "", limit: int = 30) -> dict:
+    """Keyword search over the chunk corpus (title/section hits rank first).
+
+    ``q="*"`` is the browse mode: every chunk of the selected document passes
+    unscored, so the UI can list a document's sections in order.
+    """
+    q = (q or "").strip()[:REGULATIONS_QUERY_CAP]
+    if not q:
+        return {"ok": False, "error": "query required", "results": []}
+    limit = max(1, min(int(limit or 30), REGULATIONS_LIMIT_CAP if q != "*" else 500))
+    browse = q == "*"
+    terms = [] if browse else [t for t in q.lower().split() if len(t) >= 2]
+    if not terms and not browse:
+        return {"ok": False, "error": "query too short", "results": []}
+    results = []
+    for entry in _reg_chunks():
+        if doc and str(entry.get("doc") or "") != doc:
+            continue
+        title = str(entry.get("title") or "")
+        section = str(entry.get("section") or "")
+        text = str(entry.get("text") or "")
+        hay = f"{title} {section} {text}".lower()
+        score = 0
+        for term in terms:
+            if term in title.lower():
+                score += 8
+            if term == section.lower() or section.lower().startswith(term):
+                score += 20
+            score += min(hay.count(term), 10)
+        if score or browse:
+            at = hay.find(terms[0]) if terms else -1
+            snippet_at = max(0, (at if at >= 0 else 0) - 60)
+            snippet = text[max(0, snippet_at):snippet_at + 260].replace("\n", " ").strip()
+            results.append({
+                "path": entry.get("path"), "doc": entry.get("doc"),
+                "doc_title": entry.get("doc_title"), "section": section,
+                "title": title, "pages": f"{entry.get('page_start')}–{entry.get('page_end')}"
+                if entry.get("page_start") else "",
+                "score": score, "snippet": snippet,
+            })
+    # browse mode: document order (numeric-aware path sort); search: score first
+    if browse:
+        results.sort(key=lambda r: _natkey(str(r["path"] or "")))
+    else:
+        results.sort(key=lambda r: (-r["score"], _natkey(str(r["path"] or ""))))
+    return {"ok": True, "query": q, "count": len(results),
+            "results": results[:limit]}
+
+
+def _natkey(path: str) -> tuple:
+    """Numeric-aware sort key so §2.10 sorts after §2.9."""
+    import re as _re
+    return tuple(int(p) if p.isdigit() else p for p in _re.split(r"(\d+)", path))
+
+
+def regulation_chunk(path: str) -> dict:
+    """One chunk's markdown text; the path is containment-checked under chunks/."""
+    rel = str(path or "").strip().lstrip("/")
+    if not rel or ".." in rel or "\x00" in rel or not rel.endswith(".md"):
+        return {"ok": False, "error": "invalid chunk path"}
+    target = (CHUNKS_DIR / rel).resolve()
+    try:
+        target.relative_to(CHUNKS_DIR.resolve())
+    except ValueError:
+        return {"ok": False, "error": "invalid chunk path"}
+    if not target.is_file():
+        return {"ok": False, "error": "chunk not found"}
+    meta = next((c for c in _reg_chunks() if c.get("path") == rel), {})
+    try:
+        text = target.read_text(encoding="utf-8")
+    except Exception as exc:
+        return {"ok": False, "error": f"chunk unreadable: {exc}"}
+    return {"ok": True, "path": rel, "text": text,
+            "doc": meta.get("doc"), "doc_title": meta.get("doc_title"),
+            "version": meta.get("version"), "section": meta.get("section"),
+            "title": meta.get("title"),
+            "pages": f"{meta.get('page_start')}–{meta.get('page_end')}"
+            if meta.get("page_start") else "",
+            "source_file": meta.get("source_file")}
+
+
+def regulation_pdf(doc: str) -> Path | None:
+    """The original PDF for a corpus document, from the allowlist only."""
+    source_file = next((str(d.get("source_file") or "") for d in regulations_overview()["docs"]
+                        if d.get("doc") == str(doc or "")), "")
+    if not source_file:
+        return None
+    pdf = _pdf_index().get(source_file)
+    if pdf and pdf.is_file() and pdf.suffix.lower() == ".pdf":
+        return pdf
+    return None
 
 
 def load_story_cases(path: Path | None = None) -> dict:
@@ -268,6 +429,37 @@ def load_seal(store_root: Path) -> dict | None:
             "seq": receipt.get("seq")}
 
 
+def privacy_status() -> dict:
+    """Honest Datenschutz-Schleuse status for the UI badge (T10-043).
+
+    Reports configuration and wiring, never key material and never scan values:
+    everything here is derivable from the imported module and the environment.
+    """
+    try:
+        import privacy.schleuse as schleuse   # respects the sys.modules None sentinel (tests)
+    except ImportError:
+        return {"ok": False, "active": False,
+                "reason": "privacy module not importable — external calls are refused (fail closed)"}
+    destinations = {name: {"mode": cfg.get("mode", ""), "allowed": bool(cfg.get("allowed"))}
+                    for name, cfg in sorted(schleuse.POLICY.items())}
+    key_configured = bool(os.environ.get(schleuse.KEY_ENV))
+    return {
+        "ok": True,
+        "active": True,
+        "policy_version": schleuse.POLICY_VERSION,
+        "key_configured": key_configured,
+        # Without PRIVACY_KEY the airlock derives an ephemeral run key (privacy/schleuse.py
+        # get_key): tokens are still stable within one run, none persist across restarts.
+        "key_mode": "persistent (PRIVACY_KEY)" if key_configured else "ephemeral per run",
+        "destinations": destinations,
+        "wired": {
+            "susie_chat_gateway": "pseudonymize + final gate, fail closed (itsg/chat.py)",
+            "langfuse_tracing": "minimize + pseudonymize + check_clean (privacy/langfuse_guard.py)",
+        },
+        "categories": list(schleuse.CATEGORIES),
+    }
+
+
 def build_state(store_root: Path) -> dict:
     """Assemble the UI payload from the store; empty store → empty draft state."""
     store = Store(store_root)
@@ -349,14 +541,18 @@ def build_state(store_root: Path) -> dict:
     return state
 
 
-def run_demo_into(store_root: Path, live: bool) -> dict:
-    """Re-run the demo driver into the store (serialized; offline unless asked)."""
+def run_demo_into(store_root: Path, live: bool, fresh: bool = False) -> dict:
+    """Re-run the demo driver into the store (serialized; offline unless asked).
+
+    ``fresh`` deletes the store first — that silently destroys a fed corpus
+    (T10-045 footgun), so the API only wipes on the explicit opt-in flag.
+    """
     from . import demo  # local import keeps --help cheap
 
     with _run_lock:
         buffer = io.StringIO()
         with contextlib.redirect_stdout(buffer):
-            demo.run_demo(store_root, live=live, fresh=True)
+            demo.run_demo(store_root, live=live, fresh=fresh)
     return build_state(store_root)
 
 
@@ -645,6 +841,35 @@ class SUSIEHandler(BaseHTTPRequestHandler):
                 return
             self._send_json({"ok": True,
                              "turns": chat_history(self.store_root, session_id)})
+        elif path == "/api/privacy":
+            self._send_json(privacy_status())
+        elif path == "/api/regulations":
+            self._send_json(regulations_overview())
+        elif path == "/api/regulations/search":
+            query = urllib.parse.parse_qs(self.path.split("?", 1)[1]) if "?" in self.path else {}
+            self._send_json(regulations_search(
+                (query.get("q") or [""])[0],
+                doc=(query.get("doc") or [""])[0],
+                limit=int((query.get("limit") or ["30"])[0] or 30)))
+        elif path == "/api/regulations/chunk":
+            query = urllib.parse.parse_qs(self.path.split("?", 1)[1]) if "?" in self.path else {}
+            self._send_json(regulation_chunk((query.get("path") or [""])[0]))
+        elif path == "/api/regulations/pdf":
+            query = urllib.parse.parse_qs(self.path.split("?", 1)[1]) if "?" in self.path else {}
+            pdf = regulation_pdf((query.get("doc") or [""])[0])
+            if pdf is None:
+                self._send_json({"ok": False, "error": "pdf not available for this document"},
+                                status=404)
+                return
+            body = pdf.read_bytes()
+            self.send_response(200)
+            self.send_header("Content-Type", "application/pdf")
+            self.send_header("Content-Length", str(len(body)))
+            self.send_header("Content-Disposition",
+                             f'inline; filename="{pdf.name}"')
+            self.send_header("Cache-Control", "no-store")
+            self.end_headers()
+            self.wfile.write(body)
         elif path == "/api/report/pdf":
             self._report_pdf({})
         else:
@@ -666,8 +891,12 @@ class SUSIEHandler(BaseHTTPRequestHandler):
             return
         if path == "/api/run":
             live = bool(body.get("live", False))
+            # T10-045 footgun guard: the demo re-run used to wipe the store
+            # unconditionally (fresh=True), silently destroying a fed corpus.
+            # A wipe now requires the explicit opt-in flag; default is additive.
+            fresh = bool(body.get("fresh", False))
             try:
-                self._send_json(run_demo_into(self.store_root, live=live))
+                self._send_json(run_demo_into(self.store_root, live=live, fresh=fresh))
             except Exception as exc:
                 self._send_json({"ok": False, "error": f"run failed: {exc}"}, status=500)
             return
