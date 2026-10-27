@@ -1,9 +1,0 @@
-# Runtime dependencies for the segmentation stage (T10-005).
-# The skeleton and its tests import and run on the standard library only;
-# these are imported lazily inside the extractor modules.
-pymupdf>=1.24
-python-docx>=1.1
-
-# Development (optional): the test suite also runs without it via
-#   python3 -m unittest discover -s tests
-pytest>=8
