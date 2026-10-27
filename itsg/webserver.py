@@ -731,6 +731,31 @@ def run_seal_action(store_root: Path, action: str) -> dict:
     raise ValueError(f"unknown seal action: {action!r}")
 
 
+def _store_result_rows(store_root: Path, case_id: str) -> list[dict]:
+    """Project one case's store records into an artifact result row.
+
+    report.artifact.json only carries the four T10 story cases; the bulk
+    corpus (T10-044) lives solely in the store. The store is the source of
+    truth — a per-case report must render from it, never 404 on a case the
+    UI clearly shows. Row schema matches the artifact: case_id, criterion_id,
+    result_status, reason, evidence_links.
+    """
+    store = Store(store_root)
+    case = next((t for t in store.all("test_case")
+                 if str(t.get("id", "")) == case_id), None)
+    if case is None:
+        return []
+    finding = next((f for f in store.all("finding")
+                    if case_id in [str(x) for x in (f.get("links") or [])]), None)
+    return [{
+        "case_id": case_id,
+        "criterion_id": str(case.get("criterion_id", "")),
+        "result_status": str((finding or {}).get("status", "NOT_EVALUATED")),
+        "reason": str((finding or {}).get("reason", "")),
+        "evidence_links": [str(f.get("id", ""))] if finding else [],
+    }]
+
+
 def build_report_pdf(store_root: Path, live: bool = False,
                      client_name: str | None = None, lang: str = "de",
                      case_id: str | None = None) -> bytes:
@@ -741,7 +766,8 @@ def build_report_pdf(store_root: Path, live: bool = False,
     the PDF is still returned — with an explicit note instead of a summary.
     ``case_id`` renders a single-case report (owner request 2026-10-27): the
     artifact is filtered to that case's results and the PDF carries an explicit
-    Einzelfall note. An unknown case raises ValueError (→ 404).
+    Einzelfall note. Cases that exist only in the store (bulk corpus) are
+    projected from the store records; an unknown case raises ValueError (→ 404).
     """
     import tempfile
 
@@ -750,17 +776,21 @@ def build_report_pdf(store_root: Path, live: bool = False,
     artifact = report_pdf.find_artifact(store_root)
     summary = None
     summary_note = None
+    data = None
     if case_id:
         data = json.loads(artifact.read_text(encoding="utf-8"))
         rows = [r for r in (data.get("results") or [])
                 if str(r.get("case_id", "")) == str(case_id)]
+        if not rows:
+            rows = _store_result_rows(store_root, case_id)
         if not rows:
             raise ValueError(f"unknown case for report: {case_id!r}")
         data["results"] = rows
         summary_note = (_l_report_scope_de(case_id) if lang != "en"
                         else _l_report_scope_en(case_id))
     if live:
-        data = json.loads(artifact.read_text(encoding="utf-8"))
+        if data is None:
+            data = json.loads(artifact.read_text(encoding="utf-8"))
         with _pdf_lock:
             run = report_pdf.draft_summary_live(
                 data, data.get("results") or [],

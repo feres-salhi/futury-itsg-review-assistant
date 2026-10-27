@@ -28,6 +28,7 @@ import urllib.request
 
 from . import actions, retrieval
 from .llm import LLMError
+from .llm import extract_json_payload
 
 try:   # T10-043: Datenschutz-Schleuse — same import guard as chat.py
     from privacy.schleuse import PrivacyBlocked, apply_policy
@@ -48,7 +49,20 @@ class AgentUnavailable(Exception):
 
 
 def api_key() -> str:
-    return os.environ.get("ANTHROPIC_API_KEY", "").strip()
+    env = os.environ.get("ANTHROPIC_API_KEY", "").strip()
+    if env:
+        return env
+    # owner directive 2026-10-27: the key lives in the encrypted secrets store
+    # (same fail-closed pattern as llm.resolve_token) — an unreadable store
+    # must never block the deterministic chain
+    try:
+        from .secrets import SecretsStore
+        store = SecretsStore()
+        if not store.path.exists():
+            return ""
+        return store.get("ANTHROPIC_API_KEY").strip()
+    except (ValueError, KeyError, OSError):
+        return ""
 
 
 def model_id() -> str:
@@ -282,12 +296,54 @@ def run_turn(message: str, state_context: dict, corpus_hits: list[dict], history
         validation_errors.append(f"tool-step cap reached ({AGENT_MAX_STEPS})")
 
     if not final_text:
+        # The model may spend the whole loop on tool calls without ever
+        # emitting a text block (observed 2026-10-27: 8× tool_use on the full
+        # state context, then the step cap). One last no-tools call forces the
+        # final answer out of what the tools already gathered; the wall clock
+        # still applies — fail closed if nothing is left.
+        remaining = deadline - time.monotonic()
+        if remaining > 5.0:
+            messages.append({"role": "user", "content":
+                             "Beende jetzt den Loop und gib deine finale Antwort als "
+                             "Klartext (keine weiteren Werkzeuge). / End the loop now and "
+                             "give your final answer as plain text — no more tools."})
+            try:
+                payload = {"model": model_id(), "max_tokens": 2048,
+                           "system": system_prompt + "\n" + AGENT_SYSTEM_ADDENDUM,
+                           "messages": messages}
+                response = _messages_post(payload, timeout=min(PER_CALL_TIMEOUT_S, remaining))
+                final_text = "\n".join(
+                    b.get("text", "") for b in (response.get("content") or [])
+                    if isinstance(b, dict) and b.get("type") == "text").strip()
+                if final_text:
+                    validation_errors.append(
+                        "step cap reached without a text block — final answer forced "
+                        "via one no-tools call")
+            except Exception as exc:  # noqa: BLE001 — degrade, never crash the turn
+                validation_errors.append(f"forced final answer failed: {exc}")
+
+    if not final_text:
         raise AgentUnavailable("agent produced no final text")
 
-    proposal = ctx["last_proposal"]
+    # The model sometimes wraps its whole answer in the contracted JSON object
+    # ({"utterance": …}) even on the agent path — unwrap it like the hessian
+    # path does, so the user never sees raw protocol JSON.
+    utterance = final_text
+    action = None
+    try:
+        parsed = json.loads(extract_json_payload(final_text))
+        if isinstance(parsed, dict) and isinstance(parsed.get("utterance"), str):
+            utterance = parsed["utterance"]
+            if isinstance(parsed.get("action"), dict):
+                action = parsed["action"]
+            validation_errors.append("final text was protocol JSON — unwrapped")
+    except (ValueError, json.JSONDecodeError, LLMError):
+        pass  # plain prose — nothing to unwrap
+
+    proposal = ctx["last_proposal"] or action
     return {
         "reply": {
-            "utterance": final_text,
+            "utterance": utterance,
             "citations": _dedupe(ctx["corpus_refs"] + ctx["state_refs"]),
             "action": proposal,
             # grounded only when tools actually returned review data

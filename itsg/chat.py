@@ -73,7 +73,10 @@ PROVIDER = "hessian-ai-vllm-gateway"
 # Demo-critical: a hung gateway must never freeze the assistant. The default
 # wrapper below bakes this timeout into every gateway call (the chat lock is
 # held for the whole turn, so an unbounded call would block ALL chats).
-GATEWAY_TIMEOUT_S = 25
+# 60 s: 25 s measurably starved the models (GLM-Flash needed 17 s on a good
+# turn and spiked past 25 s; Claude's tool loop has its own budget) — the
+# too-tight timeout was the main source of false "gateway down" degradation.
+GATEWAY_TIMEOUT_S = 60
 
 # One-line description + expected params shape per registered action id.
 # Kept in sync with itsg.actions constants — tests/test_chat.py asserts that
@@ -722,9 +725,10 @@ def turn(message: str, state_context: dict, corpus_hits: list[dict], history: li
     reply text. By default the token is resolved via ``llm.resolve_token`` and
     ``llm.chat_completion`` is called with the assistant model.
 
-    Brain chain (T10-046): deterministic commands → Claude Sonnet agent loop
-    (itsg.agent, ANTHROPIC_API_KEY) → hessian gateway → canned fallback →
-    rehearsed degraded utterance.
+    Brain chain (T10-046, amended 2026-10-27): deterministic commands →
+    Claude Sonnet agent loop (itsg.agent, ANTHROPIC_API_KEY) → canned fallback
+    → rehearsed degraded utterance. The hessian gateway only serves when no
+    Anthropic key is configured (owner directive: GLM scratched off for now).
     """
     gateway_injected = gateway is not None
     if gateway is None:
@@ -750,24 +754,37 @@ def turn(message: str, state_context: dict, corpus_hits: list[dict], history: li
     model_used = None
     pre_errors: list[str] = []
 
-    # T10-046: Claude Sonnet agent loop first (owner directive). Missing key,
-    # transport failure, or a privacy block fall through to the hessian chain;
-    # the wall clock is shared (agent budget = 90 s minus the hessian budget).
-    if not gateway_injected and agent.available():
+    # T10-046: Claude Sonnet agent loop first (owner directive). When the agent
+    # is configured, its failure falls straight to the canned layer (hessian is
+    # scratched off per owner directive 2026-10-27); without a key the hessian
+    # chain below still runs. The wall clock is shared.
+    agent_configured = not gateway_injected and agent.available()
+    if agent_configured:
         try:
             agent_result = agent.run_turn(
                 message, state_context, corpus_hits, history,
                 system_prompt=_system_prompt(lang), task_id=task_id,
                 session_id=session_id, lang=lang,
                 store_root=store_root, index_path=index_path,
-                wall_clock_s=max(15.0, 90.0 - GATEWAY_TIMEOUT_S))
+                # the hessian budget no longer shares the clock (GLM scratched
+                # off per owner directive 2026-10-27) — the agent gets its full
+                wall_clock_s=agent.AGENT_WALL_CLOCK_S)
             reply = agent_result["reply"]
             model_used = agent_result["model"]
             privacy_summary = agent_result["privacy"]
             pre_errors = list(agent_result["validation_errors"])
         except agent.AgentUnavailable as exc:
-            reply = None  # hessian fallback below, recorded on the envelope
-            pre_errors = [f"claude agent unavailable — hessian fallback: {exc}"]
+            reply = None
+            pre_errors = [f"claude agent unavailable: {exc}"]
+
+    if reply is None and agent_configured:
+        # Owner directive 2026-10-27: GLM/hessian is scratched from the chain
+        # for now (unreliable — repeated gateway timeouts). When the Claude
+        # agent is configured it is the only external brain; a failure falls
+        # straight to the canned layer (degraded, recorded on the envelope).
+        return _fallback(message, state_context, task_id, session_id, lang,
+                         "; ".join(pre_errors) or "claude agent unavailable",
+                         privacy=privacy_summary)
 
     if reply is None:
         try:
@@ -803,6 +820,8 @@ def turn(message: str, state_context: dict, corpus_hits: list[dict], history: li
                 # attempt with Kolibri-1 before degrading; the envelope records
                 # which model actually answered.
                 model_used = MODEL_ASSISTANT_FALLBACK
+                pre_errors.append(
+                    f"primary model unavailable — fallback answered: {MODEL_ASSISTANT_FALLBACK}")
                 raw = gateway(DEFAULT_ENDPOINT, MODEL_ASSISTANT_FALLBACK,
                               system_prompt, messages, "")
             reply = _parse_reply(raw)
@@ -905,8 +924,6 @@ def _envelope(task_id: str, utterance: str, confidence: str, degraded: bool,
         citations=envelope_citations,
         author=AUTHOR,
     )
-    if model_used != MODEL_ASSISTANT:
-        run.validation_errors.append(f"primary model unavailable — fallback answered: {model_used}")
     run.validation_errors.extend(validation_errors)
     if degraded:
         run.status = "error"
