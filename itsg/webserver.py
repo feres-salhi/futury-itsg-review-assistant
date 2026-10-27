@@ -732,12 +732,16 @@ def run_seal_action(store_root: Path, action: str) -> dict:
 
 
 def build_report_pdf(store_root: Path, live: bool = False,
-                     client_name: str | None = None, lang: str = "de") -> bytes:
+                     client_name: str | None = None, lang: str = "de",
+                     case_id: str | None = None) -> bytes:
     """Render the formal report PDF (T10-036) and return its bytes.
 
     Deterministic content, honest degradation: ``live`` only adds the marked
     AI summary; a gateway failure records an error agent_run in the store and
     the PDF is still returned — with an explicit note instead of a summary.
+    ``case_id`` renders a single-case report (owner request 2026-10-27): the
+    artifact is filtered to that case's results and the PDF carries an explicit
+    Einzelfall note. An unknown case raises ValueError (→ 404).
     """
     import tempfile
 
@@ -746,6 +750,15 @@ def build_report_pdf(store_root: Path, live: bool = False,
     artifact = report_pdf.find_artifact(store_root)
     summary = None
     summary_note = None
+    if case_id:
+        data = json.loads(artifact.read_text(encoding="utf-8"))
+        rows = [r for r in (data.get("results") or [])
+                if str(r.get("case_id", "")) == str(case_id)]
+        if not rows:
+            raise ValueError(f"unknown case for report: {case_id!r}")
+        data["results"] = rows
+        summary_note = (_l_report_scope_de(case_id) if lang != "en"
+                        else _l_report_scope_en(case_id))
     if live:
         data = json.loads(artifact.read_text(encoding="utf-8"))
         with _pdf_lock:
@@ -761,10 +774,26 @@ def build_report_pdf(store_root: Path, live: bool = False,
         Store(store_root).put("agent_run", {"id": run_dict["run_id"], **run_dict})
     with _pdf_lock:
         with tempfile.TemporaryDirectory() as tmp:
+            source = artifact
+            if case_id:
+                # single-case scope: render from the filtered artifact copy
+                source = Path(tmp) / "report.artifact.json"
+                source.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n",
+                                  encoding="utf-8")
             out = Path(tmp) / "formal-report.pdf"
-            report_pdf.generate_report_pdf(artifact, out, client_name=client_name,
+            report_pdf.generate_report_pdf(source, out, client_name=client_name,
                                            summary=summary, summary_note=summary_note, lang=lang)
             return out.read_bytes()
+
+
+def _l_report_scope_de(case_id: str) -> str:
+    return (f"Einzelfallbericht {case_id}: aus dem vollständigen Prüfbericht gefiltert "
+            "(deterministische Grundlage, unverkürzte Nachweise im Vollbericht).")
+
+
+def _l_report_scope_en(case_id: str) -> str:
+    return (f"Single-case report {case_id}: filtered from the full review report "
+            "(deterministic basis; the full report carries the complete evidence).")
 
 
 def _chat_number(record: dict) -> int:
@@ -925,7 +954,8 @@ class SUSIEHandler(BaseHTTPRequestHandler):
             self.wfile.write(body)
         elif path == "/api/report/pdf":
             query = urllib.parse.parse_qs(self.path.split("?", 1)[1]) if "?" in self.path else {}
-            self._report_pdf({"lang": (query.get("lang") or ["de"])[0]})
+            self._report_pdf({"lang": (query.get("lang") or ["de"])[0],
+                              "case_id": (query.get("case_id") or [""])[0]})
         else:
             self._static(path)
 
@@ -1027,18 +1057,24 @@ class SUSIEHandler(BaseHTTPRequestHandler):
         if client_name is not None and not isinstance(client_name, str):
             self._send_json({"ok": False, "error": "client_name must be a string"}, status=400)
             return
+        case_id = str(body.get("case_id") or "").strip()
         try:
             pdf = build_report_pdf(self.store_root, live=bool(body.get("live", False)),
                                    client_name=client_name,
-                                   lang="en" if body.get("lang") == "en" else "de")
+                                   lang="en" if body.get("lang") == "en" else "de",
+                                   case_id=case_id or None)
+        except ValueError as exc:
+            self._send_json({"ok": False, "error": str(exc)}, status=404)
+            return
         except Exception as exc:
             self._send_json({"ok": False, "error": f"report pdf failed: {exc}"}, status=500)
             return
         self.send_response(200)
         self.send_header("Content-Type", "application/pdf")
         self.send_header("Content-Length", str(len(pdf)))
+        name = (f"susie-report-{case_id}.pdf" if case_id else "susie-formalreport.pdf")
         self.send_header("Content-Disposition",
-                         'attachment; filename="susie-formalreport.pdf"')
+                         f'attachment; filename="{name}"')
         self.send_header("Cache-Control", "no-store")
         self.end_headers()
         self.wfile.write(pdf)
