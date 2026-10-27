@@ -191,3 +191,13 @@ Wait for background `b3xx3q9a0` to finish, report before/after accuracy and doub
 - Open: T-12/T-13 expected-value doubts from the test checker (E-14); not committed, not pushed.
 
 - 02:30 Langfuse arrival confirmed: SOURCES-20261027-021434 own session (find-sources + source_finder); AGENTS-verdict-20261027-021514 has checks + check F1..C13 x29. Cause of "missing": ~10-15 min Langfuse delay + empty result of v2 observations fromStartTime query (error-log E-18). The 2 source_finder rows without session are the 01:53 run before the fix; 1 requirement_agent + 1 requirement_critic without session still unexplained.
+
+- 02:40 Annotated report for the team (Korean notes per heading: meaning, ITSG objective, importance): Desktop/Team10-test-report-annotated.pdf (script scratchpad fullreport/annotate.py). Judge version Team10-test-report.pdf unchanged. Commit 8b4d54f on lisa-stories (not pushed).
+
+- 02:55 Artifact 5jACB2sEqWgptBrbRLXM7m: v4 = restored original Korean single-case page; v5 = same layout, English, data from AGENTS-full-20261027-014300 (29 cases, case picker). Builder: scratchpad report/build_latest.py + template-en.html. Note: F1 not run in this run (no criterion linked to F1). experiment-log.md added (not committed).
+
+- 02:45 E-19 fixed: F1/F4/F6 always run (graph.py ALWAYS). Rerun AGENTS-verdict-20261027-024151: F1 29/29, 29/29 correct; wrong Abgabegrund test detected. Not committed.
+
+- 03:00 Experiment log artifact https://claude.ai/artifact/X2ajV1r8sgUU8osCAFXiZN + Desktop/Team10-experiment-log.pdf (A4 landscape, 4 pages). Langfuse per-run cost/latency (metrics API): v3 critic 2.61M tokens/$0.36 vs v2 0.42M/$0.11; no-explainer -34% cost; full loop $0.52 (92% Sonnet writers); expa 600 cases $0.30. Langfuse arrival of check F1 spans for AGENTS-verdict-20261027-024151 not yet confirmed. Report restyle (white, 5jACB2) running in a subagent.
+
+- 03:10 Report 5jACB2sEqWgptBrbRLXM7m v6: white printed-style report (latest.json data, All cases table, F1 note) + Desktop/Team10-review-report.pdf (5 pages). Build: scratchpad build_white.py, report/template-white.html.

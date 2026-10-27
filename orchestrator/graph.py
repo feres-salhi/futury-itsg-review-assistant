@@ -258,8 +258,11 @@ def compare(s: Verdict):
     return {"findings": findings, "score": sc, "log": note(s, f"compare: {sc['outcome']}")}
 
 
+ALWAYS = {"F1", "F4", "F6"}   # message-format checks (Abgabegrund, fixed default values): run even if no criterion links them
+
+
 def apply_criteria(findings, criteria):
-    linked = {c["check"] for c in criteria if c.get("check")}
+    linked = {c["check"] for c in criteria if c.get("check")} | ALWAYS
     out = [f for f in findings if f["id"] in linked or f["status"] == "BLOCKED"]
     for c in criteria:
         if not c.get("check"):
