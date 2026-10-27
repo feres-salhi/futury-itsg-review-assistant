@@ -141,11 +141,11 @@ h2 { font-size: 1.1rem; letter-spacing: -.01em; margin: 0 0 .5rem; }
 .side-link svg, .side-ext svg { width: 19px; height: 19px; flex: none; }
 .side-link:hover, .side-ext:hover { background: var(--surface); color: var(--ink); }
 .side-link.active { background: var(--accent-soft); color: var(--accent-ink); }
-.side-foot { margin-top: auto; display: flex; justify-content: flex-start; }
+.side-foot { margin-top: auto; display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-start; }
 
 .ghost-icon {
   display: grid; place-items: center;
-  width: 36px; height: 36px;
+  width: 2.25rem; height: 2.25rem; flex: none;
   border: 1px solid var(--line); border-radius: var(--radius-ctl);
   background: transparent; color: var(--ink-2);
   transition: background .15s var(--ease-out), color .15s var(--ease-out);
@@ -153,14 +153,14 @@ h2 { font-size: 1.1rem; letter-spacing: -.01em; margin: 0 0 .5rem; }
 .ghost-icon:hover { background: var(--surface); color: var(--ink); }
 .ghost-icon svg { width: 17px; height: 17px; }
 .ghost-lang {
-  min-width: 36px; height: 36px; padding: 0 8px;
+  min-width: 2.25rem; height: 2.25rem; flex: none; padding: 0 8px;
   border: 1px solid var(--line); border-radius: var(--radius-ctl);
   background: transparent; color: var(--ink-2);
   font-size: .76rem; font-weight: 700; letter-spacing: .04em;
   transition: background .15s var(--ease-out), color .15s var(--ease-out);
 }
 .ghost-lang:hover { background: var(--surface); color: var(--ink); }
-.side-foot { display: flex; gap: 8px; }
+.side-foot { display: flex; flex-wrap: wrap; gap: 6px; }
 
 /* ---------- chat agent FAB ---------- */
 .susie-fab {
@@ -201,7 +201,7 @@ h2 { font-size: 1.1rem; letter-spacing: -.01em; margin: 0 0 .5rem; }
 }
 .ghost-btn {
   display: inline-flex; align-items: center; gap: 7px;
-  min-height: 36px; padding: 0 14px;
+  min-height: 2.25rem; padding: 0 .875rem;
   border: 1px solid var(--line); border-radius: 999px;
   background: transparent; color: var(--ink-2); font-size: .86rem; font-weight: 500;
   transition: background .15s var(--ease-out), color .15s var(--ease-out);
@@ -800,12 +800,12 @@ body.whats-this, body.whats-this * { cursor: help !important; }
 }
 .case-search {
   flex: 1 1 240px; min-width: 200px; max-width: 26rem;
-  height: 36px; padding: 0 12px; font: inherit; font-size: .85rem; color: var(--ink);
+  height: 2.25rem; padding: 0 .75rem; font: inherit; font-size: .85rem; color: var(--ink);
   background: var(--surface); border: 1px solid var(--line-strong);
   border-radius: var(--radius-ctl);
 }
 .case-search:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-color: transparent; }
-.seg { display: inline-flex; align-items: center; gap: 4px; height: 36px; padding: 0 3px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-ctl); }
+.seg { display: inline-flex; align-items: center; gap: 4px; height: 2.25rem; padding: 0 .1875rem; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-ctl); }
 .seg-item {
   border: none; background: transparent; color: var(--ink-2);
   font: inherit; font-size: .75rem; padding: 5px 10px; border-radius: 7px; cursor: pointer;
@@ -815,7 +815,7 @@ body.whats-this, body.whats-this * { cursor: help !important; }
 .seg-item.active { background: var(--accent-soft); color: var(--accent-ink); font-weight: 600; }
 [data-theme="dark"] .seg-item.active { background: rgba(228, 69, 107, .18); color: #ff8fa8; }
 .case-sort {
-  height: 36px; font: inherit; font-size: .78rem; color: var(--ink);
+  height: 2.25rem; font: inherit; font-size: .78rem; color: var(--ink);
   padding: 0 8px; background: var(--surface); border: 1px solid var(--line-strong);
   border-radius: var(--radius-ctl);
 }
@@ -828,17 +828,19 @@ body.whats-this, body.whats-this * { cursor: help !important; }
 /* ---------- T10-045: regulations browser ---------- */
 .reg-body { display: flex; flex-direction: column; gap: 10px; height: 100%; min-height: 0; }
 .reg-toolbar {
-  display: grid; grid-template-columns: minmax(280px, 380px) 1fr; gap: 10px;
+  display: grid; grid-template-columns: minmax(280px, 380px) minmax(0, 1fr) auto;
+  align-items: center;
 }
+.reg-toolbar .btn { height: 2.25rem; padding: 0 .875rem; font-size: .86rem; }
 .reg-search {
   width: 100%;
-  height: 36px; padding: 0 12px; font: inherit; font-size: .85rem; color: var(--ink);
+  height: 2.25rem; padding: 0 .75rem; font: inherit; font-size: .85rem; color: var(--ink);
   background: var(--surface); border: 1px solid var(--line-strong);
   border-radius: var(--radius-ctl); box-sizing: border-box;
 }
 .reg-search:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-color: transparent; }
 .reg-doc-select {
-  width: 100%; height: 36px; font: inherit; font-size: .78rem; color: var(--ink);
+  width: 100%; height: 2.25rem; font: inherit; font-size: .78rem; color: var(--ink);
   padding: 0 8px; background: var(--surface); border: 1px solid var(--line-strong);
   border-radius: var(--radius-ctl); box-sizing: border-box;
 }
@@ -940,7 +942,7 @@ body:not([data-view="cases"]) .summary-chips { display: none; }
 
 /* ---------- T10-045 alignment pass ---------- */
 .case-toolbar, .reg-toolbar { align-items: center; }
-.case-toolbar .case-count { line-height: 36px; }
+.case-toolbar .case-count { line-height: 2.25rem; }
 .ghost-btn { white-space: nowrap; }
 .reg-reader-head .ghost-btn { flex: none; align-self: center; }
 
