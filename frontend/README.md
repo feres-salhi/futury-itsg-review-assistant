@@ -16,7 +16,7 @@ Static only (the UI then falls back to clearly-labelled synthetic data):
 python3 -m http.server 8766 --bind 127.0.0.1 --directory frontend
 ```
 
-Open [SÜSIE locally](http://127.0.0.1:8766/). Stop the foreground server with Ctrl+C. Direct entry: `pruefakte.html`.
+Open [SÜSIE locally](http://127.0.0.1:8766/). Stop the foreground server with Ctrl+C.
 
 ## What is delivered
 
@@ -33,7 +33,7 @@ Open [SÜSIE locally](http://127.0.0.1:8766/). Stop the foreground server with C
 
 ## Deliberate prototype boundary
 
-Case data and comparisons are synthetic, local UI examples in `pruefakte.js`. They are not live backend comparator results. The source screen shows reference metadata, not a rendered original PDF. Notes do not approve criteria or findings. The report uses synthetic data and always exports `compliance_claim: false`. No legal, template-compliance, certification or production-readiness claim is made.
+Case data and comparisons are synthetic. They are not live backend comparator results. The source screen shows reference metadata, not a rendered original PDF. Notes do not approve criteria or findings. The report uses synthetic data and always exports `compliance_claim: false`. No legal, template-compliance, certification or production-readiness claim is made.
 
 Backend T10-018 remains separately owned. Integration must replace the local cases/comparison display with actual typed records and endpoints, preserving states, citation provenance and human gates. No HTTP server/API contract was added by this frontend work. Do not overwrite backend fixtures or modules to make the demo appear integrated.
 

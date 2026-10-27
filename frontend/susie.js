@@ -38,7 +38,6 @@
       casesSub: "Ergebnisse je Fall: offizielle Erwartung gegen übermittelte Werte — Abweichungen sofort sichtbar",
       reportSub: "Der vollständige Prüfbericht: Befunde, empfohlene Maßnahmen, PDF-Export und Manipulationssiegel",
       sourcesSub: "Worauf die Prüfung beruht: Rechtsgrundlagen, Vorlage — und wer welche KI-Ausgabe freigegeben hat",
-      advGroup: "Expertenmodus",
       advCases: "Prüffälle-Tabelle", advCasesSub: "Soll/Ist-Tabelle je Fall — die vollständige Datengrundlage hinter den Prüffallkarten",
       advStories: "Story-Suiten", advStoriesSub: "200 Szenario-Fälle mit erwarteter Abweichung — zum Durchklicken und Nachvollziehen",
       advSources: "Quellen & Kriterien", advSourcesSub: "Quellen und Kriterien, aus denen die Prüflogik abgeleitet ist",
@@ -76,7 +75,6 @@
       openCaseAria: "im Prüfbericht öffnen",
       basisSearch: "im Regelwerk öffnen",
       sourcesOpenReg: "Im Regelwerk öffnen",
-      advanced: "Erweiterter Modus",
       topTitle: "Prüffälle",
       topSub: "Systemüberprüfung sozialversicherungsrechtlicher IT-Ergebnisse",
       ask: "Fragen Sie SÜSIE …", yourName: "Ihr Name …", start: "Starten",
@@ -192,7 +190,6 @@
       casesSub: "Results per case: official expectation vs. transmitted values — deviations visible at a glance",
       reportSub: "The full review report: findings, recommended actions, PDF export and tamper-evidence seal",
       sourcesSub: "What the review rests on: legal basis, template — and who approved which AI output",
-      advGroup: "Expert mode",
       advCases: "Case table", advCasesSub: "Expected/transmitted table per case — the full data behind the case cards",
       advStories: "Story suites", advStoriesSub: "200 scenario cases with an expected deviation — browse and verify",
       advSources: "Sources & criteria", advSourcesSub: "Sources and criteria the review logic was derived from",
@@ -230,7 +227,6 @@
       openCaseAria: "open in the report",
       basisSearch: "open in the regulations",
       sourcesOpenReg: "Open in the regulations",
-      advanced: "Advanced mode",
       topTitle: "Cases",
       topSub: "Systematic review of social-insurance IT results",
       ask: "Ask SÜSIE …", yourName: "Your name …", start: "Start",
@@ -431,12 +427,7 @@
       b.title = t(b.dataset.view + "Sub") || "";
     });
     const groupTitle = document.querySelector(".side-group-title");
-    if (groupTitle) groupTitle.textContent = t("advGroup");
-    document.querySelectorAll(".side-adv").forEach((b) => {
-      const v = b.dataset.adv;
-      b.querySelector("span").textContent = t("adv" + v[0].toUpperCase() + v.slice(1));
-      b.title = t("adv" + v[0].toUpperCase() + v.slice(1) + "Sub");
-    });
+    if (groupTitle) groupTitle.textContent = t("governance");
     $("topbar-title").textContent = t(S.view);
     $("topbar-sub").textContent = t("topSub");
     $("susie-fab").setAttribute("aria-label", t("openFab"));
@@ -815,7 +806,7 @@
   function showView(v) {
     if (v !== S.view) { S.viewStack = S.viewStack || []; S.viewStack.push(S.view); }
     S.view = v;
-    for (const id of ["cases", "report", "sources", "advanced", "regulations", "freigaben", "verlauf", "stories"]) $(`view-${id}`).hidden = id !== v;
+    for (const id of ["cases", "report", "sources", "regulations", "freigaben", "verlauf", "stories"]) $(`view-${id}`).hidden = id !== v;
     $("case-summary").hidden = v !== "cases";  // the case counts mean nothing elsewhere
     document.body.dataset.view = v;
     if (v === "regulations" && !S.regLoaded) loadRegulations();
@@ -823,12 +814,8 @@
     document.querySelectorAll(".side-link").forEach((b) =>
       b.classList.toggle("active", b.dataset.view === v));
     // the page heading follows the view — never a stale title anywhere
-    $("topbar-title").textContent = v === "advanced"
-      ? (S.advTitle || t("advGroup"))
-      : t(v);
+    $("topbar-title").textContent = t(v);
     $("topbar-sub").textContent = t(v + "Sub") || t("topSub");
-    document.querySelectorAll(".side-adv").forEach((b) =>
-      b.classList.toggle("active", v === "advanced" && b.dataset.adv === S.advView));
     document.querySelectorAll(".side-link").forEach((b) => {
       b.title = t(b.dataset.view + "Sub") || "";
     });
@@ -2048,7 +2035,7 @@
     renderFormatted(mb, replyText);
 
     const extras = el("div", "bubble-extras");
-    if (reply.disclaimer) extras.appendChild(el("span", "badge-disclaimer", LANG === "de" ? "Nicht im Datensatz — Allgemeinwissen" : "Not in my dataset — general knowledge"));
+    if (reply.disclaimer) extras.appendChild(el("span", "badge-disclaimer", LANG === "de" ? "Nicht im Datensatz — bitte selbst prüfen" : "Not in my dataset — please verify"));
     for (const c of reply.citations || []) {
       const label = c.kind === "corpus" ? `${c.source_version_id || c.ref || (LANG === "de" ? "Quelle" : "Source")}${c.locator ? " · " + c.locator : ""}` : (c.ref || (LANG === "de" ? "Beleg" : "Evidence"));
       const chip = el("button", `chip ${c.kind === "corpus" ? "source" : "state"}`, label);
@@ -2274,22 +2261,6 @@
     demoCommand(LANG === "de" ? "Generiere Testfälle aus dem Gesetz" : "Generate test cases from the law"));
   $("btn-run-compare").addEventListener("click", () =>
     demoCommand(LANG === "de" ? "Starte den Abgleich mit der Softwareausgabe" : "Run the field comparison against the software output"));
-  // Prüfakte tree: each item renders inside the SÜSIE shell (iframe, chrome hidden)
-  document.querySelectorAll(".side-adv").forEach((b) =>
-    b.addEventListener("click", () => {
-      const v = b.dataset.adv;
-      S.advView = v;
-      S.advTitle = t("adv" + v[0].toUpperCase() + v.slice(1));
-      const frame = $("advanced-frame");
-      const src = `pruefakte.html?embed=1#${v}`;
-      if (!frame.getAttribute("src") || !frame.getAttribute("src").endsWith(src)) frame.src = src;
-      try {  // the embedded app boots with the same language as the shell
-        const a = JSON.parse(localStorage.getItem("susie-appearance") || "{}");
-        a.lang = LANG;
-        localStorage.setItem("susie-appearance", JSON.stringify(a));
-      } catch { /* non-fatal */ }
-      showView("advanced");
-    }));
 
   $("lang-toggle").addEventListener("click", () => {
     LANG = LANG === "de" ? "en" : "de";
