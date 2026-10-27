@@ -48,6 +48,10 @@ READ_ONLY_ACTIONS = (
 )
 MUTATING_ACTIONS = (
     "save_note", "export_report", "run_comparison", "initiate_review_flow",
+    # T10-054 onboarding jobs (owner directive): uploads + case creation.
+    # All four-eyes: single-use confirm token, human "Ja" before execution.
+    "register_regulation", "import_software_report", "add_manual_case",
+    "create_case_from_reference", "create_random_case",
 )
 DECISION_GATE_ACTIONS: dict[str, set[str]] = {
     "record_review_state": {"G4", "G5"},
@@ -187,6 +191,24 @@ def _execute_mutating(action_id: str, params: dict, store_root: Path, reviewer: 
         live = bool(params.get("live", False))
         demo.run_demo(store_root, live=live, fresh=False)
         return {"executed": True, "mode": "server", "live": live}
+    if action_id in ("register_regulation", "import_software_report",
+                     "add_manual_case", "create_case_from_reference",
+                     "create_random_case"):
+        from . import jobs  # lazy: upload/job stack stays out of chat imports
+        if action_id == "register_regulation":
+            return jobs.register_regulation(store_root,
+                                            str(params.get("file_id", "")),
+                                            str(params.get("title", "")))
+        if action_id == "import_software_report":
+            return jobs.import_software_report(store_root, str(params.get("file_id", "")))
+        if action_id == "add_manual_case":
+            return jobs.add_manual_case(store_root,
+                                        file_id=str(params.get("file_id", "")),
+                                        text=str(params.get("text", "")))
+        if action_id == "create_case_from_reference":
+            return jobs.create_case_from_reference(store_root,
+                                                   str(params.get("reference", "")))
+        return jobs.create_random_case(store_root)
     # initiate_review_flow opens the review dialog client-side; nothing to record here.
     return {"executed": True, "mode": "client"}
 

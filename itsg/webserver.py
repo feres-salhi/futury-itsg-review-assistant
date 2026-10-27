@@ -961,6 +961,9 @@ class SUSIEHandler(BaseHTTPRequestHandler):
 
     def do_POST(self) -> None:  # noqa: N802 (http.server API)
         path = self.path.split("?", 1)[0]
+        if path == "/api/upload":
+            self._api_upload()
+            return
         if path not in ("/api/run", "/api/review/run", "/api/chat", "/api/action",
                         "/api/action/propose", "/api/report/pdf", "/api/report/seal"):
             self._send_json({"ok": False, "error": "not found"}, status=404)
@@ -1096,6 +1099,28 @@ class SUSIEHandler(BaseHTTPRequestHandler):
                                           message, session_id, lang))
         except Exception as exc:
             self._send_json({"ok": False, "error": f"chat failed: {exc}"}, status=500)
+
+    def _api_upload(self) -> None:
+        """POST /api/upload?filename=… — raw body upload into data/inbox with a
+        server-issued INB-n id (T10-054). The client name is metadata, never
+        the identity; size cap and extension allowlist are fail closed."""
+        from . import jobs  # lazy: upload stack stays out of the base imports
+
+        query = urllib.parse.parse_qs(self.path.split("?", 1)[1]) if "?" in self.path else {}
+        filename = (query.get("filename") or [""])[0]
+        length = int(self.headers.get("Content-Length") or 0)
+        if length > jobs.MAX_UPLOAD_BYTES + 1:
+            self._send_json({"ok": False, "error": "upload exceeds the size cap"},
+                            status=413)
+            return
+        data = self.rfile.read(length)
+        try:
+            record = jobs.save_upload(self.store_root, filename, data)
+        except ValueError as exc:
+            status = 413 if "cap" in str(exc) else 400
+            self._send_json({"ok": False, "error": str(exc)}, status=status)
+            return
+        self._send_json({"ok": True, "file": record})
 
     def log_message(self, format: str, *args) -> None:  # noqa: A002
         if path := (args[0] if args else ""):

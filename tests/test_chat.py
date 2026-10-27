@@ -109,6 +109,34 @@ class BuildUserContentTests(unittest.TestCase):
                              chat.HISTORY_TURNS_MAX + 1)
 
 
+class LanguageTests(unittest.TestCase):
+    """T10-053: the UI's DE/EN selection wins over the message language."""
+
+    def _turn(self, lang: str):
+        captured = {}
+
+        def gw(endpoint, model, system_prompt, messages, token=""):
+            captured["system_prompt"] = system_prompt
+            return json.dumps({"utterance": "reply", "confidence": "general",
+                               "citations": [], "action": None})
+
+        r = chat.turn("Wo stehe ich?", {}, [], [], gateway=gw, lang=lang)
+        self.assertTrue(r.disclaimer)  # sanity: the fake reply parsed
+        return captured["system_prompt"]
+
+    def test_ui_language_overrides_message_language(self):
+        self.assertIn("Always answer in English", self._turn("en"))
+        self.assertIn('Antworte immer auf Deutsch', self._turn("de"))
+        # empty/unknown lang keeps the mirror-the-message rule
+        sp = self._turn("")
+        self.assertIn("language of the user's last message", sp)
+
+    def test_base_prompt_constant_unchanged(self):
+        # the verbatim-rule contract tests read SUSIE_SYSTEM_PROMPT itself
+        self.assertIn("LANGUAGE: Always answer in the language of the user's last message",
+                      chat.SUSIE_SYSTEM_PROMPT)
+
+
 class ChatTurnTests(unittest.TestCase):
     def test_grounded_with_citation_passes(self):
         r = chat.turn("Warum weicht TC-002 ab?", {}, [], [], gateway=_gw(GROUNDED))

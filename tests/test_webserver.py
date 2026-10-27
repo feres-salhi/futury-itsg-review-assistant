@@ -4,6 +4,7 @@ story-cases/reviews/harness state overlays and POST /api/review/run (T10-032).""
 import contextlib
 import http.client
 import io
+import hashlib
 import json
 import os
 import tempfile
@@ -404,6 +405,26 @@ class TestChatEndpoints(unittest.TestCase):
         # even the degraded turn is fully audited on both sides
         _, history = self._get("/api/chat/history?session_id=s1")
         self.assertEqual([t["role"] for t in history["turns"]], ["user", "susie"])
+
+    def test_upload_endpoint_issues_server_id(self):
+        # T10-054: raw body upload → data/inbox with a server-issued INB id
+        status, raw = _request(self.port, "POST",
+                               "/api/upload?filename=amendment.xml", b"<rule/>",
+                               {"Content-Type": "application/octet-stream"})
+        self.assertEqual(status, 200)
+        payload = json.loads(raw)
+        self.assertTrue(payload["ok"])
+        self.assertEqual(payload["file"]["id"], "INB-1")
+        self.assertEqual(payload["file"]["sha256"],
+                         hashlib.sha256(b"<rule/>").hexdigest())
+        inbox = Path(self.tmp.name) / "inbox"
+        self.assertTrue((inbox / payload["file"]["stored_name"]).exists())
+        # bad type → honest 400
+        status, raw = _request(self.port, "POST",
+                               "/api/upload?filename=evil.exe", b"MZ",
+                               {"Content-Type": "application/octet-stream"})
+        self.assertEqual(status, 400)
+        self.assertIn("not allowed", json.loads(raw)["error"])
 
     def test_action_endpoint_refuses_missing_token(self):
         status, payload = self._post("/api/action", {
