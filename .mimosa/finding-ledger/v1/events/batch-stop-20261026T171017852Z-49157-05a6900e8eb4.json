@@ -1,0 +1,318 @@
+{
+  "schemaVersion": "mimosa-finding-ledger-batch/v1",
+  "batchId": "stop-20261026T171017852Z-49157-05a6900e8eb4",
+  "runId": "20261026T171017852Z-49157-05a6900e8eb4",
+  "runStatus": "inconclusive",
+  "coverage": {
+    "status": "partial",
+    "reasons": [
+      {
+        "code": "candidate_limit_exceeded",
+        "stage": "candidate-select",
+        "target": "pipeline/index/cli.py",
+        "detail": "44 changed reviewable file(s) were not scanned because the limit is 20",
+        "affectsCompletion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "pipeline/__init__.py",
+        "detail": "spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "pipeline/ids.py",
+        "detail": "spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "pipeline/audit.py",
+        "detail": "spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "pipeline/registry/__init__.py",
+        "detail": "spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "pipeline/registry/manifest.py",
+        "detail": "spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "pipeline/registry/g0.py",
+        "detail": "spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "pipeline/registry/importer.py",
+        "detail": "spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "pipeline/registry/fetch.py",
+        "detail": "spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "pipeline/registry/cli.py",
+        "detail": "spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "pipeline/segmenter/__init__.py",
+        "detail": "spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "pipeline/segmenter/models.py",
+        "detail": "spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "pipeline/segmenter/pdf_extractor.py",
+        "detail": "spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "pipeline/segmenter/docx_extractor.py",
+        "detail": "spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "pipeline/segmenter/chunker.py",
+        "detail": "spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "pipeline/segmenter/cli.py",
+        "detail": "spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "pipeline/index/__init__.py",
+        "detail": "spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "pipeline/index/fts.py",
+        "detail": "spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "pipeline/index/query.py",
+        "detail": "spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "pipeline/index/verify.py",
+        "detail": "spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "stop_budget_exhausted",
+        "stage": "supply-chain-check",
+        "target": ".",
+        "detail": "focused supply-chain check was not run before the gate budget",
+        "affectsCompletion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "candidate-select",
+        "target": "pipeline/index/cli.py",
+        "detail": "candidate_limit_exceeded: 44 changed reviewable file(s) were not scanned because the limit is 20",
+        "affectsCompletion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "pipeline/__init__.py",
+        "detail": "scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "pipeline/ids.py",
+        "detail": "scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "pipeline/audit.py",
+        "detail": "scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "pipeline/registry/__init__.py",
+        "detail": "scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "pipeline/registry/manifest.py",
+        "detail": "scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "pipeline/registry/g0.py",
+        "detail": "scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "pipeline/registry/importer.py",
+        "detail": "scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "pipeline/registry/fetch.py",
+        "detail": "scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "pipeline/registry/cli.py",
+        "detail": "scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "pipeline/segmenter/__init__.py",
+        "detail": "scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "pipeline/segmenter/models.py",
+        "detail": "scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "pipeline/segmenter/pdf_extractor.py",
+        "detail": "scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "pipeline/segmenter/docx_extractor.py",
+        "detail": "scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "pipeline/segmenter/chunker.py",
+        "detail": "scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "pipeline/segmenter/cli.py",
+        "detail": "scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "pipeline/index/__init__.py",
+        "detail": "scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "pipeline/index/fts.py",
+        "detail": "scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "pipeline/index/query.py",
+        "detail": "scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "pipeline/index/verify.py",
+        "detail": "scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "supply-chain-check",
+        "target": ".",
+        "detail": "stop_budget_exhausted: focused supply-chain check was not run before the gate budget",
+        "affectsCompletion": true
+      }
+    ]
+  },
+  "source": {
+    "component": "zcode-hook",
+    "operationId": "Stop"
+  },
+  "revision": "090703782aaa5e63b113e39178a30fd5c0f5b039",
+  "diffHash": "7a7f0cb6f6b8c9f70ff7dc7bb83b336890d0865f13d11deb6fb4805a6ce66be7",
+  "rulesVersion": "unavailable",
+  "sessionHash": "3cd8c3146e7c8fb65b4bb12d4c390def711de0cefc9663f10789c83aee8fabc4",
+  "reportRef": ".mimosa/reports/task-review-session_a05eb38e56083ad11eefcd5cc7828fd3-20261026T171017852Z-49157-05a6900e8eb4.json",
+  "events": [],
+  "observedFindingIds": [],
+  "verifiedFiles": [],
+  "recordedAt": "2026-10-26T17:10:18.422Z"
+}

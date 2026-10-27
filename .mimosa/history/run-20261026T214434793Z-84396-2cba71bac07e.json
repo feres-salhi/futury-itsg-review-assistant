@@ -1,0 +1,44 @@
+{
+  "schemaVersion": "mimosa-finding-history/v1",
+  "runId": "20261026T214434793Z-84396-2cba71bac07e",
+  "runStatus": "inconclusive",
+  "errors": [
+    "baseline-read:tests/test_chat.py: baseline_snapshot_unreadable: file is missing from task baseline",
+    "baseline-read:itsg/chat.py: baseline_snapshot_unreadable: file is missing from task baseline",
+    "scan:tests/test_chat.py: scanner_failed: spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT",
+    "scan:itsg/chat.py: scanner_failed: spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT",
+    "scan:itsg/demo.py: scanner_failed: spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT"
+  ],
+  "target": ".",
+  "revision": "3f0211868d674ad9abe30b5e113bc1b9e1be5bb7",
+  "diffHash": "788a0180ccf314f2e25a1e8082f2e1bc93d07358ef002ba0b5080413a200ebea",
+  "rulesVersion": "unavailable",
+  "recordedAt": "2026-10-26T21:44:34.793Z",
+  "timing": {
+    "startedAt": "2026-10-26T21:44:31.813Z",
+    "completedAt": "2026-10-26T21:44:34.793Z",
+    "durationMs": 2980
+  },
+  "tokens": {
+    "input": 0,
+    "output": 0,
+    "total": 0,
+    "modelCalls": 0,
+    "measurement": "known-zero"
+  },
+  "findings": {
+    "total": 0,
+    "bySeverity": {},
+    "byStatus": {}
+  },
+  "coverage": {
+    "status": "partial",
+    "reasonCounts": {
+      "baseline_snapshot_unreadable": 2,
+      "scanner_failed": 3,
+      "project_check_failed": 5
+    }
+  },
+  "evidenceBoundary": "static_only",
+  "immutableReport": ".mimosa/reports/task-review-session_10ef5f1b2df22d4570d5a4ea7413ae31-20261026T214434793Z-84396-2cba71bac07e.json"
+}

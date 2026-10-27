@@ -1,5 +1,9 @@
 """Convert one whole specification PDF into a single Markdown file (no chunking).
 
+ADOPTED IMPLEMENTATION (T10-031): authored by Team 10 teammates on `main`
+(snapshot futury_team_10-main.zip, 2026-10-26), audited and adopted verbatim —
+see src/PROVENANCE.md.
+
 Reuses the cleaning and heading logic of chunking.py. The front pages (table of
 contents, change history) are kept as plain text; the body follows with
 Markdown headings and the source page range under each heading.
@@ -19,6 +23,10 @@ OUT = ch.ROOT / "md"
 
 
 def convert(name, out=OUT):
+    if name not in ch.DOCS:
+        raise KeyError(f"unknown document: {name!r}")
+    out = Path(out).resolve()
+    out.mkdir(parents=True, exist_ok=True)
     cfg = ch.DOCS[name]
     doc = fitz.open(ch.DATA_DIR / cfg["file"])
     lines = [f"# {cfg['title']} (Version {cfg['version']})", "",
@@ -39,6 +47,8 @@ def convert(name, out=OUT):
         lines += [heading, "", f"*{pages}*", ""] + body[1:] + [""]
     out.mkdir(parents=True, exist_ok=True)
     path = out / (cfg["file"].rsplit(".", 1)[0] + ".md")
+    if not path.resolve().is_relative_to(out):  # containment: never escape the output dir
+        raise ValueError(f"output filename escapes output dir: {path!r}")
     path.write_text("\n".join(lines).rstrip() + "\n", encoding="utf-8")
     return path
 

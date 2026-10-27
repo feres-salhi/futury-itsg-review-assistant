@@ -1,0 +1,33 @@
+"""Tagged-PDF structure extractor (task T10-005).
+
+Method (ingestion-pipeline.md §2/§6 — deterministic, local, zero tokens):
+
+  - read the PDF structure tags (H1–H6) in document order via PyMuPDF;
+  - pair them with per-page line extraction (``page.get_text("dict")``);
+  - merge known corpus quirks: heading numbers split onto their own text
+    line (Verfahrensbeschreibung pp. 36–52), headings wrapped across lines,
+    dot-leader TOC lines filtered out;
+  - corroborate headings by font weight and the hierarchical numbering
+    pattern ``^\\d+(\\.\\d+)*$``;
+  - store exact text — no normalization, no dehyphenation (purity rule);
+  - reconcile per-level heading counts against the §2 baseline and record
+    mismatches as ExtractionWarnings (verification hook §8.2), never
+    silently dropped.
+
+§2 baseline (2026-10-26 survey) to reconcile against: GG_EEL
+H1×10/H2×10/H3×13; Verfahrensbeschreibung H1×5/H2×23/H3×175/H4×18;
+Beispielpapier H1×24/H2×42/H3×24/H4×65; Anl3 carries 154 H6 tags
+(suspected style noise — verify, do not trust).
+"""
+from __future__ import annotations
+
+from pathlib import Path
+
+from .models import Segment
+
+# import fitz  # PyMuPDF — imported lazily inside extract_pdf when T10-005 is implemented
+
+
+def extract_pdf(path: Path, source_version_id: str) -> list[Segment]:
+    """Extract canonical heading segments from a tagged PDF. STUB — implemented by T10-005."""
+    raise NotImplementedError("T10-005: tagged-PDF extraction")

@@ -1,0 +1,55 @@
+{
+  "schemaVersion": "mimosa-finding-history/v1",
+  "runId": "20261026T165435076Z-47949-7440137e199c",
+  "runStatus": "inconclusive",
+  "errors": [
+    "baseline-read:.agents/skills/taste-skill/assets/base.js: baseline_snapshot_unreadable: file is missing from task baseline",
+    "baseline-read:.agents/skills/taste-skill/assets/charts.js: baseline_snapshot_unreadable: file is missing from task baseline",
+    "baseline-read:.agents/skills/taste-skill/assets/scenes/stage.js: baseline_snapshot_unreadable: file is missing from task baseline",
+    "baseline-read:.agents/skills/impeccable/scripts/live-browser-dom.js: baseline_snapshot_unreadable: file is missing from task baseline",
+    "baseline-read:.agents/skills/impeccable/scripts/live-browser-ignores.js: baseline_snapshot_unreadable: file is missing from task baseline",
+    "baseline-read:.agents/skills/impeccable/scripts/live-browser-session.js: baseline_snapshot_unreadable: file is missing from task baseline",
+    "baseline-read:.agents/skills/impeccable/scripts/live-browser.js: baseline_snapshot_unreadable: file is missing from task baseline",
+    "baseline-read:.agents/skills/impeccable/scripts/modern-screenshot.umd.js: baseline_snapshot_unreadable: file is missing from task baseline",
+    "scan:.agents/skills/taste-skill/assets/base.js: scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+    "scan:.agents/skills/taste-skill/assets/charts.js: scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+    "scan:.agents/skills/taste-skill/assets/scenes/stage.js: scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+    "scan:.agents/skills/impeccable/scripts/live-browser-dom.js: scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+    "scan:.agents/skills/impeccable/scripts/live-browser-ignores.js: scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+    "scan:.agents/skills/impeccable/scripts/live-browser-session.js: scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+    "scan:.agents/skills/impeccable/scripts/live-browser.js: scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+    "scan:.agents/skills/impeccable/scripts/modern-screenshot.umd.js: scanner_failed: spawnSync /usr/local/Cellar/node/26.7.0/bin/node ETIMEDOUT"
+  ],
+  "target": ".",
+  "revision": "090703782aaa5e63b113e39178a30fd5c0f5b039",
+  "diffHash": "b270fb1b65f5e545894e098c6b2e95bffc1f3cbbac5d4cb655e35bb734047db1",
+  "rulesVersion": "unavailable",
+  "recordedAt": "2026-10-26T16:54:35.076Z",
+  "timing": {
+    "startedAt": "2026-10-26T16:54:31.905Z",
+    "completedAt": "2026-10-26T16:54:35.076Z",
+    "durationMs": 3171
+  },
+  "tokens": {
+    "input": 0,
+    "output": 0,
+    "total": 0,
+    "modelCalls": 0,
+    "measurement": "known-zero"
+  },
+  "findings": {
+    "total": 0,
+    "bySeverity": {},
+    "byStatus": {}
+  },
+  "coverage": {
+    "status": "partial",
+    "reasonCounts": {
+      "baseline_snapshot_unreadable": 8,
+      "scanner_failed": 8,
+      "project_check_failed": 16
+    }
+  },
+  "evidenceBoundary": "static_only",
+  "immutableReport": ".mimosa/reports/task-review-session_0af5e4b32e7f6c8d0481cad3988e984b-20261026T165435076Z-47949-7440137e199c.json"
+}

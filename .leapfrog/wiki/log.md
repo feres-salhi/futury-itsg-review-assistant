@@ -1,0 +1,2 @@
+- 2026-10-26 21:19 CET | SAVE T10-030 | Frontend design and repo handoff session saved; index/overview/hot and cp-008 synchronized. No broad source ingestion or harness evolution.
+- 2026-10-26 | SAVE T10-035 | Added first findings note: findings/2026-10-26-report-template-legal-basis.md (verified: no statute prescribes a Systemprüfung report template; § 95b SGB IV + pitch deck + corpus evidence; sources SRCV-1-A/SRCV-2-A registered G0-candidate). Index linked; hot cache updated; cp-014 pair written. No broad source ingestion.

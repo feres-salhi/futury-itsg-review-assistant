@@ -1,0 +1,46 @@
+{
+  "schemaVersion": "mimosa-finding-history/v1",
+  "runId": "20261026T224938771Z-96203-6bc2a62294a2",
+  "runStatus": "inconclusive",
+  "errors": [
+    "baseline-read:frontend/susie.js: baseline_snapshot_unreadable: file is missing from task baseline",
+    "scan:itsg/story_pdfs.py: scanner_failed: spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT",
+    "scan:itsg/report_pdf.py: scanner_failed: spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT",
+    "scan:tests/test_story_pdfs.py: scanner_failed: spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT",
+    "scan:tests/test_actions.py: scanner_failed: spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT",
+    "scan:itsg/actions.py: scanner_failed: spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT",
+    "scan:frontend/susie.js: scanner_failed: spawnSync /Users/amour/.nvm/versions/node/v22.22.2/bin/node ETIMEDOUT"
+  ],
+  "target": ".",
+  "revision": "d8e76e71fe871c57fc23bae7ffd7d23ffb5f3f85",
+  "diffHash": "b7e5cfa5e4bf3fe692d06d36fab955dcd7569a3226a1955157f7769e8f97f0c1",
+  "rulesVersion": "unavailable",
+  "recordedAt": "2026-10-26T22:49:38.771Z",
+  "timing": {
+    "startedAt": "2026-10-26T22:49:35.750Z",
+    "completedAt": "2026-10-26T22:49:38.771Z",
+    "durationMs": 3021
+  },
+  "tokens": {
+    "input": 0,
+    "output": 0,
+    "total": 0,
+    "modelCalls": 0,
+    "measurement": "known-zero"
+  },
+  "findings": {
+    "total": 0,
+    "bySeverity": {},
+    "byStatus": {}
+  },
+  "coverage": {
+    "status": "partial",
+    "reasonCounts": {
+      "baseline_snapshot_unreadable": 1,
+      "scanner_failed": 6,
+      "project_check_failed": 7
+    }
+  },
+  "evidenceBoundary": "static_only",
+  "immutableReport": ".mimosa/reports/task-review-session_10ef5f1b2df22d4570d5a4ea7413ae31-20261026T224938771Z-96203-6bc2a62294a2.json"
+}
