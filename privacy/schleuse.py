@@ -46,8 +46,16 @@ _PRIORITY = {c: i for i, c in enumerate(CATEGORIES)}  # lower = wins when two ma
 POLICY: Dict[str, dict] = {
     "hessian_ai": {"mode": "pseudonymize", "allowed": True, "final_gate": "block_if_any_hit"},
     "langfuse": {"mode": "pseudonymize", "minimize": True, "allowed": True, "max_string_chars": 200,
-                 "allowed_keys": ("run_id", "status", "check", "rule", "source", "expected", "scenario",
-                                  "count", "categories", "policy_version")},
+                 # top-level keys only; everything not listed here is dropped before it can reach Langfuse
+                 "allowed_keys": (
+                     "run_id", "report_id", "id", "status", "check", "rule", "source", "expected", "actual", "reason",
+                     "scenario", "count", "counts", "total", "messages", "overall_status", "robustness", "result",
+                     "tool", "baseline", "attacks", "attack", "kind", "failed_checks", "categories", "policy_version",
+                     "report", "findings", "level", "criterion_id", "case_id", "category", "group", "must_flag",
+                     "observed_dbvo", "flagged", "outcome", "reviewer", "data", "git_sha",
+                     # parsed DBVO fields (no names, no VSNR) from run_review.parse_teel0
+                     "ABGABEGRUND", "ANZAHL-AU", "AU-AB-AG", "AU-AB-SV", "KZ-AK-AU", "GRUNDAV", "DATENSATZ-ID",
+                     "DATUM-ERSTELLUNG", "AU-ZEITRAEUME", "error")},
     "seal": {"mode": "hash_only", "allowed": True},
     "logs": {"mode": "none", "allowed": True},
 }
@@ -592,12 +600,12 @@ def hash_only(value, key=None) -> str:
     return "hmac-sha256:" + hmac.new(key_bytes, data.encode("utf-8"), hashlib.sha256).hexdigest()
 
 
-def _minimize(obj, policy):
+def _minimize(obj, policy, top=True):
     limit = policy["max_string_chars"]
     if isinstance(obj, dict):
-        return {k: _minimize(v, policy) for k, v in obj.items() if k in policy["allowed_keys"]}
+        return {k: _minimize(v, policy, False) for k, v in obj.items() if not top or k in policy["allowed_keys"]}
     if isinstance(obj, (list, tuple)):
-        return [_minimize(v, policy) for v in obj]
+        return [_minimize(v, policy, False) for v in obj]
     if isinstance(obj, str) and len(obj) > limit:
         return obj[:limit] + "...[truncated]"
     return obj
