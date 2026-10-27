@@ -74,6 +74,9 @@ ROLE_MODELS = {
 ENV_LLM_TOKEN = "SUSIE_LLM_TOKEN"
 SECRET_NAME = "LLM_API_KEY"
 TEMPERATURE = 0.0
+# T10-051: the conversational assistant role gets a natural-sampling
+# temperature; the pipeline roles stay fully deterministic at 0.0.
+TEMPERATURE_ASSISTANT = 0.5
 MAX_TOKENS = 4096  # api.py: reasoning models can spend the whole budget thinking
 RETRY_MAX_TOKENS = 8192
 TIMEOUT_S = 120
@@ -195,7 +198,8 @@ def extract_json_payload(raw_text: str) -> str:
 
 
 def _send_chat(endpoint: str, model: str, messages: list[dict],
-               token: str, timeout: int = TIMEOUT_S) -> str:
+               token: str, timeout: int = TIMEOUT_S,
+               temperature: float = TEMPERATURE) -> str:
     """Shared gateway transport: validate → POST → parse content.
 
     The endpoint is re-validated at request time (DNS pinning) and every
@@ -211,7 +215,7 @@ def _send_chat(endpoint: str, model: str, messages: list[dict],
         payload = {
             "model": model,
             "messages": messages,
-            "temperature": TEMPERATURE,
+            "temperature": temperature,
             "max_tokens": max_tokens,
         }
         request = urllib.request.Request(
@@ -247,18 +251,20 @@ def _send_chat(endpoint: str, model: str, messages: list[dict],
 
 
 def chat_completion(endpoint: str, model: str, system_prompt: str, messages: list[dict],
-                    token: str, timeout: int = TIMEOUT_S) -> str:
+                    token: str, timeout: int = TIMEOUT_S,
+                    temperature: float = TEMPERATURE_ASSISTANT) -> str:
     """Public conversational completion for the SÜSIE assistant wizard.
 
     ``messages`` is a list of ``{"role": "user"|"assistant", "content": str}``
     turns, sent after the system prompt. Uses the same SSRF-hardened
     transport and two-stage max_tokens retry as every other gateway call;
-    transport failures raise LLMError (fail closed).
+    transport failures raise LLMError (fail closed). Defaults to the
+    assistant temperature (0.5) — pipeline roles keep 0.0 via ``_chat``.
     """
     return _send_chat(endpoint, model, [
         {"role": "system", "content": system_prompt},
         *messages,
-    ], token, timeout)
+    ], token, timeout, temperature=temperature)
 
 
 def _chat(endpoint: str, model: str, system_prompt: str, user_content: str,

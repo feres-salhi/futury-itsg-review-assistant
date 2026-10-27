@@ -394,7 +394,10 @@ class TestChatEndpoints(unittest.TestCase):
         self.assertEqual(status, 200)  # degraded is honest data, not an error
         self.assertTrue(payload["ok"])
         self.assertTrue(payload["degraded"])
-        self.assertEqual(payload["utterance"], chat.DEGRADED_UTTERANCE)
+        # T10-051: the canned layer answers locally when the gateway is down —
+        # a status question still gets its local summary instead of the
+        # generic rehearsed line, and the failure is recorded on the envelope.
+        self.assertIn("Prüfstand", payload["utterance"])
         self.assertIsNone(payload["action"])
         self.assertIsNone(payload["confirm_token"])
         self.assertEqual(payload["agent_run"]["status"], "error")

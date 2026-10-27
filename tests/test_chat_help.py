@@ -1,10 +1,12 @@
-"""T10-044 — deterministic help & support layer in the SÜSIE chat.
+"""T10-044 + T10-051 — canned help & support layer in the SÜSIE chat.
 
-Owner directive 2026-10-27: a help-and-support feature fully inside the SÜSIE
-assistant — onboarding/capability overview, per-topic explanations (the targets
-of the UI "What's this?" flyovers), and a troubleshooting checklist. All
-deterministic (governance §1.6), matched BEFORE the action commands so an
-explanation question is never executed as one.
+Owner directive 2026-10-27 (T10-051): help topics, the capability overview
+and the troubleshooting checklist are no longer interceptors in front of the
+model — with a live gateway the model answers these questions (it has the
+state context). The canned texts live in ``chat.canned_turn`` as the
+gateway-down fallback; ``chat.deterministic_turn`` returns None for them.
+Facts only, no legal interpretation; the model's answers still go through
+cite-or-abstain.
 """
 from __future__ import annotations
 
@@ -22,11 +24,19 @@ STATE = {
 
 
 def turn(message: str, state=STATE):
-    return chat.deterministic_turn(message, state, "T10-044", "s1")
+    return chat.canned_turn(message, state, "T10-044", "s1")
 
 
 def cmd(reply) -> str:
     return reply.agent_run["result"]["deterministic_command"]
+
+
+class HelpFallsThroughToModelTests(unittest.TestCase):
+    def test_help_and_topics_are_not_interceptors_anymore(self) -> None:
+        for msg in ("Hilfe", "Was kannst du?", "Was ist der Abgleich?",
+                    "wie funktioniert das Siegel", "Der Abgleich funktioniert nicht"):
+            with self.subTest(msg=msg):
+                self.assertIsNone(chat.deterministic_turn(msg, STATE, "T10-051", "s1"), msg)
 
 
 class HelpCommandTests(unittest.TestCase):
@@ -65,14 +75,8 @@ class HelpCommandTests(unittest.TestCase):
                 # a topic answer must never propose an action
                 self.assertIsNone(reply.action)
 
-    def test_unknown_explanation_falls_through_to_model(self) -> None:
+    def test_unknown_explanation_matches_nothing(self) -> None:
         self.assertIsNone(turn("Was ist eine Kiwi?"))
-
-    def test_action_commands_still_win_for_real_intents(self) -> None:
-        # explanation wording must not break the existing demo-critical commands
-        self.assertEqual(cmd(turn("Wo stehe ich?")), "status")
-        self.assertEqual(cmd(turn("Zeig mir die Abweichung")), "select_case")
-        self.assertEqual(cmd(turn("start over")), "start_over")
 
 
 class TroubleshootTests(unittest.TestCase):
@@ -86,7 +90,7 @@ class TroubleshootTests(unittest.TestCase):
                 self.assertIn("Bridge", reply.utterance)  # first checklist item
 
     def test_case_questions_stay_case_answers(self) -> None:
-        # "Fehler" in a case context must still open the deviating case
+        # "Fehler" in a case context must still open the deviating case (fallback)
         reply = turn("Zeig mir den Fehler")
         self.assertIsNotNone(reply)
         self.assertEqual(reply.action["id"], "open_evidence")

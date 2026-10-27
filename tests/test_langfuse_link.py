@@ -13,7 +13,7 @@ class LangfuseLinkTest(unittest.TestCase):
 
     def test_chat_command_without_connection(self):
         with mock.patch.object(langfuse_link, "summary", return_value=None):
-            reply = chat.deterministic_turn("Was ist in Langfuse?", {}, task_id="T", session_id="s")
+            reply = chat.canned_turn("Was ist in Langfuse?", {}, task_id="T", session_id="s")
         self.assertIn("nicht verbunden", reply.utterance)
 
     def test_chat_command_lists_datasets_and_case_link(self):
@@ -23,7 +23,7 @@ class LangfuseLinkTest(unittest.TestCase):
                 "scores": {"case_correct": {"true": 299, "false": 1}, "false_alarm": {"true": 0, "false": 130}}}
         with mock.patch.object(langfuse_link, "summary", return_value=info), \
                 mock.patch.object(langfuse_link, "item_url", return_value="https://lf/item/EAZ-021"):
-            reply = chat.deterministic_turn("show langfuse for EAZ-021", {}, task_id="T", session_id="s")
+            reply = chat.canned_turn("show langfuse for EAZ-021", {}, task_id="T", session_id="s")
         ut = reply.utterance
         self.assertIn("30 cases — https://lf/d1", ut)
         self.assertIn("missing", ut)
