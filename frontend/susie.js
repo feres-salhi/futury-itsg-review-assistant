@@ -68,8 +68,6 @@ console.info(`[SÜSIE] frontend build ${SUSIE_BUILD}`);
       reportRegen: "Bericht neu erzeugen",
       reportRegenBusy: "Erzeuge Bericht …",
       reportRegenDone: "Bericht erzeugt",
-      regExpand: "Les Ansicht vergrößern",
-      regCollapse: "Les Ansicht verkleinern",
       openCaseAria: "im Prüfbericht öffnen",
       basisSearch: "im Regelwerk öffnen",
       sourcesOpenReg: "Im Regelwerk öffnen",
@@ -171,6 +169,13 @@ console.info(`[SÜSIE] frontend build ${SUSIE_BUILD}`);
       chainTitle: "Belegkette",
       runAt: "Ausgeführt am",
       chips: ["Wo stehe ich?", "Zeig mir die Abweichung", "Generiere Testfälle aus dem Gesetz", "Erstelle den Bericht als PDF"],
+      menuTitle: "Was kann ich für Sie tun?",
+      menuUploadRegulation: "Neue Regeländerung hochladen",
+      menuUploadReport: "Softwarebericht hochladen",
+      menuUploadCase: "Neuen manuellen Fall hochladen",
+      menuCaseReference: "Fall aus einer Fundstelle erstellen",
+      menuCaseRandom: "Zufälligen Fall aus den Regelwerken erstellen",
+      referenceAsk: "Nennen Sie mir die Fundstelle aus den Regelwerken (z. B. „BP §3.2 Abs. 1“), auf die sich der neue Fall beziehen soll — ich schlage Ihnen dann Fall-Entwürfe dazu vor.",
       tryAsk: "Oder fragen Sie direkt:",
       genCasesTitle: "Testfälle aus dem Gesetz erstellen",
       genCasesSub: "Gesetz → Anforderung → Testfälle, ausgeführt von den KI-Rollen — erst mit Ihrer Freigabe",
@@ -213,8 +218,6 @@ console.info(`[SÜSIE] frontend build ${SUSIE_BUILD}`);
       reportRegen: "Regenerate report",
       reportRegenBusy: "Generating report …",
       reportRegenDone: "Report generated",
-      regExpand: "Enlarge reader",
-      regCollapse: "Shrink reader",
       openCaseAria: "open in the report",
       basisSearch: "open in the regulations",
       sourcesOpenReg: "Open in the regulations",
@@ -316,6 +319,13 @@ console.info(`[SÜSIE] frontend build ${SUSIE_BUILD}`);
       chainTitle: "Evidence chain",
       runAt: "Executed at",
       chips: ["Where do I stand?", "Show me the deviation", "Generate test cases from the law", "Create the report as PDF"],
+      menuTitle: "What can I do for you today?",
+      menuUploadRegulation: "Upload a new regulatory amendment",
+      menuUploadReport: "Upload a software report",
+      menuUploadCase: "Upload a new manual case",
+      menuCaseReference: "Create a case from a specific reference",
+      menuCaseRandom: "Create a random case from the regulations",
+      referenceAsk: "Name the reference in the regulations (e.g. \"BP §3.2 (1)\") the new case should cite — I will then propose draft cases for it.",
       tryAsk: "Or ask directly:",
       genCasesTitle: "Create test cases from the law",
       genCasesSub: "Law → requirement → test cases, run by the AI roles — only on your confirmation",
@@ -405,6 +415,11 @@ console.info(`[SÜSIE] frontend build ${SUSIE_BUILD}`);
     record_review_state: { de: "Prüfentscheid dokumentieren", en: "Record review decision" },
     record_conformance: { de: "Konformität bewerten", en: "Record conformance" },
     request_release: { de: "Release-Anfrage aufnehmen", en: "Record release request" },
+    register_regulation: { de: "Regeländerung registrieren (G0-Kandidat)", en: "Register regulatory amendment (G0 candidate)" },
+    import_software_report: { de: "Softwarebericht importieren (TEEL0)", en: "Import software report (TEEL0)" },
+    add_manual_case: { de: "Manuellen Fall anlegen (Entwurf)", en: "Add manual case (draft)" },
+    create_case_from_reference: { de: "Fall aus Fundstelle erstellen (Entwürfe)", en: "Create case from reference (drafts)" },
+    create_random_case: { de: "Zufälligen Fall erstellen (Entwürfe)", en: "Create random case (drafts)" },
   };
 
   function applyI18n() {
@@ -1721,19 +1736,9 @@ console.info(`[SÜSIE] frontend build ${SUSIE_BUILD}`);
       regRunSearch();
     });
     bar.appendChild(select);
-    // Expand reader (T10-049): the reader pane takes the full width, the hit
-    // list collapses to a slim index rail (CSS hook from the density pass).
-    const expandBtn = el("button", "btn ghost-btn reg-expand");
-    expandBtn.type = "button";
-    expandBtn.textContent = t("regExpand");
-    expandBtn.setAttribute("aria-pressed", "false");
-    expandBtn.addEventListener("click", () => {
-      const on = !root.classList.contains("reader-expanded");
-      root.classList.toggle("reader-expanded", on);
-      expandBtn.setAttribute("aria-pressed", on ? "true" : "false");
-      expandBtn.textContent = on ? t("regCollapse") : t("regExpand");
-    });
-    bar.appendChild(expandBtn);
+    // Reader is full-width by default (owner decision 2026-10-27) —
+    // the doc list stays as a slim index rail; no toggle.
+    root.classList.add("reader-expanded");
     root.appendChild(bar);
     const cols = el("div", "reg-cols");
     cols.appendChild(el("div", "reg-results", ""));
@@ -1992,7 +1997,14 @@ console.info(`[SÜSIE] frontend build ${SUSIE_BUILD}`);
     const send = svgBtn("send-btn", "M3 10h12M10 4l6 6-6 6");
     send.setAttribute("aria-label", LANG === "de" ? "Senden" : "Send");
     send.disabled = !S.reviewer;
-    const submit = () => { const v = input.value.trim(); if (v && !S.busy) { input.value = ""; sendMessage(v); } };
+    const submit = () => {
+      const v = input.value.trim();
+      if (!v || S.busy) return;
+      input.value = "";
+      // the reference job captures the next composer line as the Fundstelle
+      if (S.referenceAsk) { S.referenceAsk = false; proposeReference(v); return; }
+      sendMessage(v);
+    };
     send.addEventListener("click", submit);
     input.addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); submit(); } });
     comp.appendChild(input); comp.appendChild(send); root.appendChild(comp);
@@ -2681,10 +2693,20 @@ console.info(`[SÜSIE] frontend build ${SUSIE_BUILD}`);
     helpOpen = false;
     helpPanel.hidden = true;
   }
-  $("help-support").addEventListener("click", () => {
+  $("help-support").addEventListener("click", (e) => {
+    e.stopPropagation();  // the outside-click closer must not instantly undo the toggle
     helpOpen = !helpOpen;
     if (helpOpen) renderHelpPanel();
     helpPanel.hidden = !helpOpen;
+  });
+  // clicking anywhere outside the panel (or its button) dismisses it
+  document.addEventListener("click", (e) => {
+    if (!helpOpen) return;
+    if (e.target.closest("#help-panel") || e.target.closest("#help-support")) return;
+    closeHelp();
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && helpOpen) closeHelp();
   });
 
   // -- Windows-9x "What's this?" mode: ? cursor, click element, SÜSIE flyover ----
@@ -2703,11 +2725,10 @@ console.info(`[SÜSIE] frontend build ${SUSIE_BUILD}`);
   function showWhatsTip(target, id) {
     const info = id ? HELP_UI[id] : null;
     const known = id && info && info.text;
+    if (!known) { whatsTip.hidden = true; return; }  // no info → nothing displayed (owner rule)
     whatsTip.textContent = "";
-    const title = (known ? info.title[LANG]
-      : (id && id !== "whats-tip" ? (LANG === "de" ? "Kein Eintrag" : "No entry") : (LANG === "de" ? "Unbekanntes Element" : "Unknown element")));
-    whatsTip.appendChild(el("strong", null, title));
-    const txt = known ? info.text[LANG] : t("whatsNoInfo");
+    whatsTip.appendChild(el("strong", null, info.title[LANG]));
+    const txt = info.text[LANG];
     for (const line of txt.split("\n")) whatsTip.appendChild(el("p", null, line));
     const ask = info && info.ask;
     if (ask) {
