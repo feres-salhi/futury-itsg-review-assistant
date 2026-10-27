@@ -1069,3 +1069,60 @@ body:not([data-view="cases"]) .summary-chips { display: none; }
 }
 #overlay-close:hover { background: var(--accent-ink); color: #fff; }
 #overlay-close svg { stroke: #fff; }
+
+/* ---------- "Unter der Haube" — architecture view (T10-055) ----------
+   Authored bilingual SVG: three lanes (Rules / Tests / Verdict), color-coded
+   actors. Motion thesis: one authored entrance (lanes draw in staggered),
+   hover = focus (lift node, dim sibling lanes, tint the flow, march the
+   dashed rework loops). Reduced motion keeps color focus, drops movement. */
+.tech-headline { margin: 2px 0 6px; font-size: 1.35rem; font-weight: 750; letter-spacing: -0.02em; }
+.tech-intro { margin: 0 0 18px; max-width: 78ch; color: var(--ink-2); line-height: 1.55; }
+.tech-figure {
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card); padding: 18px 14px 12px; overflow-x: auto;
+}
+.tech-svg { display: block; width: 100%; min-width: 840px; height: auto; font-family: inherit; }
+.tech-svg text { font-family: inherit; user-select: none; }
+
+.tech-svg .lane-label { font-size: 15px; font-weight: 700; fill: var(--ink); }
+.tech-svg .node-txt { font-size: 13px; font-weight: 600; fill: var(--ink); text-anchor: middle; }
+.tech-svg .k-ai .node-box, .tech-svg .node-box.k-ai { fill: var(--accent-soft); stroke: var(--accent-line); stroke-width: 1.4; }
+.tech-svg .k-ai .node-txt, .tech-svg .node-txt.k-ai { fill: var(--accent-ink); }
+.tech-svg .k-code .node-box, .tech-svg .node-box.k-code { fill: var(--mute-bg); stroke: var(--line-strong); stroke-width: 1.4; }
+.tech-svg .k-approved .node-box, .tech-svg .node-box.k-approved { fill: var(--surface); stroke: var(--accent); stroke-width: 1.6; }
+.tech-svg .k-person .node-box, .tech-svg .node-box.k-person { fill: #211f1e; stroke: #211f1e; }
+.tech-svg .k-person .node-txt, .tech-svg .node-txt.k-person { fill: #ffffff; font-weight: 700; font-size: 12px; }
+[data-theme="dark"] .tech-svg .k-person .node-box { fill: #32302e; stroke: #5d5854; }
+
+.tech-svg .flow { stroke: var(--line-strong); stroke-width: 1.5; fill: none; }
+.tech-svg .flow-head { fill: var(--line-strong); }
+.tech-svg .loop { stroke: var(--accent); stroke-width: 1.3; fill: none; stroke-dasharray: 5 6; opacity: .85; }
+.tech-svg .loop-head { fill: var(--accent); }
+.tech-svg .tech-note { font-size: 12.5px; font-weight: 600; fill: var(--accent); text-anchor: middle; }
+.tech-svg .legend-txt { font-size: 13px; fill: var(--ink-2); }
+
+/* hover = focus: the hovered lane comes forward, siblings step back */
+.tech-svg .lane { transition: opacity .3s var(--ease-out); }
+.tech-svg:has(.lane:hover) .lane:not(:hover) { opacity: .38; }
+.tech-svg .node-inner { transition: transform .18s var(--ease-out); }
+.tech-svg .node:hover .node-inner { transform: translateY(-2px); }
+.tech-svg .node:hover .node-box { stroke: var(--accent); }
+.tech-svg .lane:hover .flow { stroke: var(--accent); stroke-opacity: .55; }
+.tech-svg .lane:hover .flow-head { fill: var(--accent); fill-opacity: .55; }
+.tech-svg .lane:hover .loop { animation: tech-march 1.1s linear infinite; animation-delay: 0ms; }
+@keyframes tech-march { to { stroke-dashoffset: -11; } }
+
+/* one authored entrance: lanes rise in staggered, connectors draw themselves */
+.tech-svg .node { animation: tech-node .5s var(--ease-out) both; }
+@keyframes tech-node { from { opacity: 0; transform: translateY(7px); } }
+.tech-svg .draw { stroke-dasharray: 1; animation: tech-draw .55s var(--ease-out) both; }
+@keyframes tech-draw { from { stroke-dashoffset: 1; } }
+.tech-svg .fade-late { animation: tech-fade .45s ease-out both; animation-delay: var(--d, 0ms); }
+@keyframes tech-fade { from { opacity: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .tech-svg .node, .tech-svg .fade-late { animation: none; opacity: 1; }
+  .tech-svg .draw { animation: none; stroke-dasharray: none; }
+  .tech-svg .lane:hover .loop { animation: none; }
+  .tech-svg .node:hover .node-inner { transform: none; }
+}

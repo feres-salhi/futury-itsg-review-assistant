@@ -921,6 +921,7 @@ console.info(`[SÜSIE] frontend build ${SUSIE_BUILD}`);
     document.body.dataset.view = v;
     if (v === "regulations" && !S.regLoaded) loadRegulations();
     if (v === "freigaben" || v === "verlauf") loadGovernance();
+    if (v === "technik") withViewGuard("technik", renderTechnik);
     document.querySelectorAll(".side-link").forEach((b) =>
       b.classList.toggle("active", b.dataset.view === v));
     // the page heading follows the view — never a stale title anywhere
@@ -1663,6 +1664,146 @@ console.info(`[SÜSIE] frontend build ${SUSIE_BUILD}`);
       more.addEventListener("click", () => { S.verlaufShown = cap + 200; renderVerlauf(); });
       body.appendChild(more);
     }
+  }
+
+
+  // =========================================================================
+  // "Unter der Haube" (T10-055): the architecture illustration — three lanes
+  // (Rules / Tests / Verdict) as an authored, bilingual SVG in SÜSIE tokens.
+  // Pure presentation: no data, no endpoints, nothing executed. Hovering a
+  // lane focuses it (dim others, tint its flow, march the dashed rework
+  // loops); prefers-reduced-motion keeps the color focus without movement.
+  // =========================================================================
+  const TECH = (() => {
+    const X0 = 150, NODE_W = 146, NODE_H = 54, PITCH_X = 174, LANE_Y = [46, 240, 434];
+    // kind: ai = KI entwirft · code = Code rechnet und prüft ·
+    // person = der Mensch entscheidet (Raute) · approved = Freigabe-Ergebnis
+    const lanes = [
+      { key: "techLaneRules", nodes: [
+        { kind: "ai", de: ["Passende Abschnitte", "finden"], en: ["Find relevant", "sections"] },
+        { kind: "ai", de: ["Kriterien +", "Codeprüfung schreiben"], en: ["Write criteria", "+ code check"] },
+        { kind: "code", de: ["Zitate in der", "Quelle prüfen"], en: ["Check quotes", "in the source"] },
+        { kind: "ai", de: ["Fehlende Regeln", "suchen"], en: ["Find missing", "rules"] },
+        { kind: "person", de: ["Regeln", "prüfen"], en: ["Review", "rules"] },
+        { kind: "approved", de: ["Kriterien", "freigegeben"], en: ["Approved", "criteria"] },
+      ]},
+      { key: "techLaneTests", nodes: [
+        { kind: "approved", de: ["Freigegebene", "Kriterien übernehmen"], en: ["Take approved", "criteria"] },
+        { kind: "ai", de: ["Testfälle", "schreiben"], en: ["Write test", "cases"] },
+        { kind: "code", de: ["Erwartungswerte", "festlegen"], en: ["Expected", "values"] },
+        { kind: "ai", de: ["Fehlende Tests", "suchen"], en: ["Find missing", "tests"] },
+        { kind: "person", de: ["Tests", "prüfen"], en: ["Review", "tests"] },
+        { kind: "approved", de: ["Tests", "freigegeben"], en: ["Approved", "tests"] },
+      ]},
+      { key: "techLaneVerdict", nodes: [
+        { kind: "code", de: ["Softwareausgabe", "einlesen"], en: ["Read payroll", "output file"] },
+        { kind: "code", de: ["Mit Erwartung", "vergleichen"], en: ["Compare with", "expected"] },
+        { kind: "ai", de: ["Zweifel", "markieren"], en: ["Flag", "doubts"] },
+        { kind: "ai", de: ["Verständliche", "Zusammenfassung"], en: ["Plain", "summary"] },
+        { kind: "person", de: ["Einmal", "signieren"], en: ["Sign", "once"] },
+        { kind: "code", de: ["Bericht", "je Fall"], en: ["Report", "per case"] },
+      ]},
+    ];
+    const nodeCX = (i) => X0 + i * PITCH_X + NODE_W / 2;
+    return { X0, NODE_W, NODE_H, PITCH_X, LANE_Y, lanes, nodeCX };
+  })();
+
+  function renderTechnik() {
+    const body = $("technik-body"); if (!body) return;
+    body.textContent = "";
+    body.appendChild(el("h2", "tech-headline", t("techHeadline")));
+    body.appendChild(el("p", "tech-intro", t("techIntro")));
+
+    const NS = "http://www.w3.org/2000/svg";
+    const s = (tag, attrs, parent) => {
+      const n = document.createElementNS(NS, tag);
+      for (const [k, v] of Object.entries(attrs || {})) n.setAttribute(k, String(v));
+      if (parent) parent.appendChild(n);
+      return n;
+    };
+    const svg = s("svg", { class: "tech-svg", viewBox: "0 0 1180 630", role: "img",
+      "aria-label": `${t("techHeadline")} — ${t("technikSub")}` });
+    body.appendChild(svg);
+
+    const arrow = (parent, d, delay) => {
+      const h = s("path", { class: "flow-head fade-late", d }, parent);
+      h.style.animationDelay = `${delay}ms`;
+      return h;
+    };
+
+    TECH.lanes.forEach((lane, li) => {
+      const base = li * 220;                      // entrance stagger per lane
+      const g = s("g", { class: "lane" }, svg);
+      const y = TECH.LANE_Y[li], cy = y + TECH.NODE_H / 2;
+
+      const lbl = s("text", { class: "lane-label", x: 12, y: cy + 4 }, g);
+      lbl.textContent = `${li + 1} · ${t(lane.key)}`;
+
+      lane.nodes.forEach((nd, ni) => {
+        const cx = TECH.nodeCX(ni), x = TECH.X0 + ni * TECH.PITCH_X;
+        const node = s("g", { class: `node k-${nd.kind}` }, g);
+        node.style.animationDelay = `${base + ni * 55}ms`;
+        const inner = s("g", { class: "node-inner" }, node);
+        if (nd.kind === "person") {
+          s("path", { class: "node-box",
+            d: `M ${cx} ${cy - 30} L ${cx + 44} ${cy} L ${cx} ${cy + 30} L ${cx - 44} ${cy} Z` }, inner);
+        } else {
+          s("rect", { class: "node-box", x, y, width: TECH.NODE_W, height: TECH.NODE_H, rx: 12 }, inner);
+        }
+        const txt = s("text", { class: "node-txt", x: cx, y: cy - 2 }, inner);
+        const l1 = s("tspan", { x: cx }, txt); l1.textContent = nd[LANG][0];
+        const l2 = s("tspan", { x: cx, dy: 15 }, txt); l2.textContent = nd[LANG][1];
+
+        if (ni < lane.nodes.length - 1) {          // solid arrow to the next node
+          const x1 = x + TECH.NODE_W, x2 = x1 + TECH.PITCH_X - TECH.NODE_W, fd = base + ni * 55 + 160;
+          const p = s("path", { class: "flow draw", d: `M ${x1} ${cy} H ${x2 - 5}`, pathLength: 1 }, g);
+          p.style.animationDelay = `${fd}ms`;
+          arrow(g, `M ${x2 - 8} ${cy - 4.5} L ${x2} ${cy} L ${x2 - 8} ${cy + 4.5}`, fd + 140);
+        }
+      });
+
+      if (li < 2) {
+        // dashed rework loop: review diamond → back to the drafting step
+        const dCX = TECH.nodeCX(4), tCX = TECH.nodeCX(1), yLoop = y + 96;
+        s("path", { class: "loop fade-late",
+          d: `M ${dCX} ${cy + 30} V ${yLoop} H ${tCX} V ${y + 62}` }, g);
+        arrow(g, `M ${tCX - 4.5} ${y + 62} L ${tCX} ${y + 54} L ${tCX + 4.5} ${y + 62}`, base + 640);
+        const note = s("text", { class: "tech-note fade-late", x: (dCX + tCX) / 2, y: yLoop - 6 }, g);
+        note.textContent = t("techLoopRewrite");
+        note.style.animationDelay = `${base + 660}ms`;
+        // hand-off into the next lane: the approved result travels to its start
+        const yNext = TECH.LANE_Y[li + 1];
+        const p = s("path", { class: "flow draw",
+          d: `M ${TECH.nodeCX(5)} ${y + TECH.NODE_H} V ${yNext - 44} H ${TECH.nodeCX(0)} V ${yNext - 8}`,
+          pathLength: 1 }, g);
+        p.style.animationDelay = `${base + 420}ms`;
+        arrow(g, `M ${TECH.nodeCX(0) - 4.5} ${yNext - 8} L ${TECH.nodeCX(0)} ${yNext} L ${TECH.nodeCX(0) + 4.5} ${yNext - 8}`,
+          base + 620);
+      } else {
+        // verdict lane: broken-file stop note + dispute loop back to the tests lane
+        const warn = s("text", { class: "tech-note fade-late", x: TECH.X0, y: y + 74 }, g);
+        warn.style.textAnchor = "start";   // left-aligned: centering would clip at the viewBox edge
+        warn.textContent = t("techBrokenNote");
+        warn.style.animationDelay = `${base + 660}ms`;
+        const dCX = TECH.nodeCX(4), yDispute = y + 112, cyPrev = TECH.LANE_Y[1] + TECH.NODE_H / 2;
+        s("path", { class: "loop fade-late",
+          d: `M ${dCX} ${cy + 30} V ${yDispute} H 132 V ${cyPrev} H 140` }, g);
+        arrow(g, `M 142 ${cyPrev - 4.5} L 150 ${cyPrev} L 142 ${cyPrev + 4.5}`, base + 640);
+        const note = s("text", { class: "tech-note fade-late", x: (dCX + 132) / 2, y: yDispute - 6 }, g);
+        note.textContent = t("techDisputeNote");
+        note.style.animationDelay = `${base + 660}ms`;
+      }
+    });
+
+    // legend: the three actors
+    const leg = s("g", { class: "legend fade-late" }, svg);
+    leg.style.animationDelay = "900ms";
+    [["k-ai", "techLegendAi", 150], ["k-code", "techLegendCode", 400], ["k-person", "techLegendPerson", 700]]
+      .forEach(([cls, key, lx]) => {
+        s("rect", { class: `node-box ${cls}`, x: lx, y: 596, width: 22, height: 15, rx: 5 }, leg);
+        const tx = s("text", { class: "legend-txt", x: lx + 30, y: 608 }, leg);
+        tx.textContent = t(key);
+      });
   }
 
 
@@ -2429,6 +2570,7 @@ console.info(`[SÜSIE] frontend build ${SUSIE_BUILD}`);
     store.set("susie-ui-lang", LANG);
     applyI18n();
     withViewGuard("cases", renderCases); withViewGuard("report", renderReport); withViewGuard("sources", renderSources);; withViewGuard("trust", renderTrust);
+    withViewGuard("technik", renderTechnik);
     // empty chat surfaces re-greet in the new language; an ongoing thread stays
     for (const root of [$("chat-overlay"), $("chat-full")]) {
       const logEl = root.querySelector(".chat-log");
@@ -2601,6 +2743,17 @@ console.info(`[SÜSIE] frontend build ${SUSIE_BUILD}`);
               en: "Click opens SÜSIE in fullscreen. SÜSIE is your assistant for this system review: she explains, executes on your word and records every step." },
       ask: null,
     },
+    "nav-technik": {
+      title: { de: "Unter der Haube", en: "Under the hood" },
+      text: { de: "Die Architektur dieser Prüfung im Überblick: drei Bühnen — Regeln, Tests, Befund — und wer darin was tut: KI entwirft, Code rechnet und prüft, der Mensch entscheidet.",
+              en: "The architecture of this review at a glance: three stages — rules, tests, verdict — and who does what: AI drafts, code computes and checks, the person decides." },
+      ask: null,
+    },
+    "technik-body": {
+      title: { de: "Architektur-Schaubild", en: "Architecture diagram" },
+      text: { de: "Das Schaubild zeigt den Weg vom Gesetz zum signierten Bericht. Rosa = KI entwirft, beige = Code rechnet und prüft, dunkle Raute = der Mensch entscheidet. Gestrichelte Linien sind Rückschleifen (max. 2 Runden).",
+              en: "The diagram shows the path from the law to the signed report. Pink = AI drafts, beige = code computes and checks, dark diamond = the person decides. Dashed lines are rework loops (max 2 rounds)." },
+      ask: { de: "Wie funktioniert die Prüfung?", en: "How does the review work?" } },
     "nav-regulations": {
       title: { de: "Regelwerke", en: "Regulations" },
       text: { de: "Durchsuchen und lesen Sie die indizierten Gesetzestexte (VB, GG, Beispielpapier, Rundschreiben) — als Abschnitt im Markdown-Reader oder als Original-PDF.",
