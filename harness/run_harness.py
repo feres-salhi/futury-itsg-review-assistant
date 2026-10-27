@@ -134,8 +134,11 @@ def main():
     ap.add_argument("--langfuse", action="store_true")
     ap.add_argument("--limit", type=int)
     ap.add_argument("--stories", action="store_true", help="story cases (data/story_cases.json) instead of the 300")
+    ap.add_argument("--cases", help="another case file in data/, e.g. expa_sick.json (experiment a)")
     args = ap.parse_args()
-    if args.stories:
+    if args.cases:
+        dataset, src = f"team10-{Path(args.cases).stem}", args.cases
+    elif args.stories:
         dataset, src = STORY_DATASET, "story_cases.json"
     else:
         dataset, src = DATASET, "testcases.json"

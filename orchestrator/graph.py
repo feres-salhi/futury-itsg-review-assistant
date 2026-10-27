@@ -13,11 +13,12 @@ Usage:
 """
 import argparse
 import json
+import os
 import re
 import sys
 import tempfile
 import uuid
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from pathlib import Path
 from typing import Any, TypedDict
 
@@ -28,11 +29,11 @@ from langgraph.types import Command, interrupt
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent
 sys.path[:0] = [str(HERE), str(ROOT), str(ROOT / "harness")]
-from agents import (explainer, findings_critic, requirement_agent, requirement_critic,  # noqa: E402
+from agents import (CHECKS, explainer, findings_critic, requirement_agent, requirement_critic,  # noqa: E402
                     testcase_agent, testcase_critic)
 from llm import AgentError, lf_client  # noqa: E402
 from generate_cases import decide  # noqa: E402
-from run_harness import TEMPLATE, evaluate  # noqa: E402
+from run_harness import TEMPLATE, evaluate, score  # noqa: E402
 from run_review import load_env  # noqa: E402
 
 MAX_REVISIONS = 2   # critic -> author loops per stage
@@ -98,7 +99,12 @@ def citation_check(s: Design):
         return {"issues": issues, "cite_rounds": s.get("cite_rounds", 0) + 1,
                 "log": note(s, f"citation_check: {len(bad)} quotes not found -> redraft")}
     keep = [c for c in s["criteria"] if c not in bad]
-    return {"criteria": keep, "issues": [], "log": note(s, f"citation_check: {len(keep)} cited, {len(bad)} dropped")}
+    for c in keep:   # a link to a check that does not exist is removed, not trusted
+        if c.get("check") not in CHECKS:
+            c["check"] = None
+    linked = sum(1 for c in keep if c["check"])
+    return {"criteria": keep, "issues": [], "log": note(s, f"citation_check: {len(keep)} cited, {len(bad)} dropped, "
+                                                          f"{linked} linked to a code check")}
 
 
 def req_critic(s: Design):
@@ -217,10 +223,12 @@ def route_g3(s):
 class Verdict(TypedDict, total=False):
     mode: str
     case: Any
+    criteria: list
     findings: list
     score: dict
     sampled: bool
     critic_changed: list
+    critic_on_mismatch: list
     summary: str
     gates: list
     log: list
@@ -233,8 +241,32 @@ _TMP = tempfile.mkdtemp(prefix="team10-")
 def compare(s: Verdict):
     global _RAW
     _RAW = _RAW or TEMPLATE.read_text(encoding="latin-1")
-    findings, score = evaluate(s["case"], _RAW, _TMP)
-    return {"findings": findings, "score": score, "log": note(s, f"compare: {score['outcome']}")}
+    findings, sc = evaluate(s["case"], _RAW, _TMP)
+    # stage 1 decides which checks run; criteria without a code check go to a person
+    # (older design files have no "check" field: they keep all 12 checks)
+    if s.get("criteria") and any("check" in c for c in s["criteria"]):
+        findings = apply_criteria(findings, s["criteria"])
+        sc = score(s["case"], findings)
+        lf = lf_client()   # full loop: one span per check (the 300-case harness skips this, it scores per case)
+        if lf:
+            with lf.start_as_current_span(name="checks", input={"case_id": s["case"]["id"]}, output={"total": len(findings)}):
+                for f in findings:
+                    with lf.start_as_current_span(name=f"check {f['id']}", input={"rule": f["rule"], "source": f.get("source"),
+                                                  "expected": f["expected"]}, output={"actual": f["actual"], "status": f["status"],
+                                                  "reason": f.get("reason")}, level="DEFAULT" if f["status"] == "PASS" else "WARNING"):
+                        pass
+    return {"findings": findings, "score": sc, "log": note(s, f"compare: {sc['outcome']}")}
+
+
+def apply_criteria(findings, criteria):
+    linked = {c["check"] for c in criteria if c.get("check")}
+    out = [f for f in findings if f["id"] in linked or f["status"] == "BLOCKED"]
+    for c in criteria:
+        if not c.get("check"):
+            out.append({"id": c["id"], "rule": c["text"], "source": c.get("chunk"), "expected": "-",
+                        "actual": "no code check for this criterion", "status": "NOT EVALUATED",
+                        "reason": "approved criterion without a code check: a person must check it"})
+    return out
 
 
 def f_critic(s: Verdict):
@@ -243,13 +275,17 @@ def f_critic(s: Verdict):
     except AgentError as exc:
         return {"critic_changed": [], "log": note(s, f"findings_critic failed, verdict unchanged: {exc}")}
     named = {r.get("check"): r.get("note", "") for r in review}
-    out, changed = [], []
-    for f in s["findings"]:   # the critic can only send a check to a person; it cannot pass or fail anything
-        if f["id"] in named and f["status"] in ("PASS", "MISMATCH"):
+    out, changed, confirmed = [], [], []
+    for f in s["findings"]:   # the critic can only send a PASS check to a person; it cannot pass or fail anything
+        if f["id"] in named and f["status"] == "PASS":
             f = {**f, "status": "NEEDS_REVIEW", "reason": f"findings_critic: {named[f['id']]}", "was": f["status"]}
             changed.append(f["id"])
+        elif f["id"] in named and f["status"] == "MISMATCH":   # code already found an error: it stays an error
+            f = {**f, "critic_note": named[f["id"]]}
+            confirmed.append(f["id"])
         out.append(f)
-    return {"findings": out, "critic_changed": changed, "log": note(s, f"findings_critic: {changed or 'no change'}")}
+    return {"findings": out, "critic_changed": changed, "critic_on_mismatch": confirmed,
+            "log": note(s, f"findings_critic: to person {changed or '-'}, on MISMATCH {confirmed or '-'}")}
 
 
 def explain(s: Verdict):
@@ -260,7 +296,7 @@ def explain(s: Verdict):
 
 
 def g5(s: Verdict):
-    bad = [f["id"] for f in s["findings"] if f["status"] != "PASS"]
+    bad = [f["id"] for f in s["findings"] if f["status"] not in ("PASS", "NOT EVALUATED")]
     d = gate(s, "G5", {"summary": f"case {s['case']['id']}: {s['score']['outcome']}, not PASS: {bad}",
                        "explanation": s.get("summary")})
     return {"gates": s.get("gates", []) + [d], "log": note(s, f"G5 {d['decision']} by {d['by']}")}
@@ -273,10 +309,90 @@ def build_verdict():
     g.add_edge(START, "compare")
     g.add_conditional_edges("compare", lambda s: "G5" if any(f["status"] == "BLOCKED" for f in s["findings"])
                             else ("findings_critic" if s.get("sampled", True) else "G5"))
-    g.add_edge("findings_critic", "explainer")
+    g.add_conditional_edges("findings_critic",   # TEAM10_NO_EXPLAINER=1: ablation without the Explainer AI
+                            lambda s: "G5" if os.environ.get("TEAM10_NO_EXPLAINER") else "explainer")
     g.add_edge("explainer", "G5")
     g.add_edge("G5", END)
     return g.compile(checkpointer=InMemorySaver())
+
+
+# ---------------------------------------------------------------- stage 2 -> stage 4
+def design_cases(design):
+    """Turn the approved stage-2 test cases into verdict cases.
+
+    There is no payroll software here, so its output is simulated (labelled synthetic): for each case
+    the correct 41 (or, when no 41 is allowed, a 41 sent anyway) plus one copy with a wrong start date.
+    The expected values are the ones code computed in stage 2.
+    """
+    out = []
+    for c in design.get("cases", []):
+        exp = c.get("expected")
+        if not exp or c.get("blocked"):
+            continue
+        sc, rule = c["scenario"], exp["rule"]
+        prior = sorted(sc.get("prior", []), key=lambda p: p["start"], reverse=True)
+        base = {"group": "design", "scenario": sc, "expected": exp, "source": "stage 2 (AI test, code expected value)"}
+        if rule == "OK":
+            good = dict(exp["dbvo"])
+            out.append({**base, "id": f"{c['id']}-ok", "category": f"{c['kind']}: correct output",
+                        "observed_dbvo": good, "must_flag": None})
+            bad = {**good, "AU-AB-AG": (date.fromisoformat(good["AU-AB-AG"]) + timedelta(days=1)).isoformat()}
+            out.append({**base, "id": f"{c['id']}-bad", "category": f"{c['kind']}: AU-AB-AG one day late",
+                        "observed_dbvo": bad, "must_flag": "AU-AB-AG (§3.12.2)"})
+        else:   # no 41 allowed (R1-R4) or rules unclear: the simulated software sends one anyway
+            sent = {"ABGABEGRUND": "41", "AU-AB-AG": sc["current_start"], "AU-AB-SV": "00000000", "KZ-AK-AU": "0",
+                    "ANZAHL-AU": len(prior), "periods": [[p["start"], p["end"]] for p in prior]}
+            if not prior:
+                continue   # a 41 without periods cannot be written as a file; nothing to judge
+            out.append({**base, "id": f"{c['id']}-sent", "category": f"{c['kind']}: 41 sent ({rule})",
+                        "observed_dbvo": sent, "must_flag": "NEEDS_REVIEW" if rule == "AMBIGUOUS" else rule})
+    return out
+
+
+# ---------------------------------------------------------------- full loop with the report signature
+def sign_report(cases_out, auto):
+    """G5 for the whole report: a person signs it, or disputes it back to G3 (tests) or G1 (rules)."""
+    not_eval = sorted({f["id"] for r in cases_out for f in r["findings"] if f["status"] == "NOT EVALUATED"})
+    errors = sum(1 for r in cases_out if any(f["status"] in ("MISMATCH", "BLOCKED") for f in r["findings"]))
+    review = sum(1 for r in cases_out if any(f["status"] == "NEEDS_REVIEW" for f in r["findings"]))
+    summary = (f"{len(cases_out)} cases: {errors} with errors, {review} need review; "
+               f"criteria without a code check (person checks): {not_eval or '-'}")
+    if auto:
+        d = {"decision": "approve", "target": None, "note": "", "by": AUTO}
+    else:
+        print("\n" + "=" * 70 + f"\nG5 report  {summary}")
+        word, _, rest = input("sign / dispute g3 <note> / dispute g1 <note> > ").strip().partition(" ")
+        target, _, why = rest.partition(" ")
+        d = ({"decision": "dispute", "target": target.upper(), "note": why}
+             if word.lower() == "dispute" and target.lower() in ("g1", "g3")
+             else {"decision": "approve", "target": None, "note": ""})
+        d["by"] = input("your name > ").strip() or "unknown"
+    d.update(gate="G5 report", at=datetime.now().isoformat(timespec="seconds"), summary=summary)
+    lf = lf_client()
+    if lf:
+        with lf.start_as_current_span(name="gate G5 report", input=summary, output=d, metadata={"human": d["by"] != AUTO}):
+            pass
+    return d
+
+
+def run_full(chunks, auto, max_disputes=2):
+    """Stage 1 -> 2 -> 3, then one signature on the report. A dispute goes back to G3 or G1 (at most twice)."""
+    design, history = run(build_design(), {"chunks": chunks}, auto), []
+    while True:
+        if design.get("status") != "APPROVED":
+            return {"design": design, "verdicts": [], "history": history}
+        verdicts = [run(build_verdict(), {"case": c, "sampled": True, "criteria": design["criteria"]}, True)
+                    for c in design_cases(design)]   # per-case gates pass; the person signs the whole report
+        d = sign_report(verdicts, auto)
+        history.append(d)
+        if d["decision"] == "approve" or len(history) > max_disputes:
+            return {"design": design, "verdicts": verdicts, "history": history}
+        issue = [{"problem": f"report signature disputed: {d['note']}", "fix": d["note"]}]
+        if d["target"] == "G3":   # back to test design; the approved rules stay
+            design = run(build_design(), {**design, "chunks": chunks, "issues": issue, "tc_rounds": 0,
+                                          "g3_rejects": 0, "status": ""}, auto)
+        else:                     # back to the rules
+            design = run(build_design(), {"chunks": chunks, "criteria": design["criteria"], "issues": issue}, auto)
 
 
 # ---------------------------------------------------------------- running with a person at the gates
@@ -306,24 +422,44 @@ def run(graph, state, auto):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("what", choices=["design", "verdict"])
+    ap.add_argument("what", choices=["design", "verdict", "full"])
     ap.add_argument("--auto", action="store_true", help="pass gates automatically (harness), never counted as human")
     ap.add_argument("--cases", default="GOLD-13.1,GOLD-13.2,GOLD-13.3,GOLD-13.4,GOLD-13.5")
+    ap.add_argument("--from-design", help="reports/AGENTS-design-*.json: judge the test cases stage 2 wrote")
+    ap.add_argument("--sources", help="reports/SOURCES-*.json: rule writer reads the sections stage 0 picked")
     args = ap.parse_args()
     load_env(ROOT / ".env")
     run_id = f"AGENTS-{args.what}-{datetime.now():%Y%m%d-%H%M%S}"
     lf = lf_client()
     root = lf.start_as_current_span(name=f"agents-{args.what}") if lf else None
     span = root.__enter__() if root else None
-    if args.what == "design":
-        chunks = [json.loads(line) for line in open(ROOT / "chunks" / "chunks.jsonl", encoding="utf-8")]
+    chunks = [json.loads(line) for line in open(ROOT / "chunks" / "chunks.jsonl", encoding="utf-8")]
+    if args.sources:   # stage 0: the sections the Source finder AI picked (find_sources.py)
+        picked = {r["path"] for r in json.loads(Path(args.sources).read_text(encoding="utf-8"))["picked"]}
+        chunks = [c for c in chunks if c["path"] in picked]
+    else:
         chunks = [c for c in chunks if c["doc"] == "VB" and re.fullmatch(r"3\.12(\.[1-8])?", str(c["section"]))]
+    if args.what == "full":
+        result = run_full(chunks, args.auto)
+        result["design"].pop("chunks", None)
+        result["cases"] = result.pop("verdicts")
+        for r in result["cases"]:
+            r["case"] = r["case"]["id"]
+            r.pop("criteria", None)
+        result["log"] = result["design"].get("log", [])
+    elif args.what == "design":
         result = run(build_design(), {"chunks": chunks}, args.auto)
         result.pop("chunks", None)
     else:
-        want = args.cases.split(",")
-        cases = [c for c in json.loads((ROOT / "data" / "testcases.json").read_text(encoding="utf-8")) if c["id"] in want]
-        result = {"cases": [run(build_verdict(), {"case": c, "sampled": True}, args.auto) for c in cases]}
+        criteria = None
+        if args.from_design:
+            design = json.loads(Path(args.from_design).read_text(encoding="utf-8"))
+            cases, criteria = design_cases(design), design.get("criteria")
+        else:
+            want = args.cases.split(",")
+            cases = [c for c in json.loads((ROOT / "data" / "testcases.json").read_text(encoding="utf-8")) if c["id"] in want]
+        result = {"cases": [run(build_verdict(), {"case": c, "sampled": True, "criteria": criteria}, args.auto)
+                            for c in cases]}
         for r in result["cases"]:
             r["case"] = r["case"]["id"]
     if span:
@@ -335,8 +471,14 @@ def main():
     out.write_text(json.dumps(result, indent=1, ensure_ascii=False, default=str), encoding="utf-8")
     for line in result.get("log", []):
         print(line)
-    for r in result.get("cases", []) if args.what == "verdict" else []:
+    for r in result.get("cases", []) if args.what != "design" else []:
         print(r["case"], r["score"]["outcome"], "| critic changed:", r.get("critic_changed"), "|", r.get("summary"))
+    if args.what == "full":
+        print("report signature:", [(h["decision"], h.get("target"), h["by"]) for h in result["history"]])
+    if args.what != "design":
+        ok = sum(bool(r["score"]["ok"]) for r in result["cases"])
+        print(f"correct {ok} / {len(result['cases'])}, sent to a person by the AI: "
+              f"{sum(bool(r.get('critic_changed')) for r in result['cases'])}")
     print("->", out)
 
 
