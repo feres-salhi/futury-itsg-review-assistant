@@ -32,3 +32,14 @@ build/
 .seal_current_run
 seal-data/
 .pytest_cache/
+
+# Portfolio cleanup (Fares)
+.agents/
+.claude/
+.codex/
+.zcode/
+.superpowers/
+.code-review-graph/
+.impeccable/
+.mcp.json
+data/secrets/
