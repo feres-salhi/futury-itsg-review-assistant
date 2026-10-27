@@ -1020,3 +1020,36 @@ body:not([data-view="cases"]) .summary-chips { display: none; }
 
 /* Governance sub-links (T10-049): indented under the group title */
 .side-sub-link { padding-left: 26px; font-size: .78125rem; }
+
+/* ---- Governance views (T10-049): Freigaben cards + Verlauf protocol ---- */
+.gov-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.gov-filter {
+  height: 2.25rem; padding: 0 .5rem; font: inherit; font-size: .85rem; color: var(--ink);
+  background: var(--surface); border: 1px solid var(--line-strong);
+  border-radius: var(--radius-ctl); box-sizing: border-box;
+}
+.gov-row { display: flex; gap: 8px; margin: 8px 0; flex-wrap: wrap; }
+.gov-input {
+  flex: 1 1 180px; min-width: 0; height: 2.25rem; padding: 0 .625rem;
+  font: inherit; font-size: .85rem; color: var(--ink);
+  background: var(--surface); border: 1px solid var(--line-strong);
+  border-radius: var(--radius-ctl); box-sizing: border-box;
+}
+.gov-input.needs-input { border-color: var(--accent); }
+.gov-act { align-self: center; }
+.freigaben-card .card-ref { color: var(--ink-2); font-size: .78rem; }
+.gov-timeline { display: flex; flex-direction: column; }
+.gov-event {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px;
+  padding: 7px 10px;
+  border-bottom: 1px solid var(--line);
+}
+.gov-event:last-child { border-bottom: none; }
+.gov-time { flex: none; min-width: 11ch; color: var(--ink-2); font-size: .8rem; font-variant-numeric: tabular-nums; }
+.gov-label { font-weight: 600; font-size: .875rem; }
+.gov-detail { margin: 0; flex-basis: 100%; color: var(--ink-2); font-size: .8rem; }
+.gov-more { align-self: flex-start; margin-top: 8px; }
+.gov-count { color: var(--ink-2); font-size: .8rem; align-self: center; }
+.case-report-actions { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+.case-report-btn { min-height: 2.25rem; padding: 0 .875rem; font-size: .82rem; }
+.link-like { color: var(--accent); cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
