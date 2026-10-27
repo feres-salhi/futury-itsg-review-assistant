@@ -1,6 +1,7 @@
 """The six agents: prompt + input builder + mock answer. Authors draft, critics only list issues, nobody approves."""
 import json
 import re
+from pathlib import Path
 
 from llm import PROMPT, call
 
@@ -9,12 +10,32 @@ SCOPE = ("Scope: the employer's request 'Abgabegrund 41' with Datenbaustein DBVO
          "insurer fills in its reply (Abgabegrund 61) are out of scope.")
 
 # ---------------------------------------------------------------- 02 requirements
+# The code checks that exist (run_review.dbvo_findings). Stage 1 links each criterion to one of them; stage 3 runs
+# only the linked checks and sends criteria without a code check to a person.
+CHECKS = {
+    "F1": "Abgabegrund = 41",
+    "F2": "ANZAHL-AU = number of prior AUs to report",
+    "F3": "Reported prior AU periods are the right ones",
+    "F4": "Employer sends KZ-AK-AU = 0 (default value)",
+    "F5": "AU-AB-AG = start of the current AU",
+    "F6": "Employer sends AU-AB-SV = 00000000 (default value)",
+    "F7": "Prior AUs listed most recent first",
+    "C9": "41 only if the current AU and at least one prior AU are certified",
+    "C10": "At most 6 months between the start of the current AU and the end of the last prior AU",
+    "C11": "Prior AUs included only if each gap is at most 6 months",
+    "C12": "Prior AUs of the last 12 months plus the current AU reach at least 30 days",
+    "C13": "No 41 for private insurance or marginal employment",
+}
+CHECK_LIST = "\n".join(f"{k}: {v}" for k, v in CHECKS.items())
+
 REQ_SYSTEM = f"""You turn German rule text into atomic, testable review criteria. {SCOPE}
 Use only the rule text you are given. Each criterion needs a quote copied character for character from one chunk
 (at most 200 characters) and that chunk's id. Do not invent rules. Set "uncertain": true if the text leaves room
 for more than one reading. At most 15 criteria.
+Link each criterion to the code check below that tests it ("check"), or null if none of them tests it:
+{CHECK_LIST}
 Answer with JSON only:
-{{"criteria":[{{"id":"R-01","text":"...","chunk":"VB/3.12.md","quote":"...","uncertain":false}}]}}"""
+{{"criteria":[{{"id":"R-01","text":"...","chunk":"VB/3.12.md","quote":"...","check":"F5","uncertain":false}}]}}"""
 
 REQ_CRITIC_SYSTEM = f"""You review draft criteria against the rule text. {SCOPE}
 List problems only: a rule in the text that no criterion covers, duplicates, a criterion its quote does not support,
@@ -90,15 +111,45 @@ If you cannot give all three facts, do not flag. You cannot pass or fail anythin
 Answer with JSON only: {"review":[{"check":"F5","field":"AU-AB-AG","seen":"2026-03-25","expected":"2026-03-24","note":"..."}]}
 Return an empty list if you have no such evidence."""
 
+# Experiment 3: the AI sees the code's status and the rule text, and speaks only when it disagrees with the code.
+FINDINGS_CRITIC_V3 = """You double-check the result of a rule-based reviewer for one 'Abgabegrund 41' message.
+For every check you see the code's status (PASS or MISMATCH), what it expected, what it found, and the rule text.
+Most results are right. Speak only when you disagree with the code: a PASS that should be an error, or a MISMATCH
+that should pass. For each disagreement give the field, the value you see, the value it should have, and copy the
+rule sentence that supports you. Do not repeat errors the code already found. If you agree with every check, say nothing.
+Answer with JSON only:
+{"review":[{"check":"C11","field":"...","seen":"...","expected":"...","rule_quote":"...","note":"..."}]}
+Return an empty list if you agree with the code."""
+
 EXPLAINER_SYSTEM = """You explain a review result to a payroll clerk in plain English, at most three short sentences.
 Name the checks that failed or need review and what to do. Use only the facts given.
 Answer with JSON only: {"summary":"..."}"""
+
+
+_CHUNKS = None
+
+
+def rule_text(source, limit=2500):
+    """German rule text for a check's source, e.g. 'VB 13.4 §3.12.2 p.137' -> chunk VB/3.12.2.md."""
+    global _CHUNKS
+    if _CHUNKS is None:
+        path = Path(__file__).resolve().parent.parent / "chunks" / "chunks.jsonl"
+        _CHUNKS = {c["section"]: c["text"] for c in map(json.loads, open(path, encoding="utf-8")) if c["doc"] == "VB"}
+    m = re.search(r"§(3\.12(?:\.\d+)?)", source or "")
+    return _CHUNKS.get(m.group(1), "")[:limit] if m else ""
 
 
 def findings_critic(case, findings):
     user = json.dumps({"scenario": case["scenario"], "observed_message": case.get("observed_dbvo"),
                        "checks": [{k: f.get(k) for k in ("id", "rule", "expected", "actual", "status")} for f in findings]},
                       ensure_ascii=False, default=str)
+    if PROMPT == "v3":
+        user = json.dumps({"scenario": case["scenario"], "observed_message": case.get("observed_dbvo"),
+                           "checks": [{**{k: f.get(k) for k in ("id", "rule", "source", "expected", "actual", "status")},
+                                       "rule_text": rule_text(f.get("source", ""))} for f in findings]},
+                          ensure_ascii=False, default=str)
+        review = call("findings_critic", "light", FINDINGS_CRITIC_V3, user, lambda u: {"review": []}, 8000)["review"]
+        return [r for r in review if all(str(r.get(k) or "").strip() for k in ("field", "seen", "expected", "rule_quote"))]
     if PROMPT == "v1":
         return call("findings_critic", "light", FINDINGS_CRITIC_V1, user, lambda u: {"review": []}, 8000)["review"]
     review = call("findings_critic", "light", FINDINGS_CRITIC_V2, user, lambda u: {"review": []}, 8000)["review"]
@@ -124,7 +175,7 @@ def _mock_requirements(user):
         if i > 3:
             break
         out.append({"id": f"R-{i:02d}", "text": f"mock criterion {i}", "chunk": m.group(1),
-                    "quote": m.group(2)[:60], "uncertain": False})
+                    "quote": m.group(2)[:60], "check": ["F5", "C12", None][i - 1], "uncertain": False})
     return {"criteria": out}
 
 
