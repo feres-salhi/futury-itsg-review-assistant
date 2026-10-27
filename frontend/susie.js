@@ -1469,7 +1469,8 @@ console.info(`[SÜSIE] frontend build ${SUSIE_BUILD}`);
     // honest default: decisions when any exist, otherwise the change summary
     const hasDecisions = (gov.gates || []).length > 0 ||
       (gov.events || []).some((ev) => ev.kind === "gate" || ev.kind === "agent_run");
-    filterSel.value = S.verlaufFilter || (hasDecisions ? "decisions" : "changes");
+    if (!S.verlaufFilter) S.verlaufFilter = hasDecisions ? "decisions" : "changes";
+    filterSel.value = S.verlaufFilter;
     filterSel.addEventListener("change", () => { S.verlaufFilter = filterSel.value; S.verlaufShown = 200; renderVerlauf(); });
     const bar = el("div", "gov-bar");
     bar.appendChild(filterSel);
