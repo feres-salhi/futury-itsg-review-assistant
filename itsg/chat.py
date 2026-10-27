@@ -34,7 +34,7 @@ import json
 import re
 from dataclasses import dataclass
 
-from . import actions, langfuse_link
+from . import actions, agent, langfuse_link
 from .candidates import ROLE_SUSIE_ASSISTANT, new_run
 from .llm import (
     DEFAULT_ENDPOINT,
@@ -713,7 +713,7 @@ def canned_turn(message: str, state_context: dict, task_id: str,
 
 def turn(message: str, state_context: dict, corpus_hits: list[dict], history: list[dict],
          task_id: str = TASK_ID_DEFAULT, gateway=None, store_path: str | None = None,
-         session_id: str = "", lang: str = "") -> ChatReply:
+         session_id: str = "", lang: str = "", store_root=None, index_path=None) -> ChatReply:
     """One SÜSIE chat turn: gateway call + deterministic enforcement + envelope.
 
     ``gateway`` (injectable for tests, no network) is a
@@ -721,6 +721,10 @@ def turn(message: str, state_context: dict, corpus_hits: list[dict], history: li
     (endpoint, model, system_prompt, messages, token) and returning the raw
     reply text. By default the token is resolved via ``llm.resolve_token`` and
     ``llm.chat_completion`` is called with the assistant model.
+
+    Brain chain (T10-046): deterministic commands → Claude Sonnet agent loop
+    (itsg.agent, ANTHROPIC_API_KEY) → hessian gateway → canned fallback →
+    rehearsed degraded utterance.
     """
     gateway_injected = gateway is not None
     if gateway is None:
@@ -741,52 +745,76 @@ def turn(message: str, state_context: dict, corpus_hits: list[dict], history: li
         if deterministic is not None:
             return deterministic
 
+    reply = None
     privacy_summary = None
-    try:
-        # Prior turns travel as real user/assistant messages (T10-051) so the
-        # model can keep tone and refer back instead of restarting each turn.
-        messages = build_messages(message, state_context, corpus_hits, history)
-        if not gateway_injected:
-            # T10-043: the gateway call is the only path where app data leaves the
-            # system. Fares's airlock (policy "hessian_ai" in privacy/schleuse.py)
-            # pseudonymizes the ENTIRE outbound message list (history included),
-            # then a final check_clean gate blocks the call entirely if anything
-            # personal survived. Fail closed: no airlock module -> no external call.
-            if Schleuse is None:
-                return _fallback(message, state_context, task_id, session_id, lang,
-                                 "privacy airlock unavailable — external call refused (fail closed)")
-            airlock = Schleuse()
-            messages, airlock_summary = airlock.pseudonymize(messages)
-            hits = [hit for m in messages for hit in airlock.check_clean(m["content"])]
-            if hits:
-                cats = sorted({h.category for h in hits})
-                return _fallback(
-                    message, state_context, task_id, session_id, lang,
-                    "privacy airlock blocked the outbound call — personal data still present "
-                    f"after pseudonymization (categories: {', '.join(cats)})",
-                    privacy={"airlock": "blocked", "categories": cats})
-            privacy_summary = {**airlock_summary, "airlock": "passed"}
-        model_used = MODEL_ASSISTANT
-        system_prompt = _system_prompt(lang)  # T10-053: the UI language wins
+    model_used = None
+    pre_errors: list[str] = []
+
+    # T10-046: Claude Sonnet agent loop first (owner directive). Missing key,
+    # transport failure, or a privacy block fall through to the hessian chain;
+    # the wall clock is shared (agent budget = 90 s minus the hessian budget).
+    if not gateway_injected and agent.available():
         try:
-            raw = gateway(DEFAULT_ENDPOINT, MODEL_ASSISTANT, system_prompt, messages, "")
-        except LLMError:
-            # Human directive 2026-10-27: primary model down → one fallback
-            # attempt with Kolibri-1 before degrading; the envelope records
-            # which model actually answered.
-            model_used = MODEL_ASSISTANT_FALLBACK
-            raw = gateway(DEFAULT_ENDPOINT, MODEL_ASSISTANT_FALLBACK,
-                          system_prompt, messages, "")
-        reply = _parse_reply(raw)
-    except (LLMError, ValueError, KeyError, TypeError) as exc:
-        return _fallback(message, state_context, task_id, session_id, lang,
-                         f"transport/parse failure recorded: {exc}",
-                         privacy=privacy_summary)
+            agent_result = agent.run_turn(
+                message, state_context, corpus_hits, history,
+                system_prompt=_system_prompt(lang), task_id=task_id,
+                session_id=session_id, lang=lang,
+                store_root=store_root, index_path=index_path,
+                wall_clock_s=max(15.0, 90.0 - GATEWAY_TIMEOUT_S))
+            reply = agent_result["reply"]
+            model_used = agent_result["model"]
+            privacy_summary = agent_result["privacy"]
+            pre_errors = list(agent_result["validation_errors"])
+        except agent.AgentUnavailable as exc:
+            reply = None  # hessian fallback below, recorded on the envelope
+            pre_errors = [f"claude agent unavailable — hessian fallback: {exc}"]
+
+    if reply is None:
+        try:
+            # Prior turns travel as real user/assistant messages (T10-051) so the
+            # model can keep tone and refer back instead of restarting each turn.
+            messages = build_messages(message, state_context, corpus_hits, history)
+            if not gateway_injected:
+                # T10-043: the gateway call is the only path where app data leaves the
+                # system. Fares's airlock (policy "hessian_ai" in privacy/schleuse.py)
+                # pseudonymizes the ENTIRE outbound message list (history included),
+                # then a final check_clean gate blocks the call entirely if anything
+                # personal survived. Fail closed: no airlock module -> no external call.
+                if Schleuse is None:
+                    return _fallback(message, state_context, task_id, session_id, lang,
+                                     "privacy airlock unavailable — external call refused (fail closed)")
+                airlock = Schleuse()
+                messages, airlock_summary = airlock.pseudonymize(messages)
+                hits = [hit for m in messages for hit in airlock.check_clean(m["content"])]
+                if hits:
+                    cats = sorted({h.category for h in hits})
+                    return _fallback(
+                        message, state_context, task_id, session_id, lang,
+                        "privacy airlock blocked the outbound call — personal data still present "
+                        f"after pseudonymization (categories: {', '.join(cats)})",
+                        privacy={"airlock": "blocked", "categories": cats})
+                privacy_summary = {**airlock_summary, "airlock": "passed"}
+            model_used = MODEL_ASSISTANT
+            system_prompt = _system_prompt(lang)  # T10-053: the UI language wins
+            try:
+                raw = gateway(DEFAULT_ENDPOINT, MODEL_ASSISTANT, system_prompt, messages, "")
+            except LLMError:
+                # Human directive 2026-10-27: primary model down → one fallback
+                # attempt with Kolibri-1 before degrading; the envelope records
+                # which model actually answered.
+                model_used = MODEL_ASSISTANT_FALLBACK
+                raw = gateway(DEFAULT_ENDPOINT, MODEL_ASSISTANT_FALLBACK,
+                              system_prompt, messages, "")
+            reply = _parse_reply(raw)
+        except (LLMError, ValueError, KeyError, TypeError) as exc:
+            return _fallback(message, state_context, task_id, session_id, lang,
+                             f"transport/parse failure recorded: {exc}",
+                             privacy=privacy_summary)
 
     utterance = str(reply.get("utterance", ""))
     citations = [c for c in reply.get("citations", []) if isinstance(c, dict)]
     confidence = reply.get("confidence", "unknown")
-    validation_errors: list[str] = []
+    validation_errors: list[str] = list(pre_errors)
     needs_confirmation = False
     disclaimer = False
 

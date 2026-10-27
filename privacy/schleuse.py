@@ -45,6 +45,9 @@ _PRIORITY = {c: i for i, c in enumerate(CATEGORIES)}  # lower = wins when two ma
 # Per destination: what may leave the system and in which form.
 POLICY: Dict[str, dict] = {
     "hessian_ai": {"mode": "pseudonymize", "allowed": True, "final_gate": "block_if_any_hit"},
+    # T10-046: new model destination (Claude Sonnet agent loop) — same
+    # pseudonymize-then-block posture, same detector set as hessian_ai.
+    "anthropic": {"mode": "pseudonymize", "allowed": True, "final_gate": "block_if_any_hit"},
     "langfuse": {"mode": "pseudonymize", "minimize": True, "allowed": True, "max_string_chars": 200,
                  # top-level keys only; everything not listed here is dropped before it can reach Langfuse
                  "allowed_keys": (
